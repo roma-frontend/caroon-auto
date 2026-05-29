@@ -95,18 +95,22 @@ export default function HomePage() {
         <section className="mx-auto" style={{ maxWidth: 'var(--container-max)', paddingInline: 'var(--space-container)', paddingBlock: 'var(--space-section)' }}>
           <h2 className="text-center font-bold" style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-8)' }}>{HOME.categoriesTitle}</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4" style={{ gap: 'var(--space-4)' }}>
-            {(categories ?? []).map((cat, i) => <CategoryCard key={cat._id} id={cat._id} name={cat.name} slug={cat.slug} description={cat.description} index={i} />)}
+            {categories === undefined
+              ? Array.from({ length: 8 }).map((_, i) => <div key={i} className="animate-pulse rounded-xl bg-muted" style={{ height: '8rem' }} />)
+              : categories.map((cat, i) => <CategoryCard key={cat._id} id={cat._id} name={cat.name} slug={cat.slug} description={cat.description} index={i} />)}
           </div>
         </section>
 
         {/* Featured Products */}
-        {featured && featured.length > 0 && (
+        {(featured === undefined || featured.length > 0) && (
           <section className="mx-auto" style={{ maxWidth: 'var(--container-max)', paddingInline: 'var(--space-container)', paddingBlock: 'var(--space-section)' }}>
             <h2 className="text-center font-bold" style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-8)' }}>Առաջարկվող ապրանքներ</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4" style={{ gap: 'var(--space-4)' }}>
-              {featured.map((p, i) => (
-                <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} index={i} />
-              ))}
+              {featured === undefined
+                ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="animate-pulse rounded-xl bg-muted" style={{ height: '16rem' }} />)
+                : featured.map((p, i) => (
+                    <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} index={i} />
+                  ))}
             </div>
           </section>
         )}

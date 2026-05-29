@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Noto_Sans_Armenian } from 'next/font/google';
-import React, { Suspense } from 'react';
+import React from 'react';
 import './globals.css';
 import { ConvexClientProvider } from '@/lib/convex';
 import { ThemeProvider } from 'next-themes';
@@ -165,15 +165,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <ConvexClientProvider>
-            <Suspense
-              fallback={
-                <div className="flex h-screen items-center justify-center">
-                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
-                </div>
-              }
-            >
-              <main id="main-content">{children}</main>
-            </Suspense>
+            <main id="main-content">{children}</main>
             <Toaster richColors position="top-center" />
           </ConvexClientProvider>
         </ThemeProvider>
