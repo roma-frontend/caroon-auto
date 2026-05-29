@@ -10,17 +10,18 @@ import { toast } from 'sonner';
 import { Id } from '../../../../convex/_generated/dataModel';
 import Link from 'next/link';
 import { useReveal, revealStyle } from '@/lib/motion';
+import { useAuth } from '@/store/auth';
 
 const ICONS: Record<string, string> = { tires: '🛞', oils: '🛢️', filters: '🔧', brakes: '🚗', lamps: '💡', batteries: '🔋' };
 
-function AdminCategoryCard({ cat, index }: { cat: { _id: Id<'categories'>; name: string; slug: string; description?: string; isActive: boolean }; index: number }) {
+function AdminCategoryCard({ cat, sessionToken, index }: { cat: { _id: Id<'categories'>; name: string; slug: string; description?: string; isActive: boolean }; sessionToken: string; index: number }) {
   const { ref, visible } = useReveal();
   const remove = useMutation(api.categories.remove);
   const router = useRouter();
 
   const handleDelete = async () => {
     if (!confirm(`Ջնջել "${cat.name}"?`)) return;
-    await remove({ id: cat._id });
+    await remove({ sessionToken, id: cat._id });
     toast.success('Կատեգորիան ջնջվել է');
   };
 
@@ -46,6 +47,7 @@ function AdminCategoryCard({ cat, index }: { cat: { _id: Id<'categories'>; name:
 }
 
 export default function AdminCategoriesPage() {
+  const { sessionToken } = useAuth();
   const categories = useQuery(api.categories.list, {});
 
   return (
@@ -61,7 +63,7 @@ export default function AdminCategoriesPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {categories?.map((cat, i) => <AdminCategoryCard key={cat._id} cat={cat} index={i} />)}
+        {categories?.map((cat, i) => <AdminCategoryCard key={cat._id} cat={cat} sessionToken={sessionToken ?? ''} index={i} />)}
       </div>
 
       {categories?.length === 0 && (

@@ -12,6 +12,7 @@ import { formatPrice, formatDateHy } from '@/lib/formatters';
 import { toast } from 'sonner';
 import { Id } from '../../../../convex/_generated/dataModel';
 import { useReveal, revealStyle } from '@/lib/motion';
+import { useAuth } from '@/store/auth';
 
 const STATUS_MAP: Record<string, { label: string; color: string; icon: typeof Clock }> = {
   pending: { label: 'Սպասում', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
@@ -54,7 +55,7 @@ function exportPDF(order: { orderNumber: string; customerName: string; customerP
   }
 }
 
-function OrderCard({ order, index }: { order: { _id: Id<'orders'>; orderNumber: string; customerName: string; customerPhone: string; customerEmail: string; shippingAddress: string; items: { name: string; price: number; quantity: number; productId: Id<'products'>; imageUrl?: string }[]; total: number; status: string; paymentStatus: string; createdAt: number }; index: number }) {
+function OrderCard({ order, sessionToken, index }: { order: { _id: Id<'orders'>; orderNumber: string; customerName: string; customerPhone: string; customerEmail: string; shippingAddress: string; items: { name: string; price: number; quantity: number; productId: Id<'products'>; imageUrl?: string }[]; total: number; status: string; paymentStatus: string; createdAt: number }; sessionToken: string; index: number }) {
   const { ref, visible } = useReveal();
   const updateStatus = useMutation(api.orders.updateStatus);
   const status = STATUS_MAP[order.status] ?? STATUS_MAP.pending;
@@ -83,11 +84,11 @@ function OrderCard({ order, index }: { order: { _id: Id<'orders'>; orderNumber: 
             <span className="text-xl font-bold text-primary">{formatPrice(order.total)}</span>
             <span className="text-xs text-muted-foreground">{formatDateHy(order.createdAt)}</span>
             <div className="flex gap-2">
-              <Select value={order.status} onValueChange={(v: string | null) => { if (v) { updateStatus({ id: order._id, status: v as 'pending' }); toast.success('Ստատուսը թարմացվել է'); } }}>
+              <Select value={order.status} onValueChange={(v: string | null) => { if (v) { updateStatus({ sessionToken, id: order._id, status: v as 'pending' }); toast.success('Ստատուսը թարմացվել է'); } }}>
                 <SelectTrigger className="h-8 w-28 text-xs"><span>{STATUS_MAP[order.status]?.label ?? order.status}</span></SelectTrigger>
                 <SelectContent>{Object.entries(STATUS_MAP).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}</SelectContent>
               </Select>
-              <Select value={order.paymentStatus} onValueChange={(v: string | null) => { if (v) { updateStatus({ id: order._id, paymentStatus: v as 'awaiting' }); toast.success('Վճարման ստատուսը թարմացվել է'); } }}>
+              <Select value={order.paymentStatus} onValueChange={(v: string | null) => { if (v) { updateStatus({ sessionToken, id: order._id, paymentStatus: v as 'awaiting' }); toast.success('Վճարման ստատուսը թարմացվել է'); } }}>
                 <SelectTrigger className="h-8 w-28 text-xs"><span>{PAYMENT_MAP[order.paymentStatus]?.label ?? order.paymentStatus}</span></SelectTrigger>
                 <SelectContent>{Object.entries(PAYMENT_MAP).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}</SelectContent>
               </Select>
@@ -103,7 +104,8 @@ function OrderCard({ order, index }: { order: { _id: Id<'orders'>; orderNumber: 
 }
 
 export default function AdminOrdersPage() {
-  const orders = useQuery(api.orders.listAdmin, {});
+  const { sessionToken } = useAuth();
+  const orders = useQuery(api.orders.listAdmin, sessionToken ? { sessionToken } : 'skip');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -126,7 +128,7 @@ export default function AdminOrdersPage() {
       </div>
 
       <div className="space-y-3">
-        {orders?.map((order, i) => <OrderCard key={order._id} order={order} index={i} />)}
+        {orders?.map((order, i) => <OrderCard key={order._id} order={order} sessionToken={sessionToken ?? ''} index={i} />)}
       </div>
 
       {filtered?.length === 0 && (

@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
 import { paginationOptsValidator } from 'convex/server';
-import { getAuthCaller, requireAdmin } from './lib/auth';
+import { getAdminCaller } from './lib/auth';
 
 export const listPaginated = query({
   args: {
@@ -139,6 +139,7 @@ export const getFeatured = query({
 
 export const create = mutation({
   args: {
+    sessionToken: v.string(),
     name: v.string(), slug: v.string(), description: v.string(), price: v.number(),
     compareAtPrice: v.optional(v.number()), categoryId: v.id('categories'),
     images: v.array(v.string()), sku: v.optional(v.string()), stock: v.number(),
@@ -147,15 +148,16 @@ export const create = mutation({
     seoTitle: v.optional(v.string()), seoDescription: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const caller = await getAuthCaller(ctx);
-    requireAdmin(caller);
+    await getAdminCaller(ctx, args.sessionToken);
+    const { sessionToken: _, ...data } = args;
     const now = Date.now();
-    return await ctx.db.insert('products', { ...args, createdAt: now, updatedAt: now });
+    return await ctx.db.insert('products', { ...data, createdAt: now, updatedAt: now });
   },
 });
 
 export const update = mutation({
   args: {
+    sessionToken: v.string(),
     id: v.id('products'), name: v.optional(v.string()), slug: v.optional(v.string()),
     description: v.optional(v.string()), price: v.optional(v.number()),
     compareAtPrice: v.optional(v.number()), categoryId: v.optional(v.id('categories')),
@@ -165,18 +167,16 @@ export const update = mutation({
     seoTitle: v.optional(v.string()), seoDescription: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const caller = await getAuthCaller(ctx);
-    requireAdmin(caller);
-    const { id, ...patch } = args;
+    await getAdminCaller(ctx, args.sessionToken);
+    const { id, sessionToken: _, ...patch } = args;
     await ctx.db.patch(id, { ...patch, updatedAt: Date.now() });
   },
 });
 
 export const remove = mutation({
-  args: { id: v.id('products') },
+  args: { sessionToken: v.string(), id: v.id('products') },
   handler: async (ctx, args) => {
-    const caller = await getAuthCaller(ctx);
-    requireAdmin(caller);
+    await getAdminCaller(ctx, args.sessionToken);
     await ctx.db.delete(args.id);
   },
 });

@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 
-export function useOrderNotifications() {
-  const orders = useQuery(api.orders.listAdmin, {});
+export function useOrderNotifications(sessionToken?: string | null) {
+  const orders = useQuery(api.orders.listAdmin, sessionToken ? { sessionToken } : 'skip');
   const pendingCount = orders?.filter((o) => o.status === 'pending').length ?? 0;
   const prevCount = useRef(pendingCount);
   const [flash, setFlash] = useState(false);

@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
-import { getAuthCaller, requireAdmin } from './lib/auth';
+import { getAdminCaller } from './lib/auth';
 
 export const list = query({
   args: {},
@@ -24,6 +24,7 @@ export const getBySlug = query({
 
 export const create = mutation({
   args: {
+    sessionToken: v.string(),
     name: v.string(),
     slug: v.string(),
     description: v.optional(v.string()),
@@ -35,12 +36,15 @@ export const create = mutation({
     seoDescription: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert('categories', { ...args, createdAt: Date.now() });
+    await getAdminCaller(ctx, args.sessionToken);
+    const { sessionToken: _, ...data } = args;
+    return await ctx.db.insert('categories', { ...data, createdAt: Date.now() });
   },
 });
 
 export const update = mutation({
   args: {
+    sessionToken: v.string(),
     id: v.id('categories'),
     name: v.optional(v.string()),
     slug: v.optional(v.string()),
@@ -53,14 +57,16 @@ export const update = mutation({
     seoDescription: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { id, ...patch } = args;
+    await getAdminCaller(ctx, args.sessionToken);
+    const { id, sessionToken: _, ...patch } = args;
     await ctx.db.patch(id, patch);
   },
 });
 
 export const remove = mutation({
-  args: { id: v.id('categories') },
+  args: { sessionToken: v.string(), id: v.id('categories') },
   handler: async (ctx, args) => {
+    await getAdminCaller(ctx, args.sessionToken);
     await ctx.db.delete(args.id);
   },
 });

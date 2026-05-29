@@ -1,28 +1,28 @@
 'use client';
 
 import { useState } from 'react';
-
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, Edit, Package, ImagePlus, Search } from 'lucide-react';
+import { Plus, Trash2, Edit, Package, Search } from 'lucide-react';
 import { formatPrice } from '@/lib/formatters';
 import { toast } from 'sonner';
 import { Id } from '../../../../convex/_generated/dataModel';
 import Link from 'next/link';
 import { useReveal, revealStyle } from '@/lib/motion';
 import Image from 'next/image';
+import { useAuth } from '@/store/auth';
 
-function AdminProductCard({ product, index }: { product: { _id: Id<'products'>; name: string; price: number; stock: number; sku?: string; images?: string[]; isActive: boolean; isFeatured?: boolean }; index: number }) {
+function AdminProductCard({ product, sessionToken, index }: { product: { _id: Id<'products'>; name: string; price: number; stock: number; sku?: string; images?: string[]; isActive: boolean; isFeatured?: boolean }; sessionToken: string; index: number }) {
   const { ref, visible } = useReveal();
   const remove = useMutation(api.products.remove);
 
   const handleDelete = async () => {
     if (!confirm(`Ջնջել "${product.name}"?`)) return;
-    await remove({ id: product._id });
+    await remove({ sessionToken, id: product._id });
     toast.success('Ապրանքը ջնջվել է');
   };
 
@@ -70,6 +70,7 @@ function AdminProductCard({ product, index }: { product: { _id: Id<'products'>; 
 }
 
 export default function AdminProductsPage() {
+  const { sessionToken } = useAuth();
   const products = useQuery(api.products.list, {});
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
@@ -154,7 +155,7 @@ export default function AdminProductsPage() {
       <p className="mb-4 text-sm text-muted-foreground">{filtered?.length ?? 0} ապրանք</p>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {filtered?.map((p, i) => <AdminProductCard key={p._id} product={p} index={i} />)}
+        {filtered?.map((p, i) => <AdminProductCard key={p._id} product={p} sessionToken={sessionToken ?? ''} index={i} />)}
       </div>
 
       {filtered?.length === 0 && (

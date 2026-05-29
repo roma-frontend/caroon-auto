@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatPrice } from '@/lib/formatters';
+import { useAuth } from '@/store/auth';
 
 function StatCard({
   title,
@@ -53,7 +54,8 @@ function StatCard({
 }
 
 export default function AdminDashboard() {
-  const orders = useQuery(api.orders.listAdmin, {});
+  const { sessionToken } = useAuth();
+  const orders = useQuery(api.orders.listAdmin, sessionToken ? { sessionToken } : 'skip');
   const products = useQuery(api.products.list, {});
   const categories = useQuery(api.categories.list, {});
 
@@ -93,7 +95,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
         <StatCard
           title={'Պատվերներ'}
           value={String(stats.totalOrders)}

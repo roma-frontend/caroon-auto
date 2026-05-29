@@ -32,7 +32,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const logoutStore = useAuthStore((s) => s.logout);
   const logoutMutation = useMutation(api.auth.logout);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { pendingCount, flash } = useOrderNotifications();
+  const { pendingCount, flash } = useOrderNotifications(sessionToken);
 
   // Redirect handled inline below
 

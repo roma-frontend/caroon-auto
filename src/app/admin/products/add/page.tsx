@@ -15,6 +15,7 @@ import { Id } from '../../../../../convex/_generated/dataModel';
 import { useUpload } from '@/hooks/useUpload';
 import { useRef } from 'react';
 import Image from 'next/image';
+import { useAuth } from '@/store/auth';
 
 function StepBasicInfo() {
   const { data, update } = useWizardData();
@@ -123,6 +124,7 @@ function StepAttributes() {
 export default function AddProductPage() {
   const router = useRouter();
   const create = useMutation(api.products.create);
+  const { sessionToken } = useAuth();
 
   const steps: WizardStep[] = [
     { id: 'basic', title: 'Սկզբնական տվյալներ', content: <StepBasicInfo />, validation: (d) => !!(d.name && d.slug && d.categoryId) },
@@ -133,6 +135,7 @@ export default function AddProductPage() {
 
   const handleComplete = async (data: Record<string, unknown>) => {
     await create({
+      sessionToken: sessionToken ?? '',
       name: data.name as string,
       slug: data.slug as string,
       description: (data.description as string) || '',

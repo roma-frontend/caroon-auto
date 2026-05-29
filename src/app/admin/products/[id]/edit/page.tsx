@@ -16,6 +16,7 @@ import { useUpload } from '@/hooks/useUpload';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '@/store/auth';
 
 export default function EditProductPage() {
   const params = useParams();
@@ -23,6 +24,7 @@ export default function EditProductPage() {
   const productId = params.id as Id<'products'>;
   const product = useQuery(api.products.getBySlug, { slug: '' }); // We need getById
   const update = useMutation(api.products.update);
+  const { sessionToken } = useAuth();
   const { upload, uploading } = useUpload();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -64,6 +66,7 @@ export default function EditProductPage() {
     setSaving(true);
     try {
       await update({
+        sessionToken: sessionToken ?? '',
         id: productId,
         name: form.name,
         price: Number(form.price),

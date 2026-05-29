@@ -21,8 +21,7 @@ const STEPS = [
 export default function OrderStatusPage() {
   const [orderNum, setOrderNum] = useState('');
   const [searchNum, setSearchNum] = useState('');
-  const orders = useQuery(api.orders.listAdmin, {});
-  const order = orders?.find((o) => o.orderNumber === searchNum);
+  const order = useQuery(api.orders.getByOrderNumber, searchNum ? { orderNumber: searchNum } : 'skip');
 
   const handleSearch = () => { if (orderNum.trim()) setSearchNum(orderNum.trim().toUpperCase()); };
 

@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
 import { internal } from './_generated/api';
-import { getAuthCaller, requireAdmin } from './lib/auth';
+import { getAdminCaller, getAuthCaller } from './lib/auth';
 
 export const create = mutation({
   args: {
@@ -75,6 +75,7 @@ export const create = mutation({
 
 export const listAdmin = query({
   args: {
+    sessionToken: v.string(),
     status: v.optional(
       v.union(
         v.literal('pending'), v.literal('confirmed'), v.literal('processing'),
@@ -83,8 +84,7 @@ export const listAdmin = query({
     ),
   },
   handler: async (ctx, args) => {
-    const caller = await getAuthCaller(ctx);
-    requireAdmin(caller);
+    await getAdminCaller(ctx, args.sessionToken);
 
     if (args.status) {
       return await ctx.db
@@ -154,6 +154,7 @@ export const myOrders = query({
 
 export const updateStatus = mutation({
   args: {
+    sessionToken: v.string(),
     id: v.id('orders'),
     status: v.optional(
       v.union(
@@ -166,10 +167,8 @@ export const updateStatus = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    const caller = await getAuthCaller(ctx);
-    requireAdmin(caller);
-
-    const { id, ...patch } = args;
+    await getAdminCaller(ctx, args.sessionToken);
+    const { id, sessionToken: _, ...patch } = args;
     await ctx.db.patch(id, { ...patch, updatedAt: Date.now() });
   },
 });

@@ -7,9 +7,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Search, Users, Mail, Phone } from 'lucide-react';
 import { formatDateHy } from '@/lib/formatters';
+import { useAuth } from '@/store/auth';
 
 export default function AdminCustomersPage() {
-  const orders = useQuery(api.orders.listAdmin, {});
+  const { sessionToken } = useAuth();
+  const orders = useQuery(api.orders.listAdmin, sessionToken ? { sessionToken } : 'skip');
   const [search, setSearch] = useState('');
 
   // Extract unique customers from orders

@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { useUpload } from '@/hooks/useUpload';
 import { useRef } from 'react';
 import Image from 'next/image';
+import { useAuth } from '@/store/auth';
 
 function StepBasicInfo() {
   const { data, update } = useWizardData();
@@ -61,6 +62,7 @@ function StepSEO() {
 export default function AddCategoryPage() {
   const router = useRouter();
   const create = useMutation(api.categories.create);
+  const { sessionToken } = useAuth();
 
   const steps: WizardStep[] = [
     { id: 'basic', title: 'Սկզբնական տվյալներ', content: <StepBasicInfo />, validation: (d) => !!(d.name && d.slug) },
@@ -69,6 +71,7 @@ export default function AddCategoryPage() {
 
   const handleComplete = async (data: Record<string, unknown>) => {
     await create({
+      sessionToken: sessionToken ?? '',
       name: data.name as string,
       slug: data.slug as string,
       description: (data.description as string) || undefined,

@@ -10,11 +10,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Save, ArrowLeft, ImagePlus } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { toast } from 'sonner';
 import { useUpload } from '@/hooks/useUpload';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '@/store/auth';
 
 export default function EditCategoryPage() {
   const params = useParams();
@@ -22,6 +23,7 @@ export default function EditCategoryPage() {
   const categoryId = params.id as Id<'categories'>;
   const categories = useQuery(api.categories.list, {});
   const update = useMutation(api.categories.update);
+  const { sessionToken } = useAuth();
   const { upload, uploading } = useUpload();
   const fileRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
@@ -44,7 +46,7 @@ export default function EditCategoryPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await update({ id: categoryId, name: form.name, slug: form.slug, description: form.description || undefined, seoTitle: form.seoTitle || undefined, seoDescription: form.seoDescription || undefined, order: form.order, imageUrl: form.imageUrl || undefined });
+      await update({ sessionToken: sessionToken ?? '', id: categoryId, name: form.name, slug: form.slug, description: form.description || undefined, seoTitle: form.seoTitle || undefined, seoDescription: form.seoDescription || undefined, order: form.order, imageUrl: form.imageUrl || undefined });
       toast.success('Կատեգորիան հաջողությամբ պահպանվեց');
       router.push('/admin/categories');
     } catch { toast.error('Կատեգորիան չի պահպանվել'); } finally { setSaving(false); }

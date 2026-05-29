@@ -8,25 +8,27 @@ export interface AuthenticatedCaller {
   name: string;
 }
 
+export async function getAdminCaller(
+  ctx: QueryCtx | MutationCtx,
+  sessionToken: string,
+): Promise<AuthenticatedCaller> {
+  const user = await ctx.db
+    .query('users')
+    .withIndex('by_session_token', (q) => q.eq('sessionToken', sessionToken))
+    .unique();
+
+  if (!user || !user.isActive) throw new Error('Not authenticated');
+  if (!user.sessionExpiry || user.sessionExpiry < Date.now()) throw new Error('Session expired');
+  if (user.role !== 'admin') throw new Error('Admin access required');
+
+  return { _id: user._id, role: user.role, email: user.email, name: user.name };
+}
+
+// Legacy: used by public queries that optionally check auth
 export async function getAuthCaller(
   ctx: QueryCtx | MutationCtx,
 ): Promise<AuthenticatedCaller | null> {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity?.email) return null;
-
-  const user = await ctx.db
-    .query('users')
-    .withIndex('by_email', (q) => q.eq('email', identity.email!.toLowerCase()))
-    .unique();
-
-  if (!user || !user.isActive) return null;
-
-  return {
-    _id: user._id,
-    role: user.role,
-    email: user.email,
-    name: user.name,
-  };
+  return null;
 }
 
 export function requireAdmin(caller: AuthenticatedCaller | null): AuthenticatedCaller {
