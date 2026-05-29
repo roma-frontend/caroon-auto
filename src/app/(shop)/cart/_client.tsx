@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useCartStore } from '@/store/cart';
 import { formatPrice } from '@/lib/formatters';
 import { CART } from '@/lib/constants';
+import { useSettings } from '@/hooks/useSettings';
 import Image from 'next/image';
 
 export default function CartPage() {
@@ -15,6 +16,7 @@ export default function CartPage() {
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
   const totalPrice = useCartStore((s) => s.totalPrice());
+  const settings = useSettings();
 
   if (items.length === 0) {
     return (
@@ -39,25 +41,29 @@ export default function CartPage() {
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
           {items.map((item) => (
-            <div key={item.id} className="flex items-center gap-4 rounded-xl border p-4" style={{ boxShadow: 'var(--shadow-xs)' }}>
-              <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">{item.image ? <Image src={item.image} alt={item.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-2xl">🔧</div>}</div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium truncate"><Link href={`/products/${item.id}`} className="hover:text-primary transition-colors">{item.name}</Link></h3>
-                <p className="text-primary font-bold" style={{ fontSize: 'var(--text-sm)' }}>{formatPrice(item.price)}</p>
+            <div key={item.id} className="flex gap-4 rounded-xl border p-3 sm:p-4" style={{ boxShadow: 'var(--shadow-xs)' }}>
+              <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">{item.image ? <Image src={item.image} alt={item.name} width={80} height={80} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-2xl">🔧</div>}</div>
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-medium line-clamp-2"><Link href={`/products/${item.id}`} className="transition-colors hover:text-primary">{item.name}</Link></h3>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-destructive" onClick={() => removeItem(item.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="font-bold text-primary" style={{ fontSize: 'var(--text-sm)' }}>{formatPrice(item.price)}</p>
+                <div className="mt-auto flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
+                      <Minus className="h-3 w-3" />
+                    </Button>
+                    <span className="w-8 text-center font-medium">{item.quantity}</span>
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => updateQuantity(item.id, item.quantity + 1)}>
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <span className="font-bold">{formatPrice(item.price * item.quantity)}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
-                  <Minus className="h-3 w-3" />
-                </Button>
-                <span className="w-8 text-center font-medium">{item.quantity}</span>
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => updateQuantity(item.id, item.quantity + 1)}>
-                  <Plus className="h-3 w-3" />
-                </Button>
-              </div>
-              <span className="font-bold w-24 text-right">{formatPrice(item.price * item.quantity)}</span>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeItem(item.id)}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
             </div>
           ))}
         </div>
@@ -65,6 +71,18 @@ export default function CartPage() {
           <Card style={{ boxShadow: 'var(--shadow-card)' }}>
             <CardHeader><CardTitle>{CART.orderSummary}</CardTitle></CardHeader>
             <CardContent className="space-y-4">
+              {settings?.freeShippingThreshold ? (
+                totalPrice >= settings.freeShippingThreshold ? (
+                  <p className="rounded-lg bg-green-600/10 px-3 py-2 text-sm font-medium text-green-600 dark:text-green-400">Դուք ստացել եք անվճար առաքում</p>
+                ) : (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Ավելացրեք ևս <span className="font-semibold text-foreground">{formatPrice(settings.freeShippingThreshold - totalPrice)}</span>՝ անվճար առաքման համար</p>
+                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+                      <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${Math.min(100, (totalPrice / settings.freeShippingThreshold) * 100)}%` }} />
+                    </div>
+                  </div>
+                )
+              ) : null}
               <div className="flex justify-between" style={{ fontSize: 'var(--text-sm)' }}><span>{CART.subtotal}</span><span>{formatPrice(totalPrice)}</span></div>
               <div className="flex justify-between" style={{ fontSize: 'var(--text-sm)' }}><span>{CART.shipping}</span><span>0 ֏</span></div>
               <Separator />

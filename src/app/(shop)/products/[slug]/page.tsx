@@ -9,10 +9,11 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ShoppingCart, Heart, ArrowLeft, Check, Truck, Shield } from 'lucide-react';
+import { ShoppingCart, Heart, ArrowLeft, Check, Truck, Shield, Star, Car } from 'lucide-react';
 import { formatPrice, discountPercent } from '@/lib/formatters';
 import { useCartStore } from '@/store/cart';
 import { useFavoritesStore } from '@/store/favorites';
+import { useVehicleStore } from '@/store/vehicle';
 import { Loader } from '@/components/ui/loader';
 import { useRecentlyViewedStore } from '@/store/recentlyViewed';
 import { RecentlyViewed } from '@/components/RecentlyViewed';
@@ -29,6 +30,8 @@ import Image from 'next/image';
 export default function ProductDetailPage() {
   const { slug } = useParams();
   const product = useQuery(api.products.getBySlug, { slug: slug as string });
+  const stats = useQuery(api.reviews.getStats, product?._id ? { productId: product._id } : 'skip');
+  const vehicle = useVehicleStore((s) => s.vehicle);
   const [selectedImg, setSelectedImg] = useState(0);
   const addViewed = useRecentlyViewedStore((s) => s.add);
   const productId = product?._id;
@@ -50,16 +53,33 @@ export default function ProductDetailPage() {
 
   const attrs = (product.attributes ?? {}) as Record<string, string | boolean>;
 
+  const productLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description,
+    image: product.images,
+    sku: product.sku || undefined,
+    offers: {
+      '@type': 'Offer',
+      price: product.price,
+      priceCurrency: 'Դ',
+      availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    },
+    ...(product.reviewCount ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: product.rating, reviewCount: product.reviewCount } } : {}),
+  };
+
   return (
     <div className="mx-auto" style={{ maxWidth: 'var(--container-max)', paddingInline: 'var(--space-container)', paddingBlock: 'var(--space-8)' }}>
       <Breadcrumbs items={[{ label: 'Ապրանքներ', href: '/products' }, { label: product.name }]} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }} />
 
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Gallery */}
         <div>
           <div className="aspect-square overflow-hidden rounded-2xl border bg-muted/30">
             {product.images?.[selectedImg] ? (
-              <Image src={product.images[selectedImg]} alt={product.name} fetchPriority="high" className="h-full w-full object-cover" />
+              <Image src={product.images[selectedImg]} alt={product.name} width={800} height={800} priority sizes="(max-width: 1024px) 100vw, 50vw" className="h-full w-full object-cover" />
             ) : (
               <div className="flex h-full items-center justify-center text-6xl text-muted-foreground/20 p-4 text-center"><div className="flex flex-col items-center gap-3"><svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground/20"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div></div>
             )}
@@ -69,7 +89,7 @@ export default function ProductDetailPage() {
               {product.images.map((img, i) => (
                 <button key={i} onClick={() => setSelectedImg(i)}
                   className={`h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${i === selectedImg ? 'border-primary' : 'border-transparent hover:border-muted-foreground/30'}`}>
-                  <Image src={img} alt="" className="h-full w-full object-cover" />
+                  <Image src={img} alt="" width={150} height={150} className="h-full w-full object-cover" />
                 </button>
               ))}
             </div>
@@ -80,6 +100,15 @@ export default function ProductDetailPage() {
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">{product.name}</h1>
 
+          {stats && stats.count > 0 && (
+            <div className="mt-2 flex items-center gap-1.5">
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((i) => <Star key={i} className={`h-4 w-4 ${i <= Math.round(stats.avg) ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'}`} />)}
+              </div>
+              <span className="text-sm text-muted-foreground">{stats.avg} ({stats.count})</span>
+            </div>
+          )}
+
           {product.sku && <p className="mt-1 text-sm text-muted-foreground">SKU: {product.sku}</p>}
 
           <div className="mt-4 flex items-center gap-3">
@@ -87,7 +116,7 @@ export default function ProductDetailPage() {
             {product.compareAtPrice && (
               <>
                 <span className="text-lg text-muted-foreground line-through">{formatPrice(product.compareAtPrice)}</span>
-                <Badge className="bg-destructive">-{discountPercent(product.price, product.compareAtPrice)}%</Badge>
+                <Badge className="bg-destructive text-white">-{discountPercent(product.price, product.compareAtPrice)}%</Badge>
               </>
             )}
           </div>
@@ -96,11 +125,21 @@ export default function ProductDetailPage() {
             {product.stock > 0 && product.stock <= 10 ? (
               <span className="inline-flex items-center gap-1 text-sm font-medium text-orange-600"><Check className="h-4 w-4" /> Միայն {product.stock} հատ պահեստում</span>
             ) : product.stock > 0 ? (
-              <span className="inline-flex items-center gap-1 text-sm text-green-600"><Check className="h-4 w-4" /> {'Ապրանքը պահեստում է'}</span>
+              <span className="inline-flex items-center gap-1 text-sm text-green-600"><Check className="h-4 w-4" /> {'Առկա է'}</span>
             ) : (
               <span className="text-sm text-destructive">{PRODUCT.outOfStock}</span>
             )}
           </div>
+
+          {typeof attrs.carBrand === 'string' && attrs.carBrand && (
+            <div className="mt-3">
+              {vehicle && vehicle.brand === attrs.carBrand ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-green-600/10 px-3 py-1 text-sm font-medium text-green-700"><Check className="h-4 w-4" /> Համապատասխանում է ձեր {vehicle.brand}{vehicle.model ? ` ${vehicle.model}` : ''}-ին</span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary"><Car className="h-4 w-4" /> Համատեղելի՝ {attrs.carBrand}</span>
+              )}
+            </div>
+          )}
 
           <Separator className="my-5" />
 
@@ -169,6 +208,18 @@ export default function ProductDetailPage() {
         <h2 className="mb-6 text-xl font-bold">{'Նմանատիպ ապրանքներ'}</h2>
         <RelatedProducts categoryId={product.categoryId} currentId={product._id} />
       </div>
+
+      {/* Sticky mobile buy bar */}
+      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t bg-background/95 p-3 backdrop-blur-md lg:hidden">
+        <div className="min-w-0">
+          <div className="text-lg font-bold text-primary">{formatPrice(product.price)}</div>
+          {product.compareAtPrice && <div className="text-xs text-muted-foreground line-through">{formatPrice(product.compareAtPrice)}</div>}
+        </div>
+        <Button size="lg" className="flex-1 gap-2" disabled={product.stock <= 0}
+          onClick={() => { for (let i = 0; i < qty; i++) addItem({ id: product._id, name: product.name, price: product.price, image: product.images?.[0] ?? null }); toast.success(`${product.name} ավելացվել է զամբյուղում`); }}>
+          <ShoppingCart className="h-5 w-5" /> {PRODUCT.addToCart}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -180,7 +231,7 @@ function RelatedProducts({ categoryId, currentId }: { categoryId: string; curren
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {filtered.map((p, i) => (
-        <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} index={i} />
+        <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} rating={p.rating} reviewCount={p.reviewCount} carBrand={p.attributes?.carBrand} index={i} />
       ))}
     </div>
   );

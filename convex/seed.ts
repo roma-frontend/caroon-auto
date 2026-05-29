@@ -13,7 +13,7 @@ export const seed = mutation({
     const catTires = await ctx.db.insert('categories', { name: 'Անիվներ', slug: 'tires', description: 'Անիվների կատեգորիա', order: 1, isActive: true, createdAt: now });
     const catOils = await ctx.db.insert('categories', { name: 'Նյութեր', slug: 'oils', description: 'Նյութերի կատեգորիա', order: 2, isActive: true, createdAt: now });
     const catFilters = await ctx.db.insert('categories', { name: 'Ֆիլտրեր', slug: 'filters', description: 'Ֆիլտրերի կատեգորիա', order: 3, isActive: true, createdAt: now });
-    const catBrakes = await ctx.db.insert('categories', { name: 'Թռիչքներ', slug: 'brakes', description: 'Թռիչքների կատեգորիա', order: 4, isActive: true, createdAt: now });
+    const catBrakes = await ctx.db.insert('categories', { name: 'Կոճղակ', slug: 'brakes', description: 'Կոճղակների կատեգորիա', order: 4, isActive: true, createdAt: now });
     const catLamps = await ctx.db.insert('categories', { name: 'Լամպեր', slug: 'lamps', description: 'Լամպերի կատեգորիա', order: 5, isActive: true, createdAt: now });
     const catBatteries = await ctx.db.insert('categories', { name: 'Բատարաններ', slug: 'batteries', description: 'Բատարանների կատեգորիա', order: 6, isActive: true, createdAt: now });
 
@@ -27,8 +27,8 @@ export const seed = mutation({
       { name: 'Shell Helix Ultra 0W-20 4', slug: 'shell-helix-ultra-0w20', description: 'Նյութերի կատեգորիա', price: 21000, categoryId: catOils, sku: 'OIL-003', stock: 28, isFeatured: true },
       { name: 'MANN-FILTER W 712/95', slug:'mann-filter-w712-95', description: 'Ֆիլտրերի կատեգորիա', price: 4500, categoryId: catFilters, sku: 'FLT-001', stock:10, isFeatured:false },
       { name: 'Bosch F 026 400 228', slug: 'bosch-air-filter-f026', description: 'Ֆիլտրերի կատեգորիա', price: 5200, categoryId: catFilters, sku: 'FLT-002', stock: 75, isFeatured: false },
-      { name: 'Brembo P 85 075', slug: 'brembo-p85075-brake-pads', description: 'Թռիչքների կատեգորիա', price: 28000, compareAtPrice: 32000, categoryId: catBrakes, sku: 'BRK-001', stock: 20, isFeatured: true },
-      { name: 'TRW GDB1550', slug: 'trw-gdb1550-brake-pads', description: 'Թռիչքների կատեգորիա', price: 19500, categoryId: catBrakes, sku: 'BRK-002', stock: 35, isFeatured: false },
+      { name: 'Brembo P 85 075', slug: 'brembo-p85075-brake-pads', description: 'Կոճղակների կատեգորիա', price: 28000, compareAtPrice: 32000, categoryId: catBrakes, sku: 'BRK-001', stock: 20, isFeatured: true },
+      { name: 'TRW GDB1550', slug: 'trw-gdb1550-brake-pads', description: 'Կոճղակների կատեգորիա', price: 19500, categoryId: catBrakes, sku: 'BRK-002', stock: 35, isFeatured: false },
       { name: 'Philips X-tremeVision H7 +150%', slug: 'philips-xtremevision-h7', description: 'Լամպերի կատեգորիա', price: 8500, compareAtPrice: 10000, categoryId: catLamps, sku: 'LMP-001', stock: 60, isFeatured: true },
       { name: 'Osram Night Breaker H4', slug: 'osram-night-breaker-h4', description: 'Լամպերի կատեգորիա', price: 7200, categoryId: catLamps, sku: 'LMP-002', stock: 48, isFeatured: false },
       { name: 'Varta Blue Dynamic D24 60Ah', slug: 'varta-blue-dynamic-d24', description: 'Բատարանների կատեգորիա', price:45000, compareAtPrice:52000, categoryId:catBatteries, sku:'BAT-001', stock:12, isFeatured:true },
@@ -40,5 +40,30 @@ export const seed = mutation({
     }
 
     return `Seeded: 6 categories, ${products.length} products`;
+  },
+});
+
+export const setImages = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const map: Record<string, string> = {
+      tires: '/products/tires.jpg',
+      oils: '/products/oils.jpg',
+      filters: '/products/filters.jpg',
+      brakes: '/products/brakes.jpg',
+      lamps: '/products/lamps.jpg',
+      batteries: '/products/batteries.jpg',
+    };
+    const cats = await ctx.db.query('categories').collect();
+    const slugById = new Map(cats.map((c) => [c._id, c.slug]));
+    const products = await ctx.db.query('products').collect();
+    let n = 0;
+    for (const p of products) {
+      if (p.images && p.images.length > 0) continue;
+      const slug = slugById.get(p.categoryId);
+      const img = slug ? map[slug] : undefined;
+      if (img) { await ctx.db.patch(p._id, { images: [img], updatedAt: Date.now() }); n++; }
+    }
+    return `Updated ${n} products`;
   },
 });

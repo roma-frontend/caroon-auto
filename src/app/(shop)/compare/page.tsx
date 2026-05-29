@@ -50,7 +50,7 @@ export default function ComparePage() {
                     </button>
                     <Link href={`/products/${item.slug}`}>
                       <div className="mx-auto mb-3 h-32 w-32 overflow-hidden rounded-xl bg-muted">
-                        {item.image ? <Image src={item.image} alt={item.name} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-3xl">{'Համեմատություն'}</div>}
+                        {item.image ? <Image src={item.image} alt={item.name} width={300} height={300} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-3xl">{'Համեմատություն'}</div>}
                       </div>
                       <p className="text-sm font-semibold hover:text-primary transition-colors">{item.name}</p>
                     </Link>

@@ -79,7 +79,7 @@ export default function EditPromotionPage() {
             <Label>Պատկեր</Label>
             {form.imageUrl ? (
               <div className="relative mt-2 aspect-video overflow-hidden rounded-lg border">
-                <Image src={form.imageUrl} alt="" className="h-full w-full object-cover" />
+                <Image src={form.imageUrl} alt="" width={600} height={200} className="h-full w-full object-cover" />
                 <button onClick={() => setForm({ ...form, imageUrl: '' })} className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-white text-xs">✕</button>
               </div>
             ) : (

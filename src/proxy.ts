@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+// Next.js 16: "Proxy" is the renamed Middleware convention.
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Admin routes: check auth token presence
+  // Admin routes: soft gate on auth token presence (real authz is enforced
+  // server-side by Convex getAdminCaller and the API routes' requireAdminAuth).
   if (pathname.startsWith('/admin')) {
     const token = request.cookies.get('auth-token')?.value;
     if (!token) {

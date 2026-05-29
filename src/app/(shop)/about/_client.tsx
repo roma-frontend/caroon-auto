@@ -79,13 +79,13 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="bg-primary text-white" style={{ paddingBlock: 'var(--space-16)' }}>
+      <section className="border-y bg-muted/40" style={{ paddingBlock: 'var(--space-16)' }}>
         <div className="mx-auto text-center" style={{ maxWidth: 'var(--container-max)', paddingInline: 'var(--space-container)' }}>
           <h2 className="text-3xl font-bold">Ունե ՞ք հարցեր</h2>
-          <p className="mx-auto mt-3 max-w-lg text-white/80">Հարցերի և առաջարկների դեպքում կարող եք կապ հաստատել մեզ հետ</p>
+          <p className="mx-auto mt-3 max-w-lg text-muted-foreground">Հարցերի և առաջարկների դեպքում կարող եք կապ հաստատել մեզ հետ</p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Link href="/products"><Button size="lg" className="gap-2 bg-white text-white hover:bg-white/90 font-bold">Ապրանքներ</Button></Link>
-            <Link href="/contact"><Button size="lg" variant="outline" className="border-white/30 text-black hover:bg-white/90">Կապ հաստատել</Button></Link>
+            <Link href="/products"><Button size="lg" className="gap-2">Ապրանքներ</Button></Link>
+            <Link href="/contact"><Button size="lg" variant="outline">Կապ հաստատել</Button></Link>
           </div>
         </div>
       </section>

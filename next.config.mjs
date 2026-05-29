@@ -5,6 +5,24 @@ const withAnalyzer = withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true
 
 const isDev = process.env.NODE_ENV === 'development';
 
+// Content-Security-Policy without a nonce, so pages stay statically cacheable
+// (ISR/CDN). 'unsafe-inline' is required for styled-jsx, next-themes and the
+// app's inline styles; script eval is only allowed in dev for React DX.
+const csp = [
+  `default-src 'self'`,
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+  `style-src 'self' 'unsafe-inline'`,
+  `img-src 'self' data: blob: https:`,
+  `font-src 'self' data:`,
+  `connect-src 'self' https://*.convex.cloud wss://*.convex.cloud https://*.convex.site https://*.r2.dev https://*.r2.cloudflarestorage.com https://vitals.vercel-insights.com`,
+  `frame-src 'self' https://www.google.com https://maps.google.com`,
+  `frame-ancestors 'none'`,
+  `base-uri 'self'`,
+  `form-action 'self'`,
+  `object-src 'none'`,
+  ...(isDev ? [] : ['upgrade-insecure-requests']),
+].join('; ');
+
 const securityHeaders = [
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -14,7 +32,7 @@ const securityHeaders = [
   { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
   { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
   { key: 'Cross-Origin-Resource-Policy', value: 'same-origin' },
-  // CSP is handled by middleware (nonce-based, per-request)
+  { key: 'Content-Security-Policy', value: csp },
 ];
 
 const nextConfig = {
@@ -22,7 +40,6 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   typescript: { ignoreBuildErrors: false },
-  eslint: { ignoreDuringBuilds: false },
 
   images: {
     remotePatterns: [

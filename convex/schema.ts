@@ -67,6 +67,8 @@ export default defineSchema(
     stock: v.number(),
     isActive: v.boolean(),
     isFeatured: v.optional(v.boolean()),
+    rating: v.optional(v.number()),
+    reviewCount: v.optional(v.number()),
     attributes: v.optional(v.any()),
     seoTitle: v.optional(v.string()),
     seoDescription: v.optional(v.string()),
@@ -77,6 +79,8 @@ export default defineSchema(
     .index('by_category', ['categoryId'])
     .index('by_active', ['isActive'])
     .index('by_featured', ['isFeatured'])
+    .index('by_category_price', ['categoryId', 'price'])
+    .index('by_active_price', ['isActive', 'price'])
     .searchIndex('search_products', { searchField: 'name', filterFields: ['categoryId', 'isActive'] }),
 
   // ─── Orders ────────────────────────────────────────────────────

@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { ShoppingCart, Search, ActivityIcon, Menu, User, Heart, X, Grid3X3, Tag, Phone, Car, Info, Truck, BarChart3, ClipboardList } from 'lucide-react';
 import { Logo } from '@/components/layout/Logo';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { NAV, SITE } from '@/lib/constants';
 import { useState } from 'react';
@@ -13,6 +12,8 @@ import { useSettings } from '@/hooks/useSettings';
 import { useCartStore } from '@/store/cart';
 import { useAuth } from '@/store/auth';
 import { useFavoritesStore } from '@/store/favorites';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { SearchCommand } from '@/components/SearchCommand';
 
 const LINKS = [
   { href: '/products', label: NAV.catalog },
@@ -22,7 +23,6 @@ const LINKS = [
 ];
 
 const MORE_LINKS = [
-  { href: '/car-selector', label: 'Պահեստամասեր ըստ մոդելի', icon: Car },
   { href: '/about', label: 'Մեր մասին', icon: Info },
   { href: '/order-status', label: NAV.orderStatus, icon: ClipboardList },
   { href: '/compare', label: 'Համեմատել', icon: BarChart3 },
@@ -35,7 +35,7 @@ export function Header() {
   const { user } = useAuth();
   const router = useRouter();
   const settings = useSettings();
-  const [searchVal, setSearchVal] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
   const favCount = useFavoritesStore((s) => s.count());
   const hasFavs = favCount > 0;
 
@@ -54,6 +54,9 @@ export function Header() {
 
           {/* Desktop Nav */}
           <nav className="hidden items-center gap-1 md:flex">
+            <Link href="/car-selector" className="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10">
+              <Car className="h-4 w-4" /> Ընտրել ավտո
+            </Link>
             {LINKS.map((link) => (
               <Link key={link.href} href={link.href} className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
                 {link.label}
@@ -73,14 +76,18 @@ export function Header() {
 
           {/* Search - desktop */}
           <div className="hidden flex-1 items-center lg:flex" style={{ maxWidth: '16rem', marginInline: '1.5rem' }}>
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder={NAV.search} className="h-9 pl-9" value={searchVal} onChange={(e) => setSearchVal(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && searchVal.trim()) { router.push(`/products?q=${searchVal.trim()}`); setSearchVal(''); } }} />
-            </div>
+            <button onClick={() => setSearchOpen(true)} className="relative flex h-9 w-full items-center rounded-md border bg-background pl-9 pr-3 text-left text-sm text-muted-foreground transition-colors hover:bg-accent">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+              <span className="truncate">{NAV.search}</span>
+            </button>
           </div>
 
           {/* Actions */}
           <div suppressHydrationWarning className="flex items-center gap-1">
+            <Button variant="ghost" size="icon" className="lg:hidden" aria-label={NAV.search} onClick={() => setSearchOpen(true)}>
+              <Search className="h-5 w-5" />
+            </Button>
+            <ThemeToggle />
             <Link href="/favorites">
               <Button variant="ghost" size="icon" className="hidden sm:inline-flex" aria-label={NAV.favorites} suppressHydrationWarning>
                 <Heart className={`h-5 w-5 transition-colors ${hasFavs ? 'fill-red-500 text-red-500' : ''}`} />
@@ -103,6 +110,8 @@ export function Header() {
           </div>
         </div>
       </header>
+
+      <SearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
 
       {/* Mobile Menu Overlay */}
       {menuOpen && (

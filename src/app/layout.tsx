@@ -4,7 +4,7 @@ import React from 'react';
 import './globals.css';
 import { ConvexClientProvider } from '@/lib/convex';
 import { ThemeProvider } from 'next-themes';
-import { Toaster } from 'sonner';
+import { ThemedToaster } from '@/components/ThemedToaster';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
@@ -33,8 +33,8 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://caroon.am';
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0f0f14' },
+    { media: '(prefers-color-scheme: light)', color: '#F4F5F6' },
+    { media: '(prefers-color-scheme: dark)', color: '#202225' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -128,7 +128,7 @@ export const metadata: Metadata = {
       { url: '/favicon.svg', type: 'image/svg+xml' },
     ],
     apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
-    other: [{ rel: 'mask-icon', url: '/favicon.svg', color: '#3B3FC4' }],
+    other: [{ rel: 'mask-icon', url: '/favicon.svg', color: '#0F6CBD' }],
   },
 
   manifest: '/site.webmanifest',
@@ -143,7 +143,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="hy" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         {/* Safari pinned tab */}
-        <link rel="mask-icon" href="/favicon.svg" color="#3B3FC4" />
+        <link rel="mask-icon" href="/favicon.svg" color="#0F6CBD" />
 
         {/* Preconnect to critical origins */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -163,10 +163,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Անցնել հիմնական բովանդակությանը
         </a>
 
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <ConvexClientProvider>
             <main id="main-content">{children}</main>
-            <Toaster richColors position="top-center" />
+            <ThemedToaster />
           </ConvexClientProvider>
         </ThemeProvider>
 

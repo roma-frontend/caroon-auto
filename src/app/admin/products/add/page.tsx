@@ -40,7 +40,7 @@ function StepBasicInfo() {
         <div className="mt-2 grid grid-cols-4 gap-2">
           {((data.images as string[]) ?? []).map((img, i) => (
             <div key={i} className="relative aspect-square overflow-hidden rounded-lg border">
-              <Image src={img} alt="" className="h-full w-full object-cover" />
+              <Image src={img} alt="" width={200} height={200} className="h-full w-full object-cover" />
               <button onClick={() => update('images', ((data.images as string[]) ?? []).filter((_, idx) => idx !== i))} className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-white text-[10px]">✕</button>
             </div>
           ))}

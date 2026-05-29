@@ -2,7 +2,7 @@
 
 export function ProductCardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl border bg-background">
+    <div className="overflow-hidden rounded-2xl border bg-card">
       <div className="skeleton aspect-square" />
       <div className="p-4 space-y-3">
         <div className="skeleton h-4 w-3/4" />

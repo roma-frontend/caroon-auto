@@ -11,6 +11,7 @@ import { HOME, FEATURES } from '@/lib/constants';
 import { ProductCard } from '@/components/cards/ProductCard';
 import { RecentlyViewed } from '@/components/RecentlyViewed';
 import { CategoryCard } from '@/components/cards/CategoryCard';
+import { VehicleSelector } from '@/components/VehicleSelector';
 import { useReveal, useMouseGlow, revealStyle, cardRevealStyle } from '@/lib/motion';
 import { useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
@@ -64,13 +65,18 @@ export default function HomePage() {
 
           {/* Title */}
           <h1 className="hero-fade-2 font-black tracking-tighter" style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', lineHeight: 'var(--line-height-tight)', marginBottom: 'var(--space-6)' }}>
-            Ձեր ավտոպահեստամասերի հարթակը <br /><span className="armenia-flag-text">Հայաստանում</span>
+            {HOME.heroTitle}
           </h1>
 
           {/* Subtitle */}
           <p className="hero-fade-3 mx-auto text-muted-foreground" style={{ fontSize: 'var(--text-lg)', maxWidth: '40rem', marginBottom: 'var(--space-8)', lineHeight: 'var(--line-height-relaxed)' }}>
             {HOME.heroDesc}
           </p>
+
+          {/* Vehicle selector — signature auto-parts fitment pattern */}
+          <div className="hero-fade-4 w-full" style={{ maxWidth: '46rem', marginBottom: 'var(--space-6)' }}>
+            <VehicleSelector />
+          </div>
 
           {/* CTA */}
           <div className="hero-fade-4 flex flex-col items-center sm:flex-row" style={{ gap: 'var(--space-4)' }}>
@@ -84,6 +90,20 @@ export default function HomePage() {
             </Link>
           </div>
 
+          {/* Trust bar */}
+          <div className="hero-fade-4 flex flex-wrap items-center justify-center" style={{ gap: 'var(--space-3) var(--space-6)', marginTop: 'var(--space-8)' }}>
+            {[
+              { Icon: Truck, label: 'Արագ առաքում ողջ ՀՀ-ում' },
+              { Icon: Shield, label: 'Երաշխիք ապրանքների վրա' },
+              { Icon: Clock, label: '24/7 աջակցություն' },
+              { Icon: Star, label: 'Բնօրինակ որակ' },
+            ].map(({ Icon, label }) => (
+              <span key={label} className="flex items-center gap-2 text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
+                <Icon className="h-4 w-4 text-primary" /> {label}
+              </span>
+            ))}
+          </div>
+
           {/* Scroll indicator */}
           <div className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center md:flex" style={{ gap: 'var(--space-2)' }} aria-hidden="true">
             <span className="uppercase tracking-widest text-primary" style={{ fontSize: 'var(--text-xs)', opacity: 0.6 }}>↓</span>
@@ -94,10 +114,21 @@ export default function HomePage() {
         {/* Categories */}
         <section className="mx-auto" style={{ maxWidth: 'var(--container-max)', paddingInline: 'var(--space-container)', paddingBlock: 'var(--space-section)' }}>
           <h2 className="text-center font-bold" style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-8)' }}>{HOME.categoriesTitle}</h2>
-          <div className="grid" style={{ gap: 'var(--space-4)', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' }}>
+          <div className="grid" style={{ gap: 'var(--space-4)', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
             {categories === undefined
               ? Array.from({ length: 8 }).map((_, i) => <div key={i} className="animate-pulse rounded-xl bg-muted" style={{ height: '8rem' }} />)
               : categories.map((cat, i) => <CategoryCard key={cat._id} id={cat._id} name={cat.name} slug={cat.slug} description={cat.description} index={i} />)}
+          </div>
+        </section>
+
+        {/* Trusted brands */}
+        <section className="marquee-pause overflow-hidden border-y bg-muted/30" style={{ paddingBlock: 'var(--space-8)' }}>
+          <div className="marquee-mask">
+            <div className="flex w-max animate-marquee">
+              {['Bosch', 'Michelin', 'Mobil', 'Castrol', 'Continental', 'Brembo', 'NGK', 'Hella', 'Bosch', 'Michelin', 'Mobil', 'Castrol', 'Continental', 'Brembo', 'NGK', 'Hella'].map((b, i) => (
+                <span key={i} className="px-8 text-lg font-bold tracking-tight text-muted-foreground/60 sm:text-xl">{b}</span>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -105,12 +136,15 @@ export default function HomePage() {
         {(featured === undefined || featured.length > 0) && (
           <section className="mx-auto" style={{ maxWidth: 'var(--container-max)', paddingInline: 'var(--space-container)', paddingBlock: 'var(--space-section)' }}>
             <h2 className="text-center font-bold" style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-8)' }}>Առաջարկվող ապրանքներ</h2>
-            <div className="grid" style={{ gap: 'var(--space-4)', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               {featured === undefined
                 ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="animate-pulse rounded-xl bg-muted" style={{ height: '16rem' }} />)
-                : featured.map((p, i) => (
-                    <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} index={i} />
+                : featured.slice(0, 4).map((p, i) => (
+                    <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} rating={p.rating} reviewCount={p.reviewCount} carBrand={p.attributes?.carBrand} index={i} />
                   ))}
+            </div>
+            <div className="mt-8 flex justify-center">
+              <Link href="/products"><Button size="lg" variant="outline" className="gap-2">Տեսնել ավելին <ArrowRight style={{ height: '1rem', width: '1rem' }} /></Button></Link>
             </div>
           </section>
         )}

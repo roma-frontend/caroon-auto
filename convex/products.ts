@@ -10,15 +10,20 @@ export const listPaginated = query({
     minPrice: v.optional(v.number()),
     maxPrice: v.optional(v.number()),
     inStockOnly: v.optional(v.boolean()),
+    onSale: v.optional(v.boolean()),
+    minRating: v.optional(v.number()),
     sort: v.optional(v.union(v.literal('newest'), v.literal('priceAsc'), v.literal('priceDesc'), v.literal('popular'))),
     attributes: v.optional(v.any()),
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
-    const hasFilters = !!(args.minPrice || args.maxPrice || args.inStockOnly || args.attributes);
+    const hasFilters = !!(args.minPrice || args.maxPrice || args.inStockOnly || args.onSale || args.minRating || args.attributes);
     const paginationOpts = hasFilters
       ? { ...args.paginationOpts, numItems: Math.max(args.paginationOpts.numItems ?? 20, 200) }
       : args.paginationOpts;
+
+    const byPrice = args.sort === 'priceAsc' || args.sort === 'priceDesc';
+    const priceDir = args.sort === 'priceAsc' ? 'asc' : 'desc';
     let result;
 
     if (args.search) {
@@ -30,25 +35,25 @@ export const listPaginated = query({
           return s.eq('isActive', true);
         })
         .paginate(paginationOpts);
+    } else if (byPrice && args.categoryId) {
+      result = await ctx.db.query('products').withIndex('by_category_price', (q) => q.eq('categoryId', args.categoryId!)).order(priceDir).paginate(paginationOpts);
+    } else if (byPrice) {
+      result = await ctx.db.query('products').withIndex('by_active_price', (q) => q.eq('isActive', true)).order(priceDir).paginate(paginationOpts);
     } else if (args.categoryId) {
-      result = await ctx.db
-        .query('products')
-        .withIndex('by_category', (q) => q.eq('categoryId', args.categoryId!))
-        .paginate(paginationOpts);
+      result = await ctx.db.query('products').withIndex('by_category', (q) => q.eq('categoryId', args.categoryId!)).order('desc').paginate(paginationOpts);
     } else {
-      result = await ctx.db
-        .query('products')
-        .withIndex('by_active', (q) => q.eq('isActive', true))
-        .paginate(paginationOpts);
+      result = await ctx.db.query('products').withIndex('by_active', (q) => q.eq('isActive', true)).order('desc').paginate(paginationOpts);
     }
 
-    // Post-filter
+    // Order-preserving filters (the DB already ordered the page)
     let filtered = result.page.filter((p) => p.isActive);
     if (args.minPrice) filtered = filtered.filter((p) => p.price >= args.minPrice!);
     if (args.maxPrice) filtered = filtered.filter((p) => p.price <= args.maxPrice!);
     if (args.inStockOnly) filtered = filtered.filter((p) => p.stock > 0);
+    if (args.onSale) filtered = filtered.filter((p) => p.compareAtPrice != null && p.compareAtPrice > p.price);
+    if (args.minRating) filtered = filtered.filter((p) => (p.rating ?? 0) >= args.minRating!);
 
-    // Attribute filtering
+    // Attribute filtering (arbitrary keys can't be indexed)
     if (args.attributes && typeof args.attributes === 'object') {
       const attrs = args.attributes as Record<string, unknown>;
       filtered = filtered.filter((p) => {
@@ -74,11 +79,9 @@ export const listPaginated = query({
       });
     }
 
-    // Sort
-    if (args.sort === 'priceAsc') filtered.sort((a, b) => a.price - b.price);
-    else if (args.sort === 'priceDesc') filtered.sort((a, b) => b.price - a.price);
-    else if (args.sort === 'newest') filtered.sort((a, b) => b.createdAt - a.createdAt);
-    else if (args.sort === 'popular') filtered.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
+    // Search is relevance-ordered: honor price sort within page. Popular: featured first.
+    if (args.search && byPrice) filtered = [...filtered].sort((a, b) => (priceDir === 'asc' ? a.price - b.price : b.price - a.price));
+    else if (args.sort === 'popular') filtered = [...filtered].sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
 
     return { ...result, page: filtered };
   },
@@ -129,11 +132,25 @@ export const getBySlug = query({
 export const getFeatured = query({
   args: {},
   handler: async (ctx) => {
-    const products = await ctx.db
+    const featured = (await ctx.db
       .query('products')
       .withIndex('by_featured', (q) => q.eq('isFeatured', true))
-      .take(20);
-    return products.filter((p) => p.isActive).slice(0, 12);
+      .take(20)).filter((p) => p.isActive);
+    if (featured.length >= 12) return featured.slice(0, 12);
+
+    // Top up with the newest active products so the section stays full
+    const recent = await ctx.db
+      .query('products')
+      .withIndex('by_active', (q) => q.eq('isActive', true))
+      .order('desc')
+      .take(24);
+    const seen = new Set(featured.map((p) => p._id));
+    const filled = [...featured];
+    for (const p of recent) {
+      if (filled.length >= 12) break;
+      if (!seen.has(p._id)) filled.push(p);
+    }
+    return filled.slice(0, 12);
   },
 });
 

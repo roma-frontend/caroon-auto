@@ -1,5 +1,7 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
+import type { MutationCtx } from './_generated/server';
+import type { Id } from './_generated/dataModel';
 
 export const getByProduct = query({
   args: { productId: v.id('products') },
@@ -24,6 +26,13 @@ export const getStats = query({
   },
 });
 
+async function recomputeRating(ctx: MutationCtx, productId: Id<'products'>) {
+  const reviews = (await ctx.db.query('reviews').withIndex('by_product', (q) => q.eq('productId', productId)).collect()).filter((r) => r.isApproved);
+  const count = reviews.length;
+  const avg = count ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / count) * 10) / 10 : 0;
+  await ctx.db.patch(productId, { rating: avg, reviewCount: count });
+}
+
 export const create = mutation({
   args: {
     productId: v.id('products'),
@@ -32,15 +41,21 @@ export const create = mutation({
     text: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert('reviews', {
+    const id = await ctx.db.insert('reviews', {
       ...args,
       isApproved: true,
       createdAt: Date.now(),
     });
+    await recomputeRating(ctx, args.productId);
+    return id;
   },
 });
 
 export const remove = mutation({
   args: { id: v.id('reviews') },
-  handler: async (ctx, args) => { await ctx.db.delete(args.id); },
+  handler: async (ctx, args) => {
+    const review = await ctx.db.get(args.id);
+    await ctx.db.delete(args.id);
+    if (review) await recomputeRating(ctx, review.productId);
+  },
 });

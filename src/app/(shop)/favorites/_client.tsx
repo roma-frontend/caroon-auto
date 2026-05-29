@@ -37,7 +37,7 @@ export default function FavoritesPage() {
         {items.map((item) => (
           <Card key={item.id} className="group overflow-hidden">
             <CardContent className="p-0">
-              <div className="relative aspect-square bg-muted/50">{item.image ? <Image src={item.image} alt={item.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-3xl text-muted-foreground/30">🔧</div>}
+              <div className="relative aspect-square bg-muted/50">{item.image ? <Image src={item.image} alt={item.name} width={400} height={400} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-3xl text-muted-foreground/30">🔧</div>}
                 <button onClick={() => { toggle(item); toast.success('Ապրանքը հեռացվեց'); }} className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-background/80 text-red-500 shadow-sm transition-transform hover:scale-110">
                   <Heart className="h-4 w-4 fill-current" />
                 </button>
@@ -49,7 +49,7 @@ export default function FavoritesPage() {
             </CardContent>
             <CardFooter style={{ padding: 'var(--space-4)', paddingTop: 0 }}>
               <Button size="sm" className="w-full" style={{ gap: 'var(--space-2)' }} onClick={() => { addToCart({ id: item.id, name: item.name, price: item.price, image: item.image }); toast.success('Ապրանքը ավելացվեց զամբյուղում'); }}>
-                <ShoppingCart className="h-4 w-4" /> Ավելացնել պատվերների զամբյուղում
+                <ShoppingCart className="h-4 w-4" /> Ավելացնել զամբյուղում
               </Button>
             </CardFooter>
           </Card>

@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { jwtVerify } from 'jose';
-import { cookies } from 'next/headers';
 import { checkRateLimit } from '@/lib/ratelimit';
+import { requireAdminAuth } from '@/lib/adminAuth';
 
 const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif']);
 
@@ -15,20 +14,6 @@ const R2 = new S3Client({
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
   },
 });
-
-const jwtSecret = new TextEncoder().encode(process.env.JWT_SECRET ?? '');
-
-async function requireAdminAuth(): Promise<boolean> {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth-token')?.value;
-    if (!token || !process.env.JWT_SECRET) return false;
-    const { payload } = await jwtVerify(token, jwtSecret, { algorithms: ['HS256'] });
-    return payload.role === 'admin';
-  } catch {
-    return false;
-  }
-}
 
 export async function POST(req: NextRequest) {
   if (!(await requireAdminAuth())) {

@@ -10,7 +10,7 @@ export function JsonLd() {
     description: 'Ավտոպահեստամասերի առցանց խանութ Հայաստանում',
     address: { '@type': 'PostalAddress', addressLocality: 'Yerevan', addressCountry: 'AM' },
     priceRange: '$$',
-    currenciesAccepted: 'AMD',
+    currenciesAccepted: 'Դ',
     paymentAccepted: 'Cash',
   };
 

@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
-import { cookies } from 'next/headers';
-
-const jwtSecret = new TextEncoder().encode(process.env.JWT_SECRET ?? '');
+import { requireAdminAuth } from '@/lib/adminAuth';
 
 function escapeHtml(str: string): string {
   return String(str)
@@ -11,18 +8,6 @@ function escapeHtml(str: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;');
-}
-
-async function requireAdminAuth(): Promise<boolean> {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth-token')?.value;
-    if (!token || !process.env.JWT_SECRET) return false;
-    const { payload } = await jwtVerify(token, jwtSecret, { algorithms: ['HS256'] });
-    return payload.role === 'admin';
-  } catch {
-    return false;
-  }
 }
 
 export async function POST(req: Request) {

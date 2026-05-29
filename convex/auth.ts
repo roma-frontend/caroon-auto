@@ -1,6 +1,20 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 
+// Constant-time credential comparison (Web Crypto is available in Convex runtime).
+async function safeEqual(a: string, b: string): Promise<boolean> {
+  const enc = new TextEncoder();
+  const [ha, hb] = await Promise.all([
+    crypto.subtle.digest('SHA-256', enc.encode(a)),
+    crypto.subtle.digest('SHA-256', enc.encode(b)),
+  ]);
+  const x = new Uint8Array(ha);
+  const y = new Uint8Array(hb);
+  let diff = 0;
+  for (let i = 0; i < x.length; i++) diff |= x[i] ^ y[i];
+  return diff === 0;
+}
+
 export const login = mutation({
   args: {
     email: v.string(),
@@ -12,9 +26,9 @@ export const login = mutation({
 
     if (!adminEmail || !adminPassword) throw new Error('Admin not configured');
 
-    // Constant-time-ish comparison to avoid timing attacks
-    const emailMatch = args.email.toLowerCase() === adminEmail.toLowerCase();
-    const passMatch = args.password === adminPassword;
+    // Constant-time comparison to avoid timing attacks (both always evaluated)
+    const emailMatch = await safeEqual(args.email.toLowerCase(), adminEmail.toLowerCase());
+    const passMatch = await safeEqual(args.password, adminPassword);
     if (!emailMatch || !passMatch) {
       throw new Error('Սխալ էլ. փոստ կամ գաղտնաբառ');
     }

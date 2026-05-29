@@ -28,11 +28,11 @@ function AdminProductCard({ product, sessionToken, index }: { product: { _id: Id
 
   return (
     <div ref={ref} style={revealStyle(visible, index * 0.05)}>
-      <div className="group relative overflow-hidden rounded-xl border bg-background transition-all hover:shadow-lg" style={{ boxShadow: 'var(--shadow-xs)' }}>
+      <div className="group relative overflow-hidden rounded-2xl border bg-card shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
         {/* Image */}
-        <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-muted/50 to-muted/30">
+        <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-muted/50 to-muted/30">
           {product.images?.[0] ? (
-            <Image src={product.images[0]} alt={product.name} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+            <Image src={product.images[0]} alt={product.name} width={400} height={400} sizes="(max-width: 640px) 50vw, 240px" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
           ) : (
             <div className="flex h-full items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground/20"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
@@ -55,7 +55,7 @@ function AdminProductCard({ product, sessionToken, index }: { product: { _id: Id
               <h3 className="truncate text-sm font-semibold">{product.name}</h3>
               <p className="text-xs text-muted-foreground">{product.sku ?? '—'}</p>
             </div>
-            <span className="shrink-0 font-bold text-primary">{formatPrice(product.price)}</span>
+            <span className="shrink-0 text-lg font-bold text-primary">{formatPrice(product.price)}</span>
           </div>
           <div className="mt-3 flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Պահեստ: {product.stock}</span>
