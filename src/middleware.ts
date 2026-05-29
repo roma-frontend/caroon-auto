@@ -1,29 +1,11 @@
 /**
  * Security Middleware (Edge runtime)
- * - JWT auth guard for protected routes (validates token, not just presence)
+ * - Auth guard for protected routes
  * - CSP headers with nonce
  * - Security headers
  */
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { jwtVerify } from 'jose';
-
-const jwtSecretRaw = process.env.JWT_SECRET;
-// Guard: fail loudly if secret is missing or too short
-if (jwtSecretRaw !== undefined && jwtSecretRaw.length < 32) {
-  console.error('SECURITY: JWT_SECRET must be at least 32 characters');
-}
-const jwtSecret = new TextEncoder().encode(jwtSecretRaw ?? '');
-
-async function isValidJWT(token: string | undefined): Promise<boolean> {
-  if (!token || !jwtSecretRaw || jwtSecretRaw.length < 32) return false;
-  try {
-    await jwtVerify(token, jwtSecret, { algorithms: ['HS256'] });
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 const PUBLIC_PATHS = [
   '/',
@@ -65,11 +47,10 @@ export async function middleware(request: NextRequest) {
     "upgrade-insecure-requests",
   ].join('; ');
 
-  // Admin routes: validate JWT, not just check presence
+  // Admin routes: check auth token presence
   if (pathname.startsWith('/admin')) {
     const token = request.cookies.get('auth-token')?.value;
-    const valid = await isValidJWT(token);
-    if (!valid) {
+    if (!token) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
   }

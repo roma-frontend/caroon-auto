@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { LayoutDashboard, Package, FolderTree, ShoppingBag, Tag, FileText, LogOut, Settings, Menu, X, Users } from 'lucide-react';
+import { Logo } from '@/components/layout/Logo';
 import { Button } from '@/components/ui/button';
 import { SITE } from '@/lib/constants';
 import { useMutation } from 'convex/react';
@@ -50,8 +51,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const sidebar = (
     <>
       <div className="flex h-14 items-center gap-2 border-b px-4">
-        <Link href="/" className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary transition-transform hover:scale-110">
-          <Package className="h-4 w-4 text-primary-foreground" />
+        <Link href="/" className="transition-transform hover:scale-110">
+          <Logo size={32} />
         </Link>
         <span className="font-bold">{SITE.name}</span>
         <span className="ml-auto rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">Admin</span>

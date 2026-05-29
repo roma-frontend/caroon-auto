@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { SITE } from '@/lib/constants';
-import { ShoppingCart, Mail, Lock, Shield } from 'lucide-react';
+import { Mail, Lock } from 'lucide-react';
+import { Logo } from '@/components/layout/Logo';
 import { useAuthStore } from '@/store/auth';
 import { setAuthCookie } from '@/actions/auth';
 import { toast } from 'sonner';
@@ -51,9 +52,7 @@ export default function LoginPage() {
         <div className="rounded-2xl border bg-background/80 p-8 shadow-xl backdrop-blur-sm" style={{ boxShadow: 'var(--shadow-xl)' }}>
           <div className="mb-6 text-center">
             <Link href="/" className="mb-8 flex flex-col items-center gap-3 transition-transform hover:scale-105">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary shadow-lg" style={{ boxShadow: '0 8px 30px oklch(0.5 0.18 260 / 0.3)' }}>
-                <ShoppingCart className="h-6 w-6 text-primary-foreground" />
-              </div>
+              <Logo size={48} />
               <h1 className="text-2xl font-bold">Մուտք</h1>
             </Link>
           </div>

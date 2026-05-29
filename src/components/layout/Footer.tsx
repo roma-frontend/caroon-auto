@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { Phone, Mail, MapPin, ShoppingCart } from 'lucide-react';
+import { Phone, Mail, MapPin } from 'lucide-react';
+import { Logo } from '@/components/layout/Logo';
 import { Separator } from '@/components/ui/separator';
 import { SITE, NAV, FOOTER } from '@/lib/constants';
 import { useSettings } from '@/hooks/useSettings';
@@ -14,9 +15,7 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div>
             <Link href="/" className="flex items-center gap-2 shrink-0 mb-4">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <ShoppingCart className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <Logo size={36} />
             <span className="hidden text-xl font-bold sm:inline">{SITE.name}</span>
           </Link>
             <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>{SITE.description}</p>
