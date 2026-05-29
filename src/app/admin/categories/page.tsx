@@ -62,7 +62,7 @@ export default function AdminCategoriesPage() {
         </Link>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
         {categories?.map((cat, i) => <AdminCategoryCard key={cat._id} cat={cat} sessionToken={sessionToken ?? ''} index={i} />)}
       </div>
 

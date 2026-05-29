@@ -57,7 +57,7 @@ export default function PromotionDetailPage() {
       {promoProducts.length > 0 && (
         <div className="mt-10">
           <h2 className="mb-6 text-xl font-bold">{'Ակցիայի ապրանքներ'}</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
             {promoProducts.map((p, i) => (
               <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} stock={p.stock} index={i} />
             ))}

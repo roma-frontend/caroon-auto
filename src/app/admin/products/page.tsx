@@ -154,7 +154,7 @@ export default function AdminProductsPage() {
       </div>
       <p className="mb-4 text-sm text-muted-foreground">{filtered?.length ?? 0} ապրանք</p>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
         {filtered?.map((p, i) => <AdminProductCard key={p._id} product={p} sessionToken={sessionToken ?? ''} index={i} />)}
       </div>
 
