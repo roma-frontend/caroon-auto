@@ -100,9 +100,9 @@ export function ProductFilters({ categoryId, onFilterChange, activeFilters }: Pr
             {/* Price range */}
             <FilterSection title={'գին'} sectionKey="price" expanded={expandedSections} toggle={toggleSection}>
               <div className="flex gap-2">
-                <Input type="number" placeholder="Min" className="h-8 text-sm" value={activeFilters.minPrice ?? ''}
+                <Input type="number" placeholder="Նվազագույն" className="h-8 text-sm" value={activeFilters.minPrice ?? ''}
                   onChange={(e) => onFilterChange({ ...activeFilters, minPrice: e.target.value ? Number(e.target.value) : undefined })} />
-                <Input type="number" placeholder="Max" className="h-8 text-sm" value={activeFilters.maxPrice ?? ''}
+                <Input type="number" placeholder="Առավելագույն" className="h-8 text-sm" value={activeFilters.maxPrice ?? ''}
                   onChange={(e) => onFilterChange({ ...activeFilters, maxPrice: e.target.value ? Number(e.target.value) : undefined })} />
               </div>
             </FilterSection>
@@ -156,7 +156,7 @@ export function ProductFilters({ categoryId, onFilterChange, activeFilters }: Pr
                 )}
                 {def.type === 'range' && (
                   <div className="flex gap-2">
-                    <Input type="number" placeholder="Min" className="h-8 text-sm"
+                    <Input type="number" placeholder="Նվազ" className="h-8 text-sm"
                       onChange={(e) => updateAttr(def.slug, e.target.value ? Number(e.target.value) : null)} />
                     {def.unit && <span className="text-xs text-muted-foreground self-center">{def.unit}</span>}
                   </div>

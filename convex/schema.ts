@@ -18,7 +18,8 @@ export default defineSchema(
   })
     .index('by_email', ['email'])
     .index('by_google_id', ['googleId'])
-    .index('by_role', ['role']),
+    .index('by_role', ['role'])
+    .index('by_session_token', ['sessionToken']),
 
   // ─── Categories ────────────────────────────────────────────────
   categories: defineTable({
@@ -162,8 +163,8 @@ export default defineSchema(
     freeShippingThreshold: v.number(),
     announcementBar: v.string(),
     workingHours: v.string(),
-    telegramBotToken: v.string(),
-    telegramChatId: v.string(),
+    telegramBotToken: v.optional(v.string()),
+    telegramChatId: v.optional(v.string()),
     mapUrl: v.optional(v.string()),
   }),
 
@@ -179,5 +180,5 @@ export default defineSchema(
     updatedAt: v.number(),
   }).index('by_slug', ['slug']),
   },
-  { schemaValidation: false },
+  { schemaValidation: true },
 );

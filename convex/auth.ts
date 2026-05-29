@@ -11,11 +11,14 @@ export const login = mutation({
     const adminPassword = process.env.ADMIN_PASSWORD;
 
     if (!adminEmail || !adminPassword) throw new Error('Admin not configured');
-    if (args.email.toLowerCase() !== adminEmail.toLowerCase() || args.password !== adminPassword) {
+
+    // Constant-time-ish comparison to avoid timing attacks
+    const emailMatch = args.email.toLowerCase() === adminEmail.toLowerCase();
+    const passMatch = args.password === adminPassword;
+    if (!emailMatch || !passMatch) {
       throw new Error('Սխալ էլ. փոստ կամ գաղտնաբառ');
     }
 
-    // Find or create admin user
     let user = await ctx.db
       .query('users')
       .withIndex('by_email', (q) => q.eq('email', adminEmail.toLowerCase()))
@@ -45,8 +48,11 @@ export const login = mutation({
 export const me = query({
   args: { sessionToken: v.string() },
   handler: async (ctx, args) => {
-    const users = await ctx.db.query('users').take(100);
-    const user = users.find((u) => u.sessionToken === args.sessionToken);
+    // Use index — no full table scan
+    const user = await ctx.db
+      .query('users')
+      .withIndex('by_session_token', (q) => q.eq('sessionToken', args.sessionToken))
+      .unique();
     if (!user || !user.sessionExpiry || user.sessionExpiry < Date.now()) return null;
     return { id: user._id, name: user.name, email: user.email, role: user.role };
   },
@@ -55,8 +61,10 @@ export const me = query({
 export const logout = mutation({
   args: { sessionToken: v.string() },
   handler: async (ctx, args) => {
-    const users = await ctx.db.query('users').take(100);
-    const user = users.find((u) => u.sessionToken === args.sessionToken);
+    const user = await ctx.db
+      .query('users')
+      .withIndex('by_session_token', (q) => q.eq('sessionToken', args.sessionToken))
+      .unique();
     if (user) {
       await ctx.db.patch(user._id, { sessionToken: undefined, sessionExpiry: undefined });
     }

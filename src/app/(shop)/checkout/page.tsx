@@ -76,7 +76,7 @@ export default function CheckoutPage() {
     return (
       <div className="py-16 text-center">
         <p className="text-muted-foreground">Զամբյուղը դատարկ է</p>
-        <a href="/cart" className="mt-2 inline-block text-primary underline">Անցնել զամբյուղ</a>
+        <Link href="/cart" className="mt-2 inline-block text-primary underline">Անցնել զամբյուղ</Link>
       </div>
     );
   }
@@ -110,10 +110,10 @@ export default function CheckoutPage() {
                 </div>
               ))}
               <Separator />
-              <div className="flex justify-between" style={{ fontSize: 'var(--text-sm)' }}><span>{CART.subtotal}</span><span>{formatPrice(totalPrice + shippingCost)}</span></div>
-              <div className="flex justify-between" style={{ fontSize: 'var(--text-sm)' }}><span>{CART.shipping}</span><span>{formatPrice(0)}</span></div>
+              <div className="flex justify-between" style={{ fontSize: 'var(--text-sm)' }}><span>{CART.subtotal}</span><span>{formatPrice(totalPrice)}</span></div>
+              <div className="flex justify-between" style={{ fontSize: 'var(--text-sm)' }}><span>{CART.shipping}</span><span>{shippingCost === 0 ? 'Անվճար' : formatPrice(shippingCost)}</span></div>
               <Separator />
-              <div className="flex justify-between font-bold" style={{ fontSize: 'var(--text-lg)' }}><span>{CART.total}</span><span>{formatPrice(totalPrice)}</span></div>
+              <div className="flex justify-between font-bold" style={{ fontSize: 'var(--text-lg)' }}><span>{CART.total}</span><span>{formatPrice(totalPrice + shippingCost)}</span></div>
               <Button type="submit" variant="cta" size="xl" className="w-full" disabled={loading}>
                 {loading ? 'Բեռնվում է...' : CHECKOUT.placeOrder}
               </Button>

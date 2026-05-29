@@ -105,12 +105,12 @@ export const FEATURES = [
 ] as const;
 
 export const CATEGORIES_DATA = [
-  { name: 'Անվանում', slug: 'tires', icon: '🛞', count: 124 },
-  { name: 'Անվանում', slug: 'discs', icon: '⚙️', count: 89 },
-  { name: 'Անվանում', slug: 'oils', icon: '🛢️', count: 56 },
-  { name: 'Անվանում', slug: 'filters', icon: '🔧', count: 203 },
-  { name: 'Անվանում', slug: 'brakes', icon: '🚗', count: 78 },
-  { name: 'Անվանում', slug: 'lamps', icon: '💡', count: 145 },
-  { name: 'Անվանում', slug: 'batteries', icon: '🔋', count: 34 },
-  { name: 'Անվանում', slug: 'accessories', icon: '🎯', count: 312 },
+  { name: 'Անիվներ', slug: 'tires', icon: '🛞', count: 124 },
+  { name: 'Դիսկեր', slug: 'discs', icon: '⚙️', count: 89 },
+  { name: 'Յուղեր', slug: 'oils', icon: '🛢️', count: 56 },
+  { name: 'Ֆիլտրեր', slug: 'filters', icon: '🔧', count: 203 },
+  { name: 'Անվահեծ', slug: 'brakes', icon: '🚗', count: 78 },
+  { name: 'Լամպեր', slug: 'lamps', icon: '💡', count: 145 },
+  { name: 'Մարտկոցներ', slug: 'batteries', icon: '🔋', count: 34 },
+  { name: 'Ակսեսուարներ', slug: 'accessories', icon: '🎯', count: 312 },
 ] as const;

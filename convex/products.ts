@@ -101,17 +101,17 @@ export const list = query({
           if (args.categoryId) search = search.eq('categoryId', args.categoryId);
           return search.eq('isActive', true);
         })
-        .take(args.limit ?? 100);
+        .take(Math.min(args.limit ?? 20, 100));
       if (args.minPrice) results = results.filter((p) => p.price >= args.minPrice!);
       if (args.maxPrice) results = results.filter((p) => p.price <= args.maxPrice!);
       return results;
     }
     let products;
     if (args.categoryId) {
-      products = await ctx.db.query('products').withIndex('by_category', (q) => q.eq('categoryId', args.categoryId!)).take(args.limit ?? 100);
+      products = await ctx.db.query('products').withIndex('by_category', (q) => q.eq('categoryId', args.categoryId!)).take(Math.min(args.limit ?? 20, 100));
       products = products.filter((p) => p.isActive);
     } else {
-      products = await ctx.db.query('products').withIndex('by_active', (q) => q.eq('isActive', true)).take(args.limit ?? 100);
+      products = await ctx.db.query('products').withIndex('by_active', (q) => q.eq('isActive', true)).take(Math.min(args.limit ?? 20, 100));
     }
     if (args.minPrice) products = products.filter((p) => p.price >= args.minPrice!);
     if (args.maxPrice) products = products.filter((p) => p.price <= args.maxPrice!);
@@ -129,7 +129,11 @@ export const getBySlug = query({
 export const getFeatured = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query('products').withIndex('by_featured', (q) => q.eq('isFeatured', true)).take(12);
+    const products = await ctx.db
+      .query('products')
+      .withIndex('by_featured', (q) => q.eq('isFeatured', true))
+      .take(20);
+    return products.filter((p) => p.isActive).slice(0, 12);
   },
 });
 
@@ -143,6 +147,8 @@ export const create = mutation({
     seoTitle: v.optional(v.string()), seoDescription: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const caller = await getAuthCaller(ctx);
+    requireAdmin(caller);
     const now = Date.now();
     return await ctx.db.insert('products', { ...args, createdAt: now, updatedAt: now });
   },
@@ -159,6 +165,8 @@ export const update = mutation({
     seoTitle: v.optional(v.string()), seoDescription: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const caller = await getAuthCaller(ctx);
+    requireAdmin(caller);
     const { id, ...patch } = args;
     await ctx.db.patch(id, { ...patch, updatedAt: Date.now() });
   },
@@ -166,5 +174,9 @@ export const update = mutation({
 
 export const remove = mutation({
   args: { id: v.id('products') },
-  handler: async (ctx, args) => { await ctx.db.delete(args.id); },
+  handler: async (ctx, args) => {
+    const caller = await getAuthCaller(ctx);
+    requireAdmin(caller);
+    await ctx.db.delete(args.id);
+  },
 });

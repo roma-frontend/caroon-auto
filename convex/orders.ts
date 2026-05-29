@@ -25,11 +25,34 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     const caller = await getAuthCaller(ctx);
+
+    // Server-side price validation — recompute from DB
+    let serverSubtotal = 0;
+    for (const item of args.items) {
+      const product = await ctx.db.get(item.productId);
+      if (!product || !product.isActive) {
+        throw new Error(`Ապրանքը հասանելի չէ: ${item.name}`);
+      }
+      if (product.stock < item.quantity) {
+        throw new Error(`Անբավարար պաշար: ${product.name}`);
+      }
+      serverSubtotal += product.price * item.quantity;
+    }
+
+    const serverTotal = serverSubtotal + args.shipping;
+
+    // Reject if client total differs by more than 1 AMD (rounding tolerance)
+    if (Math.abs(serverTotal - args.total) > 1) {
+      throw new Error('Գնի անհամապատասխանություն. խնդրում ենք թարմացնել էջը');
+    }
+
     const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
     const now = Date.now();
 
     const orderId = await ctx.db.insert('orders', {
       ...args,
+      subtotal: serverSubtotal,
+      total: serverTotal,
       orderNumber,
       userId: caller?._id,
       status: 'pending',
@@ -38,12 +61,11 @@ export const create = mutation({
       updatedAt: now,
     });
 
-    // Send Telegram notification
     await ctx.scheduler.runAfter(0, internal.notifications.sendOrderNotification, {
       orderNumber,
       customerName: args.customerName,
       customerPhone: args.customerPhone,
-      total: args.total,
+      total: serverTotal,
       itemsCount: args.items.length,
     });
 
@@ -52,8 +74,18 @@ export const create = mutation({
 });
 
 export const listAdmin = query({
-  args: { status: v.optional(v.union(v.literal('pending'), v.literal('confirmed'), v.literal('processing'), v.literal('shipped'), v.literal('delivered'), v.literal('cancelled'))) },
+  args: {
+    status: v.optional(
+      v.union(
+        v.literal('pending'), v.literal('confirmed'), v.literal('processing'),
+        v.literal('shipped'), v.literal('delivered'), v.literal('cancelled'),
+      ),
+    ),
+  },
   handler: async (ctx, args) => {
+    const caller = await getAuthCaller(ctx);
+    requireAdmin(caller);
+
     if (args.status) {
       return await ctx.db
         .query('orders')
@@ -68,17 +100,42 @@ export const listAdmin = query({
 export const getByOrderNumber = query({
   args: { orderNumber: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const order = await ctx.db
       .query('orders')
       .withIndex('by_order_number', (q) => q.eq('orderNumber', args.orderNumber))
       .unique();
+    if (!order) return null;
+    // Return safe subset for public access (no full PII)
+    return {
+      _id: order._id,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      paymentStatus: order.paymentStatus,
+      total: order.total,
+      createdAt: order.createdAt,
+      items: order.items,
+    };
   },
 });
 
 export const getById = query({
   args: { id: v.id('orders') },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+    const order = await ctx.db.get(args.id);
+    if (!order) return null;
+    // Allow owner or admin
+    const caller = await getAuthCaller(ctx);
+    if (caller?.role === 'admin') return order;
+    if (caller && order.userId === caller._id) return order;
+    // Unauthenticated: return safe subset only
+    return {
+      _id: order._id,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      paymentStatus: order.paymentStatus,
+      total: order.total,
+      createdAt: order.createdAt,
+    };
   },
 });
 
@@ -98,10 +155,20 @@ export const myOrders = query({
 export const updateStatus = mutation({
   args: {
     id: v.id('orders'),
-    status: v.optional(v.union(v.literal('pending'), v.literal('confirmed'), v.literal('processing'), v.literal('shipped'), v.literal('delivered'), v.literal('cancelled'))),
-    paymentStatus: v.optional(v.union(v.literal('awaiting'), v.literal('paid'), v.literal('refunded'))),
+    status: v.optional(
+      v.union(
+        v.literal('pending'), v.literal('confirmed'), v.literal('processing'),
+        v.literal('shipped'), v.literal('delivered'), v.literal('cancelled'),
+      ),
+    ),
+    paymentStatus: v.optional(
+      v.union(v.literal('awaiting'), v.literal('paid'), v.literal('refunded')),
+    ),
   },
   handler: async (ctx, args) => {
+    const caller = await getAuthCaller(ctx);
+    requireAdmin(caller);
+
     const { id, ...patch } = args;
     await ctx.db.patch(id, { ...patch, updatedAt: Date.now() });
   },

@@ -1,15 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Background -->
   <rect width="32" height="32" rx="7" fill="#3B3FC4"/>
-  <!-- Gear/wheel shape -->
-  <circle cx="16" cy="16" r="9" stroke="white" stroke-width="2" fill="none"/>
-  <circle cx="16" cy="16" r="4" fill="white"/>
-  <!-- Gear teeth -->
-  <rect x="15" y="5" width="2" height="3" rx="1" fill="white"/>
-  <rect x="15" y="24" width="2" height="3" rx="1" fill="white"/>
-  <rect x="5" y="15" width="3" height="2" rx="1" fill="white"/>
-  <rect x="24" y="15" width="3" height="2" rx="1" fill="white"/>
-  <rect x="7.5" y="7.5" width="2" height="3" rx="1" fill="white" transform="rotate(45 8.5 9)"/>
-  <rect x="21.5" y="21.5" width="2" height="3" rx="1" fill="white" transform="rotate(45 22.5 23)"/>
-  <rect x="7.5" y="21.5" width="2" height="3" rx="1" fill="white" transform="rotate(-45 8.5 23)"/>
-  <rect x="21.5" y="7.5" width="2" height="3" rx="1" fill="white" transform="rotate(-45 22.5 9)"/>
+  <!-- Car body top (roof) -->
+  <path d="M10 14 L12 10 L20 10 L22 14 Z" fill="white"/>
+  <!-- Car body main -->
+  <rect x="7" y="14" width="18" height="8" rx="1.5" fill="white"/>
+  <!-- Windshield -->
+  <path d="M11 14 L12.5 11 L19.5 11 L21 14 Z" fill="#3B3FC4"/>
+  <!-- Left headlight -->
+  <rect x="8" y="16" width="4" height="2.5" rx="1" fill="#FFD700"/>
+  <!-- Right headlight -->
+  <rect x="20" y="16" width="4" height="2.5" rx="1" fill="#FFD700"/>
+  <!-- Grille -->
+  <rect x="13" y="16.5" width="6" height="2" rx="0.5" fill="#3B3FC4"/>
+  <!-- Left wheel -->
+  <circle cx="11" cy="23" r="3" fill="#3B3FC4" stroke="white" stroke-width="1.5"/>
+  <circle cx="11" cy="23" r="1.2" fill="white"/>
+  <!-- Right wheel -->
+  <circle cx="21" cy="23" r="3" fill="#3B3FC4" stroke="white" stroke-width="1.5"/>
+  <circle cx="21" cy="23" r="1.2" fill="white"/>
 </svg>

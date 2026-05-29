@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { ShoppingCart, Search, ActivityIcon, Menu, User, Heart, X, Grid3X3, Tag, Phone, Car, Info, Truck, BarChart3, ClipboardList } from 'lucide-react';
+import { Logo } from '@/components/layout/Logo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -47,9 +48,7 @@ export function Header() {
         <div className="mx-auto flex h-full items-center justify-between px-4" style={{ maxWidth: 'var(--container-max)' }}>
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <ShoppingCart className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <Logo size={36} />
             <span className="hidden text-xl font-bold sm:inline">{SITE.name}</span>
           </Link>
 
@@ -114,9 +113,7 @@ export function Header() {
             <div className="flex-1 overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b">
               <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                  <ShoppingCart className="h-4 w-4 text-primary-foreground" />
-                </div>
+                <Logo size={32} />
                 <span className="text-lg font-bold">{SITE.name}</span>
               </Link>
               <button onClick={() => setMenuOpen(false)} className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-accent transition-colors">

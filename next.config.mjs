@@ -5,36 +5,6 @@ const withAnalyzer = withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true
 
 const isDev = process.env.NODE_ENV === 'development';
 
-// Content Security Policy
-const cspDirectives = {
-  'default-src': ["'self'"],
-  'script-src': [
-    "'self'",
-    "'unsafe-inline'", // required for Next.js inline scripts
-    "'unsafe-eval'",   // required for Next.js dev HMR
-    'https://va.vercel-scripts.com',
-    'https://vercel.live',
-  ],
-  'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-  'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
-  'img-src': ["'self'", 'data:', 'blob:', 'https://*.r2.dev', 'https://*.r2.cloudflarestorage.com', 'https://lh3.googleusercontent.com'],
-  'connect-src': [
-    "'self'",
-    'https://*.convex.cloud',
-    'wss://*.convex.cloud',
-    'https://va.vercel-scripts.com',
-    isDev ? 'ws://localhost:*' : '',
-  ].filter(Boolean),
-  'frame-ancestors': ["'none'"],
-  'base-uri': ["'self'"],
-  'form-action': ["'self'"],
-  'upgrade-insecure-requests': [],
-};
-
-const csp = Object.entries(cspDirectives)
-  .map(([k, v]) => `${k} ${v.join(' ')}`.trim())
-  .join('; ');
-
 const securityHeaders = [
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -44,7 +14,7 @@ const securityHeaders = [
   { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
   { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
   { key: 'Cross-Origin-Resource-Policy', value: 'same-origin' },
-  ...(!isDev ? [{ key: 'Content-Security-Policy', value: csp }] : []),
+  // CSP is handled by middleware (nonce-based, per-request)
 ];
 
 const nextConfig = {
