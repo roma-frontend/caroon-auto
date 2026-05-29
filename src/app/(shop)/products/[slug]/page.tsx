@@ -14,6 +14,7 @@ import { formatPrice, discountPercent } from '@/lib/formatters';
 import { useCartStore } from '@/store/cart';
 import { useFavoritesStore } from '@/store/favorites';
 import { useVehicleStore } from '@/store/vehicle';
+import { useSettings } from '@/hooks/useSettings';
 import { Loader } from '@/components/ui/loader';
 import { useRecentlyViewedStore } from '@/store/recentlyViewed';
 import { RecentlyViewed } from '@/components/RecentlyViewed';
@@ -32,6 +33,7 @@ export default function ProductDetailPage() {
   const product = useQuery(api.products.getBySlug, { slug: slug as string });
   const stats = useQuery(api.reviews.getStats, product?._id ? { productId: product._id } : 'skip');
   const vehicle = useVehicleStore((s) => s.vehicle);
+  const settings = useSettings();
   const [selectedImg, setSelectedImg] = useState(0);
   const addViewed = useRecentlyViewedStore((s) => s.add);
   const productId = product?._id;
@@ -199,7 +201,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
-      <ProductReviews productId={product._id} />
+      {settings?.enableReviews !== false && <ProductReviews productId={product._id} />}
 
       <RecentlyViewed />
 

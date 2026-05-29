@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation } from 'convex/react';
+import { useQuery, useMutation, useAction } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 
 import {
   Save,
@@ -16,6 +17,11 @@ import {
   MessageCircle,
   Bell,
   Globe,
+  Power,
+  Palette,
+  Send,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 import { toast } from 'sonner';
@@ -23,13 +29,26 @@ import { toast } from 'sonner';
 export default function AdminSettingsPage() {
   const settings = useQuery(api.settings.get, {});
   const save = useMutation(api.settings.save);
+  const sendTest = useAction(api.notifications.sendTest);
 
   const [form, setForm] = useState<Record<string, string | number>>({});
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showToken, setShowToken] = useState(false);
+  const [testing, setTesting] = useState(false);
+
+  const saveField = async (key: string, value: string | number | boolean) => {
+    if (typeof value !== 'boolean') setForm((f) => ({ ...f, [key]: value }));
+    try {
+      await save({ [key]: value } as Parameters<typeof save>[0]);
+      toast.success('Պահպանվեց');
+    } catch {
+      toast.error('Սխալ');
+    }
+  };
 
   if (settings && !loaded) {
-    setForm(settings as Record<string, string | number>);
+    setForm(settings as unknown as Record<string, string | number>);
     setLoaded(true);
   }
 
@@ -69,6 +88,8 @@ export default function AdminSettingsPage() {
     setForm({ ...form, [key]: value });
 
   if (!settings) return null;
+
+  const flags = settings as Record<string, unknown>;
 
   return (
     <div className="max-w-3xl">
@@ -154,6 +175,15 @@ export default function AdminSettingsPage() {
                   set('address', e.target.value)
                 }
                 className="h-10"
+              />
+            </div>
+
+            <div>
+              <Label>{'Քարտեզի URL (Google Maps embed)'}</Label>
+              <Input
+                value={form.mapUrl ?? ''}
+                onChange={(e) => set('mapUrl', e.target.value)}
+                className="h-10 font-mono text-xs"
               />
             </div>
           </CardContent>
@@ -332,17 +362,19 @@ export default function AdminSettingsPage() {
             <div>
               <Label>Bot Token</Label>
 
-              <Input
-                value={form.telegramBotToken ?? ''}
-                onChange={(e) =>
-                  set(
-                    'telegramBotToken',
-                    e.target.value
-                  )
-                }
-                placeholder="123456:ABC-DEF..."
-                className="h-10 font-mono text-xs"
-              />
+              <div className="relative">
+                <Input
+                  type={showToken ? 'text' : 'password'}
+                  value={form.telegramBotToken ?? ''}
+                  onChange={(e) => set('telegramBotToken', e.target.value)}
+                  onBlur={(e) => saveField('telegramBotToken', e.target.value)}
+                  placeholder="123456:ABC-DEF..."
+                  className="h-10 pr-9 font-mono text-xs"
+                />
+                <button type="button" onClick={() => setShowToken(!showToken)} aria-label="Toggle token" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  {showToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
 
             <div>
@@ -359,6 +391,72 @@ export default function AdminSettingsPage() {
                 placeholder="-1001234567890"
                 className="h-10 font-mono text-xs"
               />
+            </div>
+
+            <div className="sm:col-span-2">
+              <Button variant="outline" size="sm" className="gap-2" disabled={testing}
+                onClick={async () => { setTesting(true); try { await sendTest({}); toast.success('Թեստային ծանուցումն ուղարկվեց'); } catch (e) { toast.error(e instanceof Error ? e.message : 'Չհաջողվեց ուղարկել'); } finally { setTesting(false); } }}>
+                <Send className="h-4 w-4" /> {testing ? 'Ուղարկվում է...' : 'Ուղարկել թեստ'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Control Center — real-time toggles */}
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Power className="h-5 w-5 text-primary" />
+              {'Կառավարման կենտրոն'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium">{'Տեխնիկական աշխատանքներ'}</p>
+                  <p className="text-xs text-muted-foreground">{'Փակում է խանութը այցելուների համար'}</p>
+                </div>
+                <Switch checked={flags.maintenanceMode === true} onCheckedChange={(v) => saveField('maintenanceMode', v)} />
+              </div>
+              {flags.maintenanceMode === true && (
+                <Input className="mt-3 h-10" placeholder={'Հաղորդագրություն...'} value={form.maintenanceMessage ?? ''}
+                  onChange={(e) => set('maintenanceMessage', e.target.value)} onBlur={(e) => saveField('maintenanceMessage', e.target.value)} />
+              )}
+            </div>
+
+            {([
+              ['announcementEnabled', 'Հայտարարության գոտի'],
+              ['showCategories', 'Կատեգորիաների բաժին (գլխավոր)'],
+              ['showFeatured', 'Առաջարկվող ապրանքներ (գլխավոր)'],
+              ['showBrands', 'Բրենդների շարք (գլխավոր)'],
+              ['showFeatures', 'Առավելությունների բաժին (գլխավոր)'],
+              ['enableCarSelector', 'Ավտոյի ընտրիչ'],
+              ['enableReviews', 'Ապրանքի գնահատականներ'],
+            ] as [string, string][]).map(([key, label]) => (
+              <div key={key} className="flex items-center justify-between gap-3">
+                <span className="text-sm">{label}</span>
+                <Switch checked={flags[key] !== false} onCheckedChange={(v) => saveField(key, v)} />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Branding — live accent color */}
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Palette className="h-5 w-5 text-primary" />
+              {'Բրենդ / Գույն'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap items-center gap-3">
+              <input type="color" aria-label="Ակցենտ գույն" value={(form.accentColor as string) || '#0F6CBD'}
+                onChange={(e) => saveField('accentColor', e.target.value)}
+                className="h-10 w-14 cursor-pointer rounded-md border bg-transparent p-1" />
+              <span className="text-sm text-muted-foreground">{'Ակցենտ գույնը՝ փոխվում է ողջ կայքում իրական ժամանակում'}</span>
+              {!!form.accentColor && <Button variant="ghost" size="sm" onClick={() => saveField('accentColor', '')}>{'Վերականգնել'}</Button>}
             </div>
           </CardContent>
         </Card>

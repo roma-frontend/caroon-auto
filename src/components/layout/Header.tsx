@@ -41,9 +41,11 @@ export function Header() {
 
   return (
     <>
-      <div className="bg-primary text-primary-foreground text-center text-xs font-medium py-2 px-4">
-        <span>{settings?.announcementBar} • Հեռ. {settings?.phone}</span>
-      </div>
+      {settings?.announcementEnabled !== false && settings?.announcementBar && (
+        <div className="bg-primary text-primary-foreground text-center text-xs font-medium py-2 px-4">
+          <span>{settings?.announcementBar} • Հեռ. {settings?.phone}</span>
+        </div>
+      )}
       <header className="glass-header sticky top-0 w-full" style={{ zIndex: 'var(--z-sticky)', height: 'var(--header-height)' }}>
         <div className="mx-auto flex h-full items-center justify-between px-4" style={{ maxWidth: 'var(--container-max)' }}>
           {/* Logo */}
@@ -54,9 +56,11 @@ export function Header() {
 
           {/* Desktop Nav */}
           <nav className="hidden items-center gap-1 md:flex">
-            <Link href="/car-selector" className="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10">
-              <Car className="h-4 w-4" /> Ընտրել ավտո
-            </Link>
+            {settings?.enableCarSelector !== false && (
+              <Link href="/car-selector" className="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10">
+                <Car className="h-4 w-4" /> Ընտրել ավտո
+              </Link>
+            )}
             {LINKS.map((link) => (
               <Link key={link.href} href={link.href} className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
                 {link.label}

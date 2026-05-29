@@ -22,6 +22,16 @@ export const get = query({
       telegramBotToken: '',
       telegramChatId: '',
       mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d48884.85!2d44.5!3d40.18!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x406aa2dab8fc8b5b%3A0x3d1479ae87da526a!2sYerevan!5e0!3m2!1sen!2sam!4v1',
+      maintenanceMode: false,
+      maintenanceMessage: '',
+      accentColor: '',
+      announcementEnabled: true,
+      showCategories: true,
+      showFeatured: true,
+      showBrands: true,
+      showFeatures: true,
+      enableCarSelector: true,
+      enableReviews: true,
     };
   },
 });
@@ -44,6 +54,16 @@ export const save = mutation({
     telegramBotToken: v.optional(v.string()),
     telegramChatId: v.optional(v.string()),
     mapUrl: v.optional(v.string()),
+    maintenanceMode: v.optional(v.boolean()),
+    maintenanceMessage: v.optional(v.string()),
+    accentColor: v.optional(v.string()),
+    announcementEnabled: v.optional(v.boolean()),
+    showCategories: v.optional(v.boolean()),
+    showFeatured: v.optional(v.boolean()),
+    showBrands: v.optional(v.boolean()),
+    showFeatures: v.optional(v.boolean()),
+    enableCarSelector: v.optional(v.boolean()),
+    enableReviews: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db.query('settings').first();

@@ -5,6 +5,7 @@ import './globals.css';
 import { ConvexClientProvider } from '@/lib/convex';
 import { ThemeProvider } from 'next-themes';
 import { ThemedToaster } from '@/components/ThemedToaster';
+import { BrandTheme } from '@/components/BrandTheme';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
@@ -165,6 +166,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <ConvexClientProvider>
+            <BrandTheme />
             <main id="main-content">{children}</main>
             <ThemedToaster />
           </ConvexClientProvider>

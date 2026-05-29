@@ -16,6 +16,7 @@ import { useReveal, useMouseGlow, revealStyle, cardRevealStyle } from '@/lib/mot
 import { useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { formatPrice } from '@/lib/formatters';
+import { useSettings } from '@/hooks/useSettings';
 
 const FEATURE_ICONS = { delivery: Truck, warranty: Shield, support: Clock, quality: Star };
 
@@ -43,6 +44,7 @@ function FeatureItem({ feature, index }: { feature: typeof FEATURES[number]; ind
 export default function HomePage() {
   const categories = useQuery(api.categories.list, {});
   const featured = useQuery(api.products.getFeatured, {});
+  const settings = useSettings();
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -74,9 +76,11 @@ export default function HomePage() {
           </p>
 
           {/* Vehicle selector — signature auto-parts fitment pattern */}
-          <div className="hero-fade-4 w-full" style={{ maxWidth: '46rem', marginBottom: 'var(--space-6)' }}>
-            <VehicleSelector />
-          </div>
+          {settings?.enableCarSelector !== false && (
+            <div className="hero-fade-4 w-full" style={{ maxWidth: '46rem', marginBottom: 'var(--space-6)' }}>
+              <VehicleSelector />
+            </div>
+          )}
 
           {/* CTA */}
           <div className="hero-fade-4 flex flex-col items-center sm:flex-row" style={{ gap: 'var(--space-4)' }}>
@@ -112,6 +116,7 @@ export default function HomePage() {
         </section>
 
         {/* Categories */}
+        {settings?.showCategories !== false && (
         <section className="mx-auto" style={{ maxWidth: 'var(--container-max)', paddingInline: 'var(--space-container)', paddingBlock: 'var(--space-section)' }}>
           <h2 className="text-center font-bold" style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-8)' }}>{HOME.categoriesTitle}</h2>
           <div className="grid" style={{ gap: 'var(--space-4)', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
@@ -120,8 +125,10 @@ export default function HomePage() {
               : categories.map((cat, i) => <CategoryCard key={cat._id} id={cat._id} name={cat.name} slug={cat.slug} description={cat.description} index={i} />)}
           </div>
         </section>
+        )}
 
         {/* Trusted brands */}
+        {settings?.showBrands !== false && (
         <section className="marquee-pause overflow-hidden border-y bg-muted/30" style={{ paddingBlock: 'var(--space-8)' }}>
           <div className="marquee-mask">
             <div className="flex w-max animate-marquee">
@@ -131,9 +138,10 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        )}
 
         {/* Featured Products */}
-        {(featured === undefined || featured.length > 0) && (
+        {settings?.showFeatured !== false && (featured === undefined || featured.length > 0) && (
           <section className="mx-auto" style={{ maxWidth: 'var(--container-max)', paddingInline: 'var(--space-container)', paddingBlock: 'var(--space-section)' }}>
             <h2 className="text-center font-bold" style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-8)' }}>Առաջարկվող ապրանքներ</h2>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -150,6 +158,7 @@ export default function HomePage() {
         )}
 
         {/* Features */}
+        {settings?.showFeatures !== false && (
         <section className="bg-muted/30" style={{ paddingBlock: 'var(--space-section)' }}>
           <div className="mx-auto" style={{ maxWidth: 'var(--container-max)', paddingInline: 'var(--space-container)' }}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4" style={{ gap: 'var(--space-6)' }}>
@@ -157,6 +166,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        )}
       </main>
       <RecentlyViewed />
       <Footer />

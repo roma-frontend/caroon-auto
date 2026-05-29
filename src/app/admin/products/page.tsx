@@ -117,9 +117,9 @@ export default function AdminProductsPage() {
           <Input placeholder="Որոնել..." className="h-9 pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <Select value={catFilter} onValueChange={(v) => setCatFilter(v ?? 'all')}>
-          <SelectTrigger className="h-9 w-40"><SelectValue>{catFilter === "all" ? "Բոլոր կատեգորիա" : categories?.find(c => c._id === catFilter)?.name ?? "Կատեգորիա"}</SelectValue></SelectTrigger>
+          <SelectTrigger className="h-9 w-40"><SelectValue>{catFilter === "all" ? "Բոլոր" : categories?.find(c => c._id === catFilter)?.name ?? "Կատեգորիա"}</SelectValue></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Բոլոր կատեգորիաներ</SelectItem>
+            <SelectItem value="all">Բոլոր</SelectItem>
             {categories?.map((cat) => <SelectItem key={cat._id} value={cat._id}>{cat.name}</SelectItem>)}
           </SelectContent>
         </Select>

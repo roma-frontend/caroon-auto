@@ -1,5 +1,5 @@
 import { v } from 'convex/values';
-import { internalAction } from './_generated/server';
+import { action, internalAction } from './_generated/server';
 import { api } from './_generated/api';
 
 export const sendOrderNotification = internalAction({
@@ -44,5 +44,23 @@ export const sendOrderNotification = internalAction({
         }),
       });
     } catch {}
+  },
+});
+
+export const sendTest = action({
+  args: {},
+  handler: async (ctx): Promise<boolean> => {
+    const settings = await ctx.runQuery(api.settings.get, {});
+    const token = settings?.telegramBotToken;
+    const chatId = settings?.telegramChatId;
+    if (!token || !chatId) throw new Error('Telegram կարգավորումներ չկան');
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text: '✅ Caroon — թեստային ծանուցում: բոտը աշխատում է:' }),
+    });
+    const data = (await res.json().catch(() => null)) as { ok?: boolean; description?: string } | null;
+    if (!res.ok || !data?.ok) throw new Error(data?.description || `Telegram error (HTTP ${res.status})`);
+    return true;
   },
 });

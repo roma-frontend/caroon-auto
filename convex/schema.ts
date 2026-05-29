@@ -170,6 +170,17 @@ export default defineSchema(
     telegramBotToken: v.optional(v.string()),
     telegramChatId: v.optional(v.string()),
     mapUrl: v.optional(v.string()),
+    // Real-time control center
+    maintenanceMode: v.optional(v.boolean()),
+    maintenanceMessage: v.optional(v.string()),
+    accentColor: v.optional(v.string()),
+    announcementEnabled: v.optional(v.boolean()),
+    showCategories: v.optional(v.boolean()),
+    showFeatured: v.optional(v.boolean()),
+    showBrands: v.optional(v.boolean()),
+    showFeatures: v.optional(v.boolean()),
+    enableCarSelector: v.optional(v.boolean()),
+    enableReviews: v.optional(v.boolean()),
   }),
 
   // ─── Pages (CMS) ──────────────────────────────────────────────
