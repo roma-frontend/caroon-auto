@@ -27,7 +27,7 @@ const notoSansArmenian = Noto_Sans_Armenian({
   variable: '--font-armenian',
   subsets: ['armenian'],
   display: 'swap',
-  preload: false,
+  preload: true,
   weight: ['400', '500', '600', '700'],
   fallback: ['sans-serif'],
 });
@@ -148,10 +148,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Safari pinned tab */}
         <link rel="mask-icon" href="/favicon.svg" color="#0F6CBD" />
 
-        {/* Preconnect to critical origins */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://api.convex.cloud" />
         <link rel="dns-prefetch" href="https://pub-*.r2.dev" />
       </head>
       <body

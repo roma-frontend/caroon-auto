@@ -113,7 +113,7 @@ export default function HomePage() {
                         <p className="mt-1 text-sm font-bold text-white">{formatPrice(p.price)}</p>
                       </div>
                     </div>
-                    {p.isFeatured && <span className="absolute left-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-white">Թոփ</span>}
+                    {p.isFeatured && <span className="absolute left-2 top-2 rounded-full bg-foreground/80 px-2 py-0.5 text-[10px] font-bold text-background">Թոփ</span>}
                   </Link>
                 ))}
               </div>
