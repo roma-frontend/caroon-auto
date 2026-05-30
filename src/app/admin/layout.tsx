@@ -2,12 +2,11 @@
 
 import { useAuthStore, useAuth } from '@/store/auth';
 import { useRouter, usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { LayoutDashboard, Package, FolderTree, ShoppingBag, Tag, FileText, LogOut, Settings, Menu, X, Users, Home, Search, BarChart3, Star, Ticket } from 'lucide-react';
 import { Logo } from '@/components/layout/Logo';
 import { Button } from '@/components/ui/button';
-import { SITE } from '@/lib/constants';
 import { useStoreName } from '@/hooks/useStoreName';
 import { useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
@@ -19,10 +18,11 @@ import { IdleTimeoutModal } from '@/components/admin/IdleTimeoutModal';
 
 const NAV_ITEMS = [
   { href: '/admin', icon: LayoutDashboard, label: 'Վահանակ' },
-  { href: '/admin/dashboard', icon: BarChart3, label: 'Դաշբորդ' },
   { href: '/admin/products', icon: Package, label: 'Ապրանքներ' },
   { href: '/admin/categories', icon: FolderTree, label: 'Կատեգորիաներ' },
-  { href: '/admin/orders', icon: ShoppingBag, label: 'Պատվերներ' },
+  { href: '/admin/orders', icon: BarChart3, label: 'Պատվերներ' },
+  { href: '/admin/products', icon: Package, label: 'Ապրանքներ' },
+  { href: '/admin/categories', icon: FolderTree, label: 'Կատեգորիաներ' },
   { href: '/admin/customers', icon: Users, label: 'Հաճախորդներ' },
   { href: '/admin/promotions', icon: Tag, label: 'Ակցիաներ' },
   { href: '/admin/promotions/coupons', icon: Ticket, label: 'Կուպոններ' },

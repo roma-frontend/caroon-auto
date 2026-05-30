@@ -6,7 +6,7 @@ import { api } from '../../convex/_generated/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { SlidersHorizontal, X, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
 import { Id } from '../../convex/_generated/dataModel';
 import { PRODUCT } from '@/lib/constants';
@@ -46,11 +46,13 @@ export function ProductFilters({ categoryId, onFilterChange, activeFilters }: Pr
 
       {/* Mobile bottom sheet */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-2xl px-5 pb-8 pt-4">
-          <SheetHeader className="p-0 pb-4">
-            <SheetTitle>{PRODUCT.filters}</SheetTitle>
-            <p className="text-sm text-muted-foreground">Ֆիլտրերի կատեգորիա</p>
-          </SheetHeader>
+        <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto px-5 pb-8 pt-0" showCloseButton={false}>
+          <div className="flex items-center justify-between sticky top-0 bg-popover z-10 pt-4 pb-3 border-b mb-4">
+            <h3 className="font-semibold text-base">{PRODUCT.filters}</h3>
+            <Button variant="ghost" size="icon-sm" onClick={() => setMobileOpen(false)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
           <FilterContent categoryId={categoryId} onFilterChange={onFilterChange} activeFilters={activeFilters} />
           <div className="mt-6">
             <Button className="w-full rounded-xl" onClick={() => setMobileOpen(false)}>Կիռառել</Button>
