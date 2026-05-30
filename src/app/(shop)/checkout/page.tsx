@@ -190,6 +190,22 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 )}
+                {paymentMethod && (paymentMethod === 'transfer' || paymentMethod === 'idram' || paymentMethod === 'easypay') && (
+                  <div className="rounded-lg border bg-muted/30 p-4 space-y-1.5">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Վճարման տվյալներ</p>
+                    {paymentMethod === 'transfer' && (
+                      <>
+                        {settings?.bankName && <p className="text-sm">Բանկ՝ <strong>{settings.bankName}</strong></p>}
+                        {settings?.bankAccount && <p className="text-sm">Հաշիվ՝ <strong className="font-mono">{settings.bankAccount}</strong></p>}
+                        {settings?.bankCode && <p className="text-sm">SWIFT/BIC՝ <strong className="font-mono">{settings.bankCode}</strong></p>}
+                      </>
+                    )}
+                    {(paymentMethod === 'idram' || paymentMethod === 'easypay') && settings?.cardNumber && (
+                      <p className="text-sm">Քարտ՝ <strong className="font-mono">{settings.cardNumber}</strong></p>
+                    )}
+                    {settings?.paymentNote && <p className="text-xs text-muted-foreground mt-2">{settings.paymentNote}</p>}
+                  </div>
+                )}
                 <div className="rounded-lg bg-muted/50 p-4 space-y-2">
                   <p className="text-sm font-medium">Կոնտակտային տվյալներ</p>
                   <p className="text-sm text-muted-foreground">{form.name} | {form.phone} | {form.email}</p>

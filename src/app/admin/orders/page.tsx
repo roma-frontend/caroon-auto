@@ -59,7 +59,9 @@ function exportPDF(order: { orderNumber: string; customerName: string; customerP
   }
 }
 
-function OrderCard({ order, sessionToken, index }: { order: { _id: Id<'orders'>; orderNumber: string; customerName: string; customerPhone: string; customerEmail: string; shippingAddress: string; items: { name: string; price: number; quantity: number; productId: Id<'products'>; imageUrl?: string }[]; total: number; status: string; paymentStatus: string; createdAt: number }; sessionToken: string; index: number }) {
+const PAYMENT_LABELS: Record<string, string> = { cash: 'Կանխիկ', card: 'Քարտով', idram: 'Idram', easypay: 'EasyPay', transfer: 'Բանկային փոխանցում' };
+
+function OrderCard({ order, sessionToken, index }: { order: { _id: Id<'orders'>; orderNumber: string; customerName: string; customerPhone: string; customerEmail: string; shippingAddress: string; items: { name: string; price: number; quantity: number; productId: Id<'products'>; imageUrl?: string }[]; total: number; status: string; paymentStatus: string; paymentMethod?: string; createdAt: number }; sessionToken: string; index: number }) {
   const { ref, visible } = useReveal();
   const updateStatus = useMutation(api.orders.updateStatus);
   const status = STATUS_MAP[order.status] ?? STATUS_MAP.pending;
@@ -74,6 +76,7 @@ function OrderCard({ order, sessionToken, index }: { order: { _id: Id<'orders'>;
               <span className="font-mono text-sm font-bold">{order.orderNumber}</span>
               <Badge className={`${status.color} border-0 text-[10px]`}>{status.label}</Badge>
               <Badge className={`${payment.color} border-0 text-[10px]`}>{payment.label}</Badge>
+              {order.paymentMethod && <Badge variant="outline" className="text-[10px]">{PAYMENT_LABELS[order.paymentMethod] || order.paymentMethod}</Badge>}
             </div>
             <p className="mt-1 text-sm font-medium">{order.customerName}</p>
             <p className="text-xs text-muted-foreground">{order.customerPhone} · {order.customerEmail}</p>
@@ -96,6 +99,9 @@ function OrderCard({ order, sessionToken, index }: { order: { _id: Id<'orders'>;
                 <SelectTrigger className="h-8 w-28 text-xs"><span>{PAYMENT_MAP[order.paymentStatus]?.label ?? order.paymentStatus}</span></SelectTrigger>
                 <SelectContent>{Object.entries(PAYMENT_MAP).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}</SelectContent>
               </Select>
+              <Button size="sm" variant={order.paymentStatus === 'paid' ? 'outline' : 'default'} className="h-8 gap-1 text-xs" onClick={() => { updateStatus({ sessionToken, id: order._id, paymentStatus: order.paymentStatus === 'paid' ? 'awaiting' : 'paid' }); toast.success(order.paymentStatus === 'paid' ? 'Վերադարձվել է սպասման' : 'Նշվել է որպես վճարված'); }}>
+                {order.paymentStatus === 'paid' ? '✗' : '✓'} Վճարված
+              </Button>
               <Button size="sm" variant="outline" className="h-8 gap-1 text-xs" onClick={() => exportPDF(order)}>
                 <FileDown className="h-3 w-3" /> PDF
               </Button>

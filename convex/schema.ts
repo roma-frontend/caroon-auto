@@ -187,6 +187,11 @@ export default defineSchema(
     enableQuickBuy: v.optional(v.boolean()),
     // Payments
     paymentMethods: v.optional(v.array(v.string())),
+    bankName: v.optional(v.string()),
+    bankAccount: v.optional(v.string()),
+    bankCode: v.optional(v.string()),
+    cardNumber: v.optional(v.string()),
+    paymentNote: v.optional(v.string()),
     // Marketing
     gaId: v.optional(v.string()),
     fbPixelId: v.optional(v.string()),
