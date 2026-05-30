@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
-import { SITE } from '@/lib/constants';
 import { Mail, Lock } from 'lucide-react';
 import { Logo } from '@/components/layout/Logo';
 import { useAuthStore } from '@/store/auth';
@@ -21,9 +20,11 @@ export default function LoginPage() {
   const setSession = useAuthStore((s) => s.setSession);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     if (!form.email || !form.password) { toast.error('Խնդրում ենք լրացնել բոլոր դաշտերը'); return; }
     setLoading(true);
     try {
@@ -33,7 +34,7 @@ export default function LoginPage() {
       toast.success(`Բարի գալուստ, ${result.name}!`);
       router.push('/admin');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Մուտքի սխալ');
+      setError(err instanceof Error ? err.message : 'Մուտքի սխալ');
     } finally {
       setLoading(false);
     }
@@ -72,6 +73,7 @@ export default function LoginPage() {
                 <Input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="••••••••" className="h-11 pl-10" />
               </div>
             </div>
+            {error && <div className="rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive animate-in fade-in slide-in-from-top-1 duration-200">{error}</div>}
             <Button type="submit" variant="cta" size="xl" className="w-full" disabled={loading}>
               {loading ? 'Մուտք...' : 'Մուտք'}
             </Button>
