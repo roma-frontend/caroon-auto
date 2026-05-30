@@ -135,22 +135,21 @@ export const getFeatured = query({
     const featured = (await ctx.db
       .query('products')
       .withIndex('by_featured', (q) => q.eq('isFeatured', true))
-      .take(20)).filter((p) => p.isActive);
+      .take(12)).filter((p) => p.isActive);
     if (featured.length >= 12) return featured.slice(0, 12);
 
-    // Top up with the newest active products so the section stays full
+    const need = 12 - featured.length;
     const recent = await ctx.db
       .query('products')
       .withIndex('by_active', (q) => q.eq('isActive', true))
       .order('desc')
-      .take(24);
+      .take(need + 4);
     const seen = new Set(featured.map((p) => p._id));
-    const filled = [...featured];
     for (const p of recent) {
-      if (filled.length >= 12) break;
-      if (!seen.has(p._id)) filled.push(p);
+      if (featured.length >= 12) break;
+      if (!seen.has(p._id)) featured.push(p);
     }
-    return filled.slice(0, 12);
+    return featured;
   },
 });
 

@@ -127,15 +127,15 @@ function FilterContent({ categoryId, onFilterChange, activeFilters }: Props) {
       )}
 
       {/* Price - Dual Range Slider */}
-      <Section title="Цена" k="price" expanded={expanded} toggle={toggle}>
+      <Section title="Գին" k="price" expanded={expanded} toggle={toggle}>
         <div className="flex gap-2 mb-3">
           <div className="flex-1">
-            <label className="text-[10px] text-muted-foreground mb-1 block">От</label>
+            <label className="text-[10px] text-muted-foreground mb-1 block">Սկսած</label>
             <Input type="number" placeholder="0" className="h-8 text-xs" value={activeFilters.minPrice ?? ''}
               onChange={(e) => onFilterChange({ ...activeFilters, minPrice: e.target.value ? Number(e.target.value) : undefined })} />
           </div>
           <div className="flex-1">
-            <label className="text-[10px] text-muted-foreground mb-1 block">До</label>
+            <label className="text-[10px] text-muted-foreground mb-1 block">Մինչև</label>
             <Input type="number" placeholder="100000" className="h-8 text-xs" value={activeFilters.maxPrice ?? ''}
               onChange={(e) => onFilterChange({ ...activeFilters, maxPrice: e.target.value ? Number(e.target.value) : undefined })} />
           </div>

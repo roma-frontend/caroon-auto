@@ -7,6 +7,7 @@ import { Footer } from '@/components/layout/Footer';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { JsonLd } from '@/components/JsonLd';
 import { MaintenanceGate } from '@/components/MaintenanceGate';
+import { ScrollToTop } from '@/components/ScrollToTop';
 
 export default function ShopLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -21,6 +22,7 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
         </MaintenanceGate>
       </main>
       <Footer />
+      <ScrollToTop />
       <MobileNav />
       <JsonLd />
     </div>

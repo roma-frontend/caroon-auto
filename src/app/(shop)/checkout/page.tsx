@@ -20,9 +20,9 @@ import Link from 'next/link';
 import { Check, ChevronLeft, ChevronRight, ShoppingBag, User, MapPin, ClipboardList } from 'lucide-react';
 
 const STEPS = [
-  { id: 'info', label: 'Данные', icon: User },
-  { id: 'delivery', label: 'Доставка', icon: MapPin },
-  { id: 'confirm', label: 'Подтверждение', icon: ClipboardList },
+  { id: 'info', label: 'Տվյալներ', icon: User },
+  { id: 'delivery', label: 'Առաքում', icon: MapPin },
+  { id: 'confirm', label: 'Հաստատում', icon: ClipboardList },
 ];
 
 export default function CheckoutPage() {
@@ -50,13 +50,13 @@ export default function CheckoutPage() {
   const validateStep = (): boolean => {
     if (step === 0) {
       if (!form.name || !form.phone || !form.email) {
-        toast.error('Լրացրեք անուն, հեռախոս и email');
+        toast.error('Լրացրեք անուն, հեռախոս և էլ. փոստ');
         return false;
       }
     }
     if (step === 1) {
       if (!form.address) {
-        toast.error('Լրացրեք адрес доставки');
+        toast.error('Լրացրեք առաքման հասցե');
         return false;
       }
     }
@@ -65,7 +65,7 @@ export default function CheckoutPage() {
 
   const handleSubmit = async () => {
     if (items.length === 0) {
-      toast.error('Զամբյուղը дарк է');
+      toast.error('Զամբյուղը դատարկ է');
       return;
     }
     setLoading(true);
@@ -90,7 +90,7 @@ export default function CheckoutPage() {
       clearCart();
       router.push(`/order-success?id=${orderId}`);
     } catch {
-      toast.error('Ошибка при оформлении заказа');
+      toast.error('Սխալ պատվերի ձևակերպման ժամանակ');
     } finally {
       setLoading(false);
     }
@@ -102,8 +102,8 @@ export default function CheckoutPage() {
         <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-muted">
           <ShoppingBag className="h-10 w-10 text-muted-foreground" />
         </div>
-        <p className="text-muted-foreground">Զամբյուղը дарк է</p>
-        <Link href="/cart" className="mt-2 inline-block text-primary underline">Перейти в корзину</Link>
+        <p className="text-muted-foreground">Զամբյուղը դատարկ է</p>
+        <Link href="/cart" className="mt-2 inline-block text-primary underline">Անցնել զամբյուղ</Link>
       </div>
     );
   }
@@ -144,7 +144,7 @@ export default function CheckoutPage() {
               <CardHeader><CardTitle>{CHECKOUT.contactInfo}</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div><Label>{CHECKOUT.fullName} *</Label><Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Аннон" className="h-11" /></div>
+                  <div><Label>{CHECKOUT.fullName} *</Label><Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={CHECKOUT.fullName} className="h-11" /></div>
                   <div><Label>{CHECKOUT.phone} *</Label><Input required type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={settings?.phone || "+374 XX XXX XXX"} className="h-11" /></div>
                 </div>
                 <div><Label>{CHECKOUT.email} *</Label><Input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="email@example.com" className="h-11" /></div>
@@ -154,9 +154,9 @@ export default function CheckoutPage() {
 
           {step === 1 && (
             <Card style={{ boxShadow: 'var(--shadow-card)' }} className="animate-in slide-in-from-right-4 duration-300">
-              <CardHeader><CardTitle>Адрес доставки</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Առաքման հասցե</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                <div><Label>{CHECKOUT.address} *</Label><Input required value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Ереван, ул. Антарайн 1" className="h-11" /></div>
+                <div><Label>{CHECKOUT.address} *</Label><Input required value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Երևան" className="h-11" /></div>
                 <div><Label>{CHECKOUT.notes}</Label><Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder={CHECKOUT.notesPlaceholder} rows={3} /></div>
               </CardContent>
             </Card>
@@ -164,20 +164,20 @@ export default function CheckoutPage() {
 
           {step === 2 && (
             <Card style={{ boxShadow: 'var(--shadow-card)' }} className="animate-in slide-in-from-right-4 duration-300">
-              <CardHeader><CardTitle>Подтверждение заказа</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Պատվերի հաստատում</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="rounded-lg bg-muted/50 p-4 space-y-2">
-                  <p className="text-sm font-medium">Контактные данные</p>
+                  <p className="text-sm font-medium">Կոնտակտային տվյալներ</p>
                   <p className="text-sm text-muted-foreground">{form.name} | {form.phone} | {form.email}</p>
                 </div>
                 <div className="rounded-lg bg-muted/50 p-4 space-y-2">
-                  <p className="text-sm font-medium">Адрес доставки</p>
+                  <p className="text-sm font-medium">Առաքման հասցե</p>
                   <p className="text-sm text-muted-foreground">{form.address}</p>
-                  {form.notes && <p className="text-sm text-muted-foreground">Примечание: {form.notes}</p>}
+                  {form.notes && <p className="text-sm text-muted-foreground">Նշում: {form.notes}</p>}
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="rounded border-input accent-primary" />
-                  <span className="text-sm text-muted-foreground">Я согласен с <Link href="/terms" className="text-primary underline">условиями</Link> и <Link href="/privacy" className="text-primary underline">политикой конфиденциальности</Link></span>
+                  <span className="text-sm text-muted-foreground">Համաձայն եմ <Link href="/terms" className="text-primary underline">պայմաններին</Link> և <Link href="/privacy" className="text-primary underline">գաղտնիության քաղաքականությանը</Link></span>
                 </label>
               </CardContent>
             </Card>
@@ -186,14 +186,14 @@ export default function CheckoutPage() {
           <div className="flex justify-between">
             {step > 0 ? (
               <Button type="button" variant="outline" size="lg" onClick={() => goToStep(step - 1)} className="gap-2">
-                <ChevronLeft className="h-4 w-4" /> Назад
+                <ChevronLeft className="h-4 w-4" /> Հետ
               </Button>
             ) : <div />}
             <Button type="submit" variant="cta" size="lg" className="gap-2" disabled={loading || (step === STEPS.length - 1 && !agreed)}>
               {step === STEPS.length - 1 ? (
-                loading ? 'Оформление...' : `${CHECKOUT.placeOrder} — ${formatPrice(totalPrice + shippingCost)}`
+                loading ? 'Ձևակերպվում է...' : `${CHECKOUT.placeOrder} — ${formatPrice(totalPrice + shippingCost)}`
               ) : (
-                <>Далее <ChevronRight className="h-4 w-4" /></>
+                <>Հաջորդ <ChevronRight className="h-4 w-4" /></>
               )}
             </Button>
           </div>
@@ -211,7 +211,7 @@ export default function CheckoutPage() {
               ))}
               <Separator />
               <div className="flex justify-between" style={{ fontSize: 'var(--text-sm)' }}><span>{CART.subtotal}</span><span>{formatPrice(totalPrice)}</span></div>
-              <div className="flex justify-between" style={{ fontSize: 'var(--text-sm)' }}><span>{CART.shipping}</span><span>{shippingCost === 0 ? 'Анвчар' : formatPrice(shippingCost)}</span></div>
+              <div className="flex justify-between" style={{ fontSize: 'var(--text-sm)' }}><span>{CART.shipping}</span><span>{shippingCost === 0 ? 'Անվճար' : formatPrice(shippingCost)}</span></div>
               <Separator />
               <div className="flex justify-between font-bold" style={{ fontSize: 'var(--text-lg)' }}><span>{CART.total}</span><span>{formatPrice(totalPrice + shippingCost)}</span></div>
               <p className="text-center text-muted-foreground" style={{ fontSize: 'var(--text-xs)' }}>{CHECKOUT.paymentNote}</p>

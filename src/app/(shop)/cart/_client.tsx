@@ -28,7 +28,7 @@ export default function CartPage() {
   const handleRemove = (id: string, name: string) => {
     removeItem(id);
     toast.success(`${name} удален`, {
-      action: { label: 'Отменить', onClick: () => undoRemove() },
+      action: { label: 'Չեղարկել', onClick: () => undoRemove() },
       duration: 5000,
     });
   };
@@ -61,18 +61,18 @@ export default function CartPage() {
               <div className="flex min-w-0 flex-1 flex-col gap-2">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="font-medium line-clamp-2"><Link href={`/products/${item.id}`} className="transition-colors hover:text-primary">{item.name}</Link></h3>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-destructive hover:bg-destructive/10" onClick={() => handleRemove(item.id, item.name)} aria-label="Удалить">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-destructive hover:bg-destructive/10" onClick={() => handleRemove(item.id, item.name)} aria-label="Ջնջել">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
                 <p className="font-bold text-primary" style={{ fontSize: 'var(--text-sm)' }}>{formatPrice(item.price)}</p>
                 <div className="mt-auto flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-accent" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label="Уменьшить количество">
+                    <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-accent" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label="Նվազեցնել քանակը">
                       <Minus className="h-3 w-3" />
                     </Button>
-                    <input type="number" value={item.quantity} onChange={(e) => { const v = parseInt(e.target.value); if (v > 0) updateQuantity(item.id, v); }} className="w-10 text-center text-sm font-medium bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" min={1} aria-label="Количество" />
-                    <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-accent" onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label="Увеличить количество">
+                    <input type="number" value={item.quantity} onChange={(e) => { const v = parseInt(e.target.value); if (v > 0) updateQuantity(item.id, v); }} className="w-10 text-center text-sm font-medium bg-transparent border-none outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" min={1} aria-label="Քանակ" />
+                    <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-accent" onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label="Ավելացնել քանակը">
                       <Plus className="h-3 w-3" />
                     </Button>
                   </div>
@@ -88,10 +88,10 @@ export default function CartPage() {
             <CardContent className="space-y-4">
               {settings?.freeShippingThreshold ? (
                 totalPrice >= settings.freeShippingThreshold ? (
-                  <p className="rounded-lg bg-green-600/10 px-3 py-2 text-sm font-medium text-green-600 dark:text-green-400">Бесплатная доставка!</p>
+                  <p className="rounded-lg bg-green-600/10 px-3 py-2 text-sm font-medium text-green-600 dark:text-green-400">Անվճար առաքում!</p>
                 ) : (
                   <div>
-                    <p className="text-xs text-muted-foreground">Добавьте ещё <span className="font-semibold text-foreground">{formatPrice(settings.freeShippingThreshold - totalPrice)}</span> для бесплатной доставки</p>
+                    <p className="text-xs text-muted-foreground">Ավելացրեք ևս <span className="font-semibold text-foreground">{formatPrice(settings.freeShippingThreshold - totalPrice)}</span> անվճար առաքման համար</p>
                     <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
                       <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${Math.min(100, (totalPrice / settings.freeShippingThreshold) * 100)}%` }} />
                     </div>
@@ -99,7 +99,7 @@ export default function CartPage() {
                 )
               ) : null}
               <div className="flex justify-between" style={{ fontSize: 'var(--text-sm)' }}><span>{CART.subtotal}</span><span>{formatPrice(totalPrice)}</span></div>
-              <div className="flex justify-between" style={{ fontSize: 'var(--text-sm)' }}><span>{CART.shipping}</span><span className="text-muted-foreground">Рассчитывается при заказе</span></div>
+              <div className="flex justify-between" style={{ fontSize: 'var(--text-sm)' }}><span>{CART.shipping}</span><span className="text-muted-foreground">Հաշվարկվում է պատվիրելիս</span></div>
               <Separator />
               <div className="flex justify-between font-bold" style={{ fontSize: 'var(--text-lg)' }}><span>{CART.total}</span><span>{formatPrice(totalPrice)}</span></div>
               <Link href="/checkout" className="block">
@@ -116,7 +116,7 @@ export default function CartPage() {
       {/* Cross-sell */}
       {featured && featured.length > 0 && (
         <section className="mt-12">
-          <h2 className="text-xl font-bold mb-6">С этим товаром покупают</h2>
+          <h2 className="text-xl font-bold mb-6">Այս ապրանքի հետ գնում են</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {featured.slice(0, 4).map((p, i) => (
               <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} rating={p.rating} reviewCount={p.reviewCount} carBrand={p.attributes?.carBrand} index={i} />

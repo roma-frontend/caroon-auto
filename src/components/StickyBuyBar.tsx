@@ -51,8 +51,8 @@ export function StickyBuyBar({ productId, productName, productPrice, productImag
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button
-            aria-label={isFav ? 'Удалить из избранного' : 'Добавить в избранное'}
-            onClick={() => { toggleFav({ id: productId, name: productName, price: productPrice, image: productImage ?? null }); toast.success(isFav ? 'Удалено' : 'Добавлено'); }}
+            aria-label={isFav ? 'Հեռացնել նախընտրածներից' : 'Ավելացնել նախընտրածներին'}
+            onClick={() => { toggleFav({ id: productId, name: productName, price: productPrice, image: productImage ?? null }); toast.success(isFav ? 'Հեռացված է' : 'Ավելացված է'); }}
             className={`flex h-10 w-10 items-center justify-center rounded-xl border transition-all ${isFav ? 'border-red-500 bg-red-500 text-white' : 'border-border text-muted-foreground hover:border-red-500/60 hover:text-red-500'}`}
           >
             <Heart className={`h-5 w-5 ${isFav ? 'fill-current' : ''}`} />
@@ -61,9 +61,9 @@ export function StickyBuyBar({ productId, productName, productPrice, productImag
             size="lg"
             className="gap-2 rounded-xl h-10"
             disabled={!inStock}
-            onClick={() => { addItem({ id: productId, name: productName, price: productPrice, image: productImage ?? null }); toast.success('Добавлено в корзину'); }}
+            onClick={() => { addItem({ id: productId, name: productName, price: productPrice, image: productImage ?? null }); toast.success('Ավելացվել է զամբյուղում'); }}
           >
-            <ShoppingCart className="h-4 w-4" /> В корзину
+            <ShoppingCart className="h-4 w-4" /> Զամբյուղ
           </Button>
         </div>
       </div>

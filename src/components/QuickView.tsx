@@ -38,7 +38,7 @@ export function QuickView({ open, onOpenChange, product }: QuickViewProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl p-0 gap-0 overflow-hidden rounded-2xl border-0 shadow-2xl" showCloseButton={false}>
-        <button onClick={() => onOpenChange(false)} className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-background/80 text-muted-foreground shadow-sm transition-colors hover:bg-background hover:text-foreground" aria-label="Закрыть">
+        <button onClick={() => onOpenChange(false)} className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-background/80 text-muted-foreground shadow-sm transition-colors hover:bg-background hover:text-foreground" aria-label="Փակել">
           <XIcon className="h-4 w-4" />
         </button>
         <div className="grid sm:grid-cols-2">

@@ -1,8 +1,7 @@
 'use client';
 
-import { useQuery } from 'convex/react';
-import { api } from '../../convex/_generated/api';
+import { useSettings as useContextSettings } from '@/components/SettingsProvider';
 
 export function useSettings() {
-  return useQuery(api.settings.getPublic, {});
+  return useContextSettings();
 }
