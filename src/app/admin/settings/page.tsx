@@ -145,6 +145,7 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="max-w-4xl">
+      <style>{`.settings-tab[data-active] { background: var(--primary) !important; color: white !important; box-shadow: 0 2px 8px rgba(15,108,189,0.3) !important; }`}</style>
       <div className="mb-6">
         <h1 className="text-3xl font-bold">{'Կարգավորումներ'}</h1>
         <p className="text-muted-foreground">{'Խանութի կարգավորումներ — թարմացվում է իրական ժամանակում'}</p>
@@ -159,7 +160,7 @@ export default function AdminSettingsPage() {
               notifications: 'Ծանուցումներ', ui: 'UI', advanced: 'Լրացուցիչ',
             };
             return (
-              <TabsTrigger key={tab} value={tab} className="px-3 py-1.5 data-active:bg-primary data-active:text-primary-foreground data-active:shadow-md data-active:scale-105 transition-all duration-200">
+              <TabsTrigger key={tab} value={tab} className="px-3 py-1.5 settings-tab">
                 <Icon className="h-4 w-4" /> {labels[tab]}
               </TabsTrigger>
             );
