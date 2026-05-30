@@ -159,7 +159,7 @@ export default function AdminSettingsPage() {
               notifications: 'Ծանուցումներ', ui: 'UI', advanced: 'Լրացուցիչ',
             };
             return (
-              <TabsTrigger key={tab} value={tab} className="px-3 py-1.5">
+              <TabsTrigger key={tab} value={tab} className="px-3 py-1.5 data-active:bg-primary data-active:text-primary-foreground data-active:shadow-md data-active:scale-105 transition-all duration-200">
                 <Icon className="h-4 w-4" /> {labels[tab]}
               </TabsTrigger>
             );
