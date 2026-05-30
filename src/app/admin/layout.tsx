@@ -4,7 +4,7 @@ import { useAuthStore, useAuth } from '@/store/auth';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, Package, FolderTree, ShoppingBag, Tag, FileText, LogOut, Settings, Menu, X, Users } from 'lucide-react';
+import { LayoutDashboard, Package, FolderTree, ShoppingBag, Tag, FileText, LogOut, Settings, Menu, X, Users, Home } from 'lucide-react';
 import { Logo } from '@/components/layout/Logo';
 import { Button } from '@/components/ui/button';
 import { SITE } from '@/lib/constants';
@@ -130,7 +130,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Menu className="h-4 w-4" />
             </button>
             <Link href="/" className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-muted text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-              <Logo size={20} />
+              <Home className="h-4 w-4" />
             </Link>
           </div>
           <div className="relative group">
