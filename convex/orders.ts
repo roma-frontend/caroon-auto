@@ -22,6 +22,7 @@ export const create = mutation({
     subtotal: v.number(),
     shipping: v.number(),
     total: v.number(),
+    paymentMethod: v.optional(v.string()),
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {

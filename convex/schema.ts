@@ -116,6 +116,7 @@ export default defineSchema(
       v.literal('paid'),
       v.literal('refunded'),
     ),
+    paymentMethod: v.optional(v.string()),
     notes: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),

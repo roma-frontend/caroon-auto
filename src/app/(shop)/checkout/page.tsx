@@ -17,7 +17,7 @@ import { api } from '../../../../convex/_generated/api';
 import { Id } from '../../../../convex/_generated/dataModel';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { Check, ChevronLeft, ChevronRight, ShoppingBag, User, MapPin, ClipboardList } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, ShoppingBag, User, MapPin, ClipboardList, CreditCard, Banknote, Smartphone, Building2 } from 'lucide-react';
 
 const STEPS = [
   { id: 'info', label: 'Տվյալներ', icon: User },
@@ -38,6 +38,7 @@ export default function CheckoutPage() {
   const [agreed, setAgreed] = useState(false);
   const [animatedStep, setAnimatedStep] = useState(0);
 
+  const [paymentMethod, setPaymentMethod] = useState('');
   const [form, setForm] = useState({
     name: '', phone: '', email: '', address: '', notes: '',
   });
@@ -68,6 +69,10 @@ export default function CheckoutPage() {
       toast.error('Զամբյուղը դատարկ է');
       return;
     }
+    if (settings?.minOrderAmount && totalPrice < settings.minOrderAmount) {
+      toast.error(`Նվազագույն պատվերի գումարը ${formatPrice(settings.minOrderAmount)} է`);
+      return;
+    }
     setLoading(true);
     try {
       const orderId = await createOrder({
@@ -75,6 +80,7 @@ export default function CheckoutPage() {
         customerEmail: form.email,
         customerPhone: form.phone,
         shippingAddress: form.address,
+        paymentMethod: paymentMethod || undefined,
         notes: form.notes || undefined,
         items: items.map((i) => ({
           productId: i.id as Id<'products'>,
@@ -166,6 +172,24 @@ export default function CheckoutPage() {
             <Card style={{ boxShadow: 'var(--shadow-card)' }} className="animate-in slide-in-from-right-4 duration-300">
               <CardHeader><CardTitle>Պատվերի հաստատում</CardTitle></CardHeader>
               <CardContent className="space-y-4">
+                {settings?.paymentMethods && settings.paymentMethods.length > 0 && (
+                  <div>
+                    <p className="mb-2 text-sm font-medium">Վճարման եղանակ</p>
+                    <div className="flex flex-wrap gap-2">
+                      {settings.paymentMethods.map((m) => {
+                        const icons: Record<string, typeof CreditCard> = { cash: Banknote, card: CreditCard, idram: Smartphone, easypay: Smartphone, transfer: Building2 };
+                        const Icon = icons[m] || CreditCard;
+                        const labels: Record<string, string> = { cash: 'Կանխիկ', card: 'Քարտով', idram: 'Idram', easypay: 'EasyPay', transfer: 'Բանկային փոխանցում' };
+                        return (
+                          <button key={m} onClick={() => setPaymentMethod(m)}
+                            className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm transition-all ${paymentMethod === m ? 'border-primary bg-primary/10 text-primary' : 'hover:border-primary/40'}`}>
+                            <Icon className="h-4 w-4" /> {labels[m] || m}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
                 <div className="rounded-lg bg-muted/50 p-4 space-y-2">
                   <p className="text-sm font-medium">Կոնտակտային տվյալներ</p>
                   <p className="text-sm text-muted-foreground">{form.name} | {form.phone} | {form.email}</p>
