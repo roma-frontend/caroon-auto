@@ -125,17 +125,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex flex-1 flex-col">
         {/* Mobile header */}
         <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b bg-background/80 backdrop-blur-md px-4 lg:hidden">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button onClick={() => setSidebarOpen(true)} className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors hover:bg-primary/20">
               <Menu className="h-4 w-4" />
             </button>
-            <div className="flex items-center gap-2">
-              <Logo size={24} />
-              <span className="text-sm font-semibold tracking-tight">{SITE.name}</span>
-              <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">Admin</span>
+            <Link href="/" className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-muted text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+              <Logo size={20} />
+            </Link>
+          </div>
+          <div className="relative group">
+            <button className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+              {user.name.charAt(0)}
+            </button>
+            <div className="absolute right-0 top-full mt-2 hidden w-40 flex-col rounded-xl border bg-popover p-1 shadow-lg group-focus-within:flex">
+              <span className="px-3 py-2 text-xs font-medium text-muted-foreground truncate">{user.email}</span>
+              <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-xs" onClick={handleLogout}>
+                <LogOut className="h-3.5 w-3.5" /> Դուրս գալ
+              </Button>
             </div>
           </div>
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">{user.name.charAt(0)}</div>
         </header>
         <main className="flex-1 p-4 pb-20 md:p-8 lg:pb-8">{children}</main>
       </div>
