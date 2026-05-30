@@ -65,8 +65,8 @@ export const get = query({
       cartTtlDays: 7,
       enableCrossSell: true,
       enableQuickView: true,
-      enableShareButtons: false,
-      enableBackInStock: false,
+      enableShareButtons: true,
+      enableBackInStock: true,
       enableOrderHistory: false,
     };
   },
@@ -203,8 +203,8 @@ export const save = mutation({
         cartTtlDays: args.cartTtlDays ?? 7,
         enableCrossSell: args.enableCrossSell ?? true,
         enableQuickView: args.enableQuickView ?? true,
-        enableShareButtons: args.enableShareButtons ?? false,
-        enableBackInStock: args.enableBackInStock ?? false,
+        enableShareButtons: args.enableShareButtons ?? true,
+        enableBackInStock: args.enableBackInStock ?? true,
         enableOrderHistory: args.enableOrderHistory ?? false,
       });
     }

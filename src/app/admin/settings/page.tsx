@@ -113,8 +113,8 @@ export default function AdminSettingsPage() {
         maxCartItems: Number(form.maxCartItems) || 50,
         enableCrossSell: flags.enableCrossSell !== false,
         enableQuickView: flags.enableQuickView !== false,
-        enableShareButtons: flags.enableShareButtons === true,
-        enableBackInStock: flags.enableBackInStock === true,
+        enableShareButtons: flags.enableShareButtons !== false,
+        enableBackInStock: flags.enableBackInStock !== false,
         enableOrderHistory: flags.enableOrderHistory === true,
       });
 
@@ -311,11 +311,23 @@ export default function AdminSettingsPage() {
                   <Switch checked={flags.enableBreadcrumbs !== false} onCheckedChange={(v) => saveField('enableBreadcrumbs', v)} />
                   <span className="text-sm">{'Հացի փշրանքներ'}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Switch checked={flags.enableScrollToTop !== false} onCheckedChange={(v) => saveField('enableScrollToTop', v)} />
-                  <span className="text-sm">{'Կոճակ «Վերև»'}</span>
-                </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={flags.enableScrollToTop !== false} onCheckedChange={(v) => saveField('enableScrollToTop', v)} />
+                <span className="text-sm">{'Կոճակ «Վերև»'}</span>
               </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={flags.enableShareButtons !== false} onCheckedChange={(v) => saveField('enableShareButtons', v)} />
+                <span className="text-sm">{'Կոճակ «Կիսվել»'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={flags.enableBackInStock !== false} onCheckedChange={(v) => saveField('enableBackInStock', v)} />
+                <span className="text-sm">{'Տեղեկացնել առկայության մասին'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={flags.enableCrossSell !== false} onCheckedChange={(v) => saveField('enableCrossSell', v)} />
+                <span className="text-sm">{'«Այս ապրանքի հետ գնում են»'}</span>
+              </div>
+            </div>
               <div>
                 <Label>{'Վճարման եղանակներ'}</Label>
                 <div className="mt-2 flex flex-wrap gap-2">
