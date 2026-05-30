@@ -184,7 +184,7 @@ export function Header() {
                   <Heart className={`h-4 w-4 transition-colors group-hover/fav:fill-red-500 group-hover/fav:text-red-500 ${hasFavs ? 'fill-red-500 text-red-500' : ''}`} />
                   {NAV.favorites}
                 </Link>
-                <Link href={user ? "/admin" : "/login"} onClick={() => setMenuOpen(false)} className="flex flex-1 items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-medium transition-colors hover:bg-accent">
+                <Link href={user ? "/admin" : "/login"} onClick={() => setMenuOpen(false)} className="flex flex-1 items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-medium transition-all hover:border-green-500/40 hover:bg-green-500/5 hover:text-green-500">
                   <User className="h-4 w-4" />
                   {user ? NAV.account : NAV.login}
                 </Link>
