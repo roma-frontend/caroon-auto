@@ -135,13 +135,22 @@ export const getById = query({
     const caller = await getAuthCaller(ctx, args.sessionToken);
     if (caller?.role === 'admin') return order;
     if (caller && order.userId === caller._id) return order;
-    // Unauthenticated: return safe subset only
+    // Unauthenticated: return invoice subset only
     return {
       _id: order._id,
       orderNumber: order.orderNumber,
       status: order.status,
       paymentStatus: order.paymentStatus,
+      paymentMethod: order.paymentMethod,
+      customerName: order.customerName,
+      customerPhone: order.customerPhone,
+      customerEmail: order.customerEmail,
+      shippingAddress: order.shippingAddress,
+      items: order.items,
+      subtotal: order.subtotal,
+      shipping: order.shipping,
       total: order.total,
+      notes: order.notes,
       createdAt: order.createdAt,
     };
   },
