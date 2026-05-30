@@ -1,15 +1,16 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { ProductCard } from '@/components/cards/ProductCard';
 import { api } from '../../../../../convex/_generated/api';
 import { Id } from '../../../../../convex/_generated/dataModel';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ShoppingCart, Heart, ArrowLeft, Check, Truck, Shield, Star, Car } from 'lucide-react';
+import { ShoppingCart, Heart, ArrowLeft, Check, Truck, Shield, Star, Car, Share2, Bell } from 'lucide-react';
 import { formatPrice, discountPercent } from '@/lib/formatters';
 import { useCartStore } from '@/store/cart';
 import { useFavoritesStore } from '@/store/favorites';
@@ -200,7 +201,19 @@ export default function ProductDetailPage() {
           <div className="mt-6 flex flex-wrap gap-3 sm:gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1"><Truck className="h-4 w-4" /> {'Առաքման վճար'}</span>
             <span className="flex items-center gap-1"><Shield className="h-4 w-4" /> {'Անվտանգ գնումներ'}</span>
+            {settings?.enableShareButtons && (
+              <span className="flex items-center gap-1">
+                <button onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Հղումը պատճենվեց'); }} className="flex items-center gap-1 hover:text-primary transition-colors">
+                  <Share2 className="h-4 w-4" /> {'Կիսվել'}
+                </button>
+              </span>
+            )}
           </div>
+          {product.stock <= 0 && settings?.enableBackInStock && (
+            <div className="mt-4">
+              <BackInStockButton productId={product._id} />
+            </div>
+          )}
         </div>
       </div>
       {settings?.enableReviews !== false && <ProductReviews productId={product._id} />}
@@ -218,6 +231,25 @@ export default function ProductDetailPage() {
         onClick={() => { for (let i = 0; i < qty; i++) addItem({ id: product._id, name: product.name, price: product.price, image: product.images?.[0] ?? null }); toast.success(`${product.name} ավելացվել է զամբյուղում`); }}>
         <ShoppingCart className="h-5 w-5" /> {PRODUCT.addToCart}
       </Button>
+    </div>
+  );
+}
+
+function BackInStockButton({ productId }: { productId: string }) {
+  const [email, setEmail] = useState('');
+  const subscribe = useMutation(api.backInStock.subscribe);
+  const [sent, setSent] = useState(false);
+  const handleSubmit = async () => {
+    if (!email) return;
+    await subscribe({ productId: productId as Id<'products'>, email });
+    setSent(true);
+    toast.success('Կծանուցենք երբ ապրանքը հայտնվի');
+  };
+  if (sent) return <p className="text-sm text-green-600">Կծանուցենք Ձեզ էլ. փոստով</p>;
+  return (
+    <div className="flex gap-2">
+      <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Ձեր էլ. փոստը" className="h-10 flex-1" />
+      <Button size="sm" onClick={handleSubmit} disabled={!email} className="gap-2"><Bell className="h-4 w-4" /> Տեղեկացնել</Button>
     </div>
   );
 }

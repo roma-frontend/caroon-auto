@@ -9,6 +9,7 @@ import { formatPrice, discountPercent } from '@/lib/formatters';
 import { useCartStore } from '@/store/cart';
 import { useFavoritesStore } from '@/store/favorites';
 import { useVehicleStore } from '@/store/vehicle';
+import { useSettings } from '@/hooks/useSettings';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
 import { PRODUCT } from '@/lib/constants';
@@ -43,6 +44,7 @@ export function ProductCard({ id, name, slug, price, compareAtPrice, image, cate
   const toggleFav = useFavoritesStore((s) => s.toggle);
   const isFav = useFavoritesStore((s) => s.items.some((i) => i.id === id));
   const vehicle = useVehicleStore((s) => s.vehicle);
+  const settings = useSettings();
   const fits = !!(vehicle && carBrand && vehicle.brand === carBrand);
   const [quickOpen, setQuickOpen] = useState(false);
 
@@ -153,6 +155,9 @@ export function ProductCard({ id, name, slug, price, compareAtPrice, image, cate
               <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-green-600/10 px-2 py-0.5 text-[11px] font-medium text-green-600 dark:text-green-400">
                 <Check className="h-3 w-3" /> Համապատասխանում է ձեր {vehicle!.brand}-ին
               </span>
+            )}
+            {settings?.showStockCount && inStock && stock !== undefined && stock <= (settings.lowStockThreshold ?? 5) && (
+              <p className="mt-1.5 text-[11px] font-medium text-orange-600">Մնացել է {stock} հատ</p>
             )}
           </div>
 

@@ -11,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCartStore } from '@/store/cart';
 import { formatPrice } from '@/lib/formatters';
 import { CHECKOUT, CART } from '@/lib/constants';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { useSettings } from '@/hooks/useSettings';
 import { api } from '../../../../convex/_generated/api';
 import { Id } from '../../../../convex/_generated/dataModel';
@@ -39,6 +39,8 @@ export default function CheckoutPage() {
   const [animatedStep, setAnimatedStep] = useState(0);
 
   const [paymentMethod, setPaymentMethod] = useState('');
+  const [couponCode, setCouponCode] = useState('');
+  const coupon = useQuery(api.coupons.validate, couponCode.trim() ? { code: couponCode.trim(), orderTotal: totalPrice + shippingCost } : 'skip');
   const [form, setForm] = useState({
     name: '', phone: '', email: '', address: '', notes: '',
   });
@@ -259,8 +261,21 @@ export default function CheckoutPage() {
               <Separator />
               <div className="flex justify-between" style={{ fontSize: 'var(--text-sm)' }}><span>{CART.subtotal}</span><span>{formatPrice(totalPrice)}</span></div>
               <div className="flex justify-between" style={{ fontSize: 'var(--text-sm)' }}><span>{CART.shipping}</span><span>{shippingCost === 0 ? 'Անվճար' : formatPrice(shippingCost)}</span></div>
+              {coupon && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Զեղչ ({coupon.code})</span>
+                  <span>-{formatPrice(coupon.discount)}</span>
+                </div>
+              )}
               <Separator />
-              <div className="flex justify-between font-bold" style={{ fontSize: 'var(--text-lg)' }}><span>{CART.total}</span><span>{formatPrice(totalPrice + shippingCost)}</span></div>
+              <div className="flex justify-between font-bold" style={{ fontSize: 'var(--text-lg)' }}><span>{CART.total}</span><span>{formatPrice(totalPrice + shippingCost - (coupon?.discount ?? 0))}</span></div>
+              <div className="flex gap-2">
+                <Input value={couponCode} onChange={(e) => setCouponCode(e.target.value.toUpperCase())} placeholder="Կուպոնի կոդ" className="h-9 text-xs flex-1" />
+                <Button type="button" size="sm" variant="outline" disabled={!couponCode.trim()} className="h-9 text-xs">OK</Button>
+              </div>
+              {settings?.deliveryEstimateYerevan && form.address && (
+                <p className="text-xs text-muted-foreground text-center">Առաքում Երևան՝ ~{settings.deliveryEstimateYerevan}</p>
+              )}
               <p className="text-center text-muted-foreground" style={{ fontSize: 'var(--text-xs)' }}>{CHECKOUT.paymentNote}</p>
             </CardContent>
           </Card>

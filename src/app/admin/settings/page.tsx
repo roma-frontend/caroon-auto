@@ -106,6 +106,16 @@ export default function AdminSettingsPage() {
         enableVinDecoder: flags.enableVinDecoder === true,
         enableOemSearch: flags.enableOemSearch === true,
         defaultWarranty: String(form.defaultWarranty ?? ''),
+        lowStockThreshold: Number(form.lowStockThreshold) || 5,
+        showStockCount: flags.showStockCount !== false,
+        deliveryEstimateYerevan: String(form.deliveryEstimateYerevan ?? ''),
+        deliveryEstimateRegions: String(form.deliveryEstimateRegions ?? ''),
+        maxCartItems: Number(form.maxCartItems) || 50,
+        enableCrossSell: flags.enableCrossSell !== false,
+        enableQuickView: flags.enableQuickView !== false,
+        enableShareButtons: flags.enableShareButtons === true,
+        enableBackInStock: flags.enableBackInStock === true,
+        enableOrderHistory: flags.enableOrderHistory === true,
       });
 
       toast.success('Կարգավորումները պահպանվել են');
