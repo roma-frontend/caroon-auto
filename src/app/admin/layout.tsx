@@ -130,8 +130,45 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
           <span className="font-bold">{SITE.name} Admin</span>
         </header>
-        <main className="flex-1 p-4 md:p-8">{children}</main>
+        <main className="flex-1 p-4 pb-20 md:p-8 lg:pb-8">{children}</main>
       </div>
+
+      {/* Mobile bottom nav */}
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex flex-col border-t bg-background/95 backdrop-blur-md lg:hidden transition-all duration-300 group/nav"
+        onTouchStart={(e) => { (e.currentTarget as HTMLElement).dataset.touchY = String(e.touches[0].clientY); }}
+        onTouchEnd={(e) => {
+          const startY = Number((e.currentTarget as HTMLElement).dataset.touchY);
+          const endY = e.changedTouches[0].clientY;
+          const el = e.currentTarget as HTMLElement;
+          if (startY - endY > 30) el.dataset.expanded = 'true';
+          else if (endY - startY > 30) el.dataset.expanded = '';
+        }}
+      >
+        <div className="mx-auto w-10 h-1 rounded-full bg-muted-foreground/30 mt-1.5 mb-1 group-data-[expanded]/nav:mb-2" />
+        <div className="flex items-stretch h-14">
+          {NAV_ITEMS.slice(0, 5).map((item) => {
+            const active = item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href);
+            return (
+              <Link key={item.href} href={item.href} className={`relative flex flex-1 flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}>
+                <item.icon className="h-5 w-5" />
+                {item.label.slice(0, 6)}
+                {item.href === '/admin/orders' && pendingCount > 0 && <span className="absolute left-1/2 top-1 ml-1 rounded-full bg-destructive px-1.5 text-[9px] font-bold text-white">{pendingCount}</span>}
+              </Link>
+            );
+          })}
+        </div>
+        <div className="grid grid-cols-5 overflow-hidden transition-all duration-300 h-0 group-data-[expanded]/nav:h-14">
+          {NAV_ITEMS.slice(5).map((item) => {
+            const active = pathname.startsWith(item.href);
+            return (
+              <Link key={item.href} href={item.href} className={`flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}>
+                <item.icon className="h-5 w-5" />
+                {item.label.slice(0, 6)}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }
