@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, Tag } from 'lucide-react';
+import { Plus, Trash2, Tag, Clock } from 'lucide-react';
+import { formatDateHy } from '@/lib/formatters';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth';
 import { Id } from '../../../../../convex/_generated/dataModel';
@@ -92,7 +93,8 @@ export default function AdminCouponsPage() {
                 {c.minOrderAmount ? <span className="ml-2 text-xs text-muted-foreground">от {c.minOrderAmount.toLocaleString()} ֏</span> : null}
               </div>
               <Badge variant={c.isActive ? 'default' : 'secondary'} className="text-[10px]">{c.isActive ? 'Ակտիվ' : 'Անակտիվ'}</Badge>
-              {c.maxUses && <span className="text-xs text-muted-foreground">Օգտագործվել է {c.usedCount}/{c.maxUses}</span>}
+              {c.expiresAt && <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" />{formatDateHy(c.expiresAt)}</span>}
+              {c.maxUses ? <span className="text-xs text-muted-foreground">Օգտագործվել է {c.usedCount}/{c.maxUses}</span> : null}
             </div>
             <Button variant="ghost" size="icon" onClick={async () => { await remove({ sessionToken: sessionToken!, id: c._id }); toast.success('Ջնջվել է'); }}>
               <Trash2 className="h-4 w-4 text-destructive" />
