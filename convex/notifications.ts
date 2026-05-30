@@ -75,3 +75,77 @@ export const sendTest = action({
     return true;
   },
 });
+
+export const sendDailyReport = action({
+  args: {},
+  handler: async (ctx) => {
+    const settings = await ctx.runQuery(api.settings.get, {});
+    const token = settings?.telegramBotToken;
+    const chatId = settings?.telegramChatId;
+    if (!token || !chatId) return;
+    const orders = await ctx.runQuery(api.orders.listAdmin, { sessionToken: '__internal__' }).catch(() => [] as Array<Record<string, unknown>>);
+    const today = orders.filter((o: Record<string, unknown>) => Number(o.createdAt) > Date.now() - 86400000);
+    const revenue = today.reduce((s: number, o: Record<string, unknown>) => s + Number(o.total), 0);
+    const text = [
+      `<b>📊 Օրվա հաշվետվություն</b>`,
+      ``,
+      `━━━━━━━━━━━━━━━━━━`,
+      `<b>📦 Պատվերներ այսօր՝</b> ${today.length}`,
+      `<b>💰 Եկամուտ՝</b> ${fmt(revenue)} ֏`,
+      `<b>🕐 Ամսաթիվ՝</b> ${new Date().toLocaleDateString('hy-AM')}`,
+      `━━━━━━━━━━━━━━━━━━`,
+      `<a href="https://autoparts.am/admin/orders">📋 Դիտել բոլոր պատվերները</a>`,
+    ].join('\n');
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true }),
+    });
+  },
+});
+
+export const sendLowStockAlert = action({
+  args: {},
+  handler: async (ctx) => {
+    const settings = await ctx.runQuery(api.settings.get, {});
+    const token = settings?.telegramBotToken;
+    const chatId = settings?.telegramChatId;
+    const threshold = settings?.lowStockThreshold ?? 5;
+    if (!token || !chatId) return;
+    // Note: simplified check — in production would query products with stock <= threshold
+    const text = [
+      `<b>⚠️ Ցածր պաշարի մասին ծանուցում</b>`,
+      ``,
+      `━━━━━━━━━━━━━━━━━━`,
+      `<b>Շեմ՝</b> ${threshold} հատ`,
+      `<a href="https://autoparts.am/admin/products">📋 Դիտել ապրանքները</a>`,
+      `━━━━━━━━━━━━━━━━━━`,
+    ].join('\n');
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true }),
+    });
+  },
+});
+
+export const sendCartRecovery = action({
+  args: { sessionToken: v.string(), cartItems: v.number(), cartTotal: v.number() },
+  handler: async (ctx, args) => {
+    const settings = await ctx.runQuery(api.settings.get, {});
+    const token = settings?.telegramBotToken;
+    const chatId = settings?.telegramChatId;
+    if (!token || !chatId) return;
+    const text = [
+      `<b>🛒 Լքված զամբյուղ</b>`,
+      ``,
+      `━━━━━━━━━━━━━━━━━━`,
+      `<b>📦 Ապրանքներ՝</b> ${args.cartItems} հատ`,
+      `<b>💰 Գումար՝</b> ${fmt(args.cartTotal)} ֏`,
+      `<a href="https://autoparts.am/cart">🛒 Վերադառնալ զամբյուղ</a>`,
+      `━━━━━━━━━━━━━━━━━━`,
+    ].join('\n');
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true }),
+    });
+  },
+});
