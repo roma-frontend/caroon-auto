@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Bot, ArrowUp, Send, X, Loader2, Phone, MessageCircle } from 'lucide-react';
+import { Bot, ArrowUp, Send, X, Loader2, Phone, MessageCircle, MessageSquare, Smartphone } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
 import { useAuth } from '@/store/auth';
 import { getRoleSuggestions, type UserRole } from '@/lib/aiAssistant';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SITE } from '@/lib/constants';
+import Link from 'next/link';
 
 type Message = { id: string; role: 'user' | 'assistant'; content: string };
 
@@ -67,7 +68,17 @@ export function FloatingActions() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10"><Bot className="h-4 w-4 text-primary" /></div>
             <div className="flex-1"><p className="text-sm font-semibold">{SITE.name} AI</p><p className="text-[10px] text-muted-foreground">Օգնական</p></div>
             <div className="flex gap-1">
-              <a href={`tel:${settings?.phone || ''}`} className="rounded-lg p-1.5 hover:bg-muted"><Phone className="h-4 w-4" /></a>
+              {settings?.whatsapp && (
+                <Link href={`https://wa.me/${settings.whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="rounded-lg p-1.5 hover:bg-muted" aria-label="WhatsApp">
+                  <MessageSquare className="h-4 w-4 text-green-500" />
+                </Link>
+              )}
+              {settings?.telegram && (
+                <Link href={`https://t.me/${settings.telegram.replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer" className="rounded-lg p-1.5 hover:bg-muted" aria-label="Telegram">
+                  <Smartphone className="h-4 w-4 text-sky-500" />
+                </Link>
+              )}
+              <Link href={`tel:${settings?.phone || ''}`} className="rounded-lg p-1.5 hover:bg-muted"><Phone className="h-4 w-4" /></Link>
               <button onClick={() => setChatOpen(false)} className="rounded-lg p-1.5 hover:bg-muted"><X className="h-4 w-4" /></button>
             </div>
           </div>
@@ -108,11 +119,20 @@ export function FloatingActions() {
 
       {/* Floating buttons */}
       <div className="fixed bottom-20 right-4 z-50 flex flex-col items-end gap-3 lg:bottom-6 lg:right-6">
-        {/* {showTop && (
-          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex h-11 w-11 items-center justify-center rounded-full bg-foreground/10 backdrop-blur-sm border shadow-lg hover:bg-foreground/20 transition-all" aria-label="Back to top">
-            <ArrowUp className="h-5 w-5" />
-          </button>
-        )} */}
+        {!chatOpen && settings?.whatsapp && (
+          <Link href={`https://wa.me/${settings.whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500 text-white shadow-xl transition-all hover:scale-110 hover:bg-green-600"
+            aria-label="WhatsApp">
+            <MessageSquare className="h-5 w-5" />
+          </Link>
+        )}
+        {!chatOpen && settings?.telegram && (
+          <Link href={`https://t.me/${settings.telegram.replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-500 text-white shadow-xl transition-all hover:scale-110 hover:bg-sky-600"
+            aria-label="Telegram">
+            <Smartphone className="h-5 w-5" />
+          </Link>
+        )}
         <button onClick={() => setChatOpen(!chatOpen)} className={`flex h-14 w-14 items-center justify-center rounded-full shadow-xl transition-all duration-300 ${chatOpen ? 'bg-foreground/80 text-background rotate-90' : 'bg-primary text-white hover:scale-110'}`} aria-label="AI Assistant">
           {chatOpen ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
         </button>

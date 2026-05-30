@@ -19,7 +19,7 @@ export default function ContactPage() {
   { icon: Phone, label: 'Հեռախոս', value: settings?.phone || '+374 XX XXX XXX', href: `tel:${settings?.phone || ''}` },
   { icon: Mail, label: 'Էլ. փոստ', value: settings?.email || 'info@autoparts.am', href: `mailto:${settings?.email || ''}` },
   { icon: MapPin, label: 'Հասցե', value: settings?.address || 'Երեւան', href: `https://www.google.com/maps/search/${encodeURIComponent(settings?.address || '')}` },
-  { icon: Clock, label: 'Աշխատանքի ժամանակ', value: 'Ժամեր 10:00 - 19:00' },
+  { icon: Clock, label: 'Աշխատանքի ժամանակ', value: settings?.workingHours || '10:00 - 19:00' },
 ];
   const [form, setForm] = useState({ name: '', phone: '', email: '', message: '' });
   const [sending, setSending] = useState(false);
@@ -74,7 +74,11 @@ export default function ContactPage() {
 
           {/* Map placeholder */}
           <div className="mt-4 aspect-video overflow-hidden rounded-xl border bg-muted/30">
-            <iframe src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || ""}&q=${encodeURIComponent(settings?.address || "Երևան, Հայաստան")}`} width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" />
+            {settings?.mapUrl ? (
+              <iframe src={settings.mapUrl} width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" />
+            ) : (
+              <iframe src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || ""}&q=${encodeURIComponent(settings?.address || "Երևան, Հայաստան")}`} width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" />
+            )}
           </div>
         </div>
 
