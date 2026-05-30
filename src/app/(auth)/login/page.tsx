@@ -34,7 +34,7 @@ export default function LoginPage() {
       toast.success(`Բարի գալուստ, ${result.name}!`);
       router.push('/admin');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Մուտքի սխալ');
+      const msg = err instanceof Error ? err.message : ''; setError(msg.includes('Uncaught Error:') ? msg.split('Uncaught Error:')[1].split(' at ')[0].trim() : msg || 'Մուտքի սխալ');
     } finally {
       setLoading(false);
     }
