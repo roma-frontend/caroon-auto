@@ -4,7 +4,7 @@ import { useAuthStore, useAuth } from '@/store/auth';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, Package, FolderTree, ShoppingBag, Tag, FileText, LogOut, Settings, Menu, X, Users, Home } from 'lucide-react';
+import { LayoutDashboard, Package, FolderTree, ShoppingBag, Tag, FileText, LogOut, Settings, Menu, X, Users, Home, Search } from 'lucide-react';
 import { Logo } from '@/components/layout/Logo';
 import { Button } from '@/components/ui/button';
 import { SITE } from '@/lib/constants';
@@ -13,6 +13,7 @@ import { useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { toast } from 'sonner';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { clearAuthCookie } from '@/actions/auth';
 import { IdleTimeoutModal } from '@/components/admin/IdleTimeoutModal';
 
@@ -73,7 +74,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Logo size={32} />
         </Link>
         <span className="font-bold">{storeName}</span>
-        <span className="ml-auto rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">Admin</span>
+        
         <button onClick={() => setSidebarOpen(false)} className="ml-2 lg:hidden"><X className="h-5 w-5" /></button>
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
@@ -149,31 +150,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
         {/* Desktop header */}
         <header className="hidden lg:flex sticky top-0 z-40 h-14 items-center justify-between border-b bg-background/80 backdrop-blur-md px-6">
-          <div className="flex items-center gap-4">
-            <h2 className="text-sm font-semibold text-muted-foreground capitalize">{pathname.split('/').pop() || 'Dashboard'}</h2>
+          <div className="relative w-64">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input type="text" placeholder="Որոնել..." className="h-9 w-full rounded-lg border bg-muted/50 pl-9 pr-3 text-sm outline-none transition-colors focus:border-primary/40 focus:bg-background" onFocus={(e) => e.currentTarget.nextElementSibling?.classList.remove('hidden')} onBlur={(e) => setTimeout(() => e.currentTarget.nextElementSibling?.classList.add('hidden'), 150)} onChange={(e) => { const q = e.target.value.toLowerCase(); const el = e.currentTarget.nextElementSibling; if (el) { el.querySelectorAll('[data-nav]').forEach((n) => { (n as HTMLElement).style.display = (n as HTMLElement).dataset.nav!.includes(q) ? '' : 'none'; }); }}} />
+            <div className="absolute left-0 top-full mt-1 hidden w-full rounded-xl border bg-popover p-1.5 shadow-lg z-50">
+              {NAV_ITEMS.map((item) => (<Link key={item.href} href={item.href} data-nav={item.label.toLowerCase()} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent"><item.icon className="h-4 w-4 text-muted-foreground" />{item.label}</Link>))}
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Link href="/" className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground" title="Go to store">
-              <Home className="h-4 w-4" />
-            </Link>
-            {pendingCount > 0 && (
-              <Link href="/admin/orders" className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-                <ShoppingBag className="h-4 w-4" />
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-white">{pendingCount}</span>
-              </Link>
-            )}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link href="/" className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"><Home className="h-4 w-4" /></Link>
+            {pendingCount > 0 && (<Link href="/admin/orders" className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"><ShoppingBag className="h-4 w-4" /><span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-white">{pendingCount}</span></Link>)}
             <div className="h-5 w-px bg-border" />
             <div className="relative group">
-              <button className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-accent">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">{user.name.charAt(0)}</div>
-                <span className="text-sm font-medium">{user.name}</span>
-              </button>
+              <button className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-accent"><div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">{user.name.charAt(0)}</div><span className="text-sm font-medium">{user.name}</span></button>
               <div className="absolute right-0 top-full mt-1 hidden w-44 flex-col rounded-xl border bg-popover p-1.5 shadow-lg group-focus-within:flex">
                 <span className="px-3 py-1.5 text-xs text-muted-foreground truncate">{user.email}</span>
                 <div className="my-1 h-px bg-border" />
-                <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-xs" onClick={handleLogout}>
-                  <LogOut className="h-3.5 w-3.5" /> Դdelays-delays
-                </Button>
+                <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-xs" onClick={handleLogout}><LogOut className="h-3.5 w-3.5" /> Դուրս գալ</Button>
               </div>
             </div>
           </div>
