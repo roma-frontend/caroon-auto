@@ -180,7 +180,7 @@ export function Header() {
             {/* User Actions */}
             <div className="p-3 border-t mt-auto">
               <div className="flex flex-col gap-2">
-                <Link href="/favorites" onClick={() => setMenuOpen(false)} className="group/fav flex flex-1 items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-medium transition-colors hover:bg-accent">
+                <Link href="/favorites" onClick={() => setMenuOpen(false)} className="group/fav flex flex-1 items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-medium transition-all hover:border-red-500/40 hover:bg-red-500/5 hover:text-red-500">
                   <Heart className={`h-4 w-4 transition-colors group-hover/fav:fill-red-500 group-hover/fav:text-red-500 ${hasFavs ? 'fill-red-500 text-red-500' : ''}`} />
                   {NAV.favorites}
                 </Link>
