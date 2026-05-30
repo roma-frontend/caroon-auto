@@ -24,15 +24,15 @@ export const sendOrderNotification = internalAction({
     const text = [
       `<b>🛒 Նոր պատվեր</b>`,
       ``,
-      `━━━━━━━━━━━━━━━`,
-      `<b>📝 Համար:</b> <code>${args.orderNumber}</code>`,
-      `<b>👤 Հաճախորդ:</b> ${args.customerName}`,
-      `<b>📞 Հեռախոս:</b> ${args.customerPhone}`,
-      `<b>📦 Ապրանքներ:</b> ${args.itemsCount} հատ`,
-      `<b>💰 Գումար:</b> <b>${fmt(args.total)} ֏</b>`,
-      `━━━━━━━━━━━━━━━`,
+      `━━━━━━━━━━━━━━━━━━`,
+      `<b>📝 Պատվերի համար՝</b> <code>${args.orderNumber}</code>`,
+      `<b>👤 Անուն՝</b> ${args.customerName}`,
+      `<b>📞 Հեռախոս՝</b> ${args.customerPhone}`,
+      `<b>📦 Ապրանքների քանակ՝</b> ${args.itemsCount} հատ`,
+      `<b>💰 Ընդհանուր գումար՝</b> <b>${fmt(args.total)} ֏</b>`,
+      `━━━━━━━━━━━━━━━━━━`,
       ``,
-      `<a href="https://autoparts.am/admin/orders">📋 Բացել պատվերները</a>`,
+      `<a href="https://autoparts.am/admin/orders">📋 Դիտել բոլոր պատվերները</a>`,
     ].join('\n');
 
     try {
@@ -56,14 +56,14 @@ export const sendTest = action({
     const chatId = settings?.telegramChatId;
     if (!token || !chatId) throw new Error('Telegram կարգավորումներ չկան');
     const testHtml = [
-      `<b>✅ AutoParts — Թեստային ծանուցում</b>`,
+      `<b>✅ AutoParts — Թեստային հաղորդագրություն</b>`,
       ``,
-      `━━━━━━━━━━━━━━━`,
-      `<b>Բոտը աշխատում է:</b> ✅`,
-      `<b>🕐 Ժամանակ:</b> ${new Date().toLocaleString('hy-AM')}`,
-      `━━━━━━━━━━━━━━━`,
+      `━━━━━━━━━━━━━━━━━━`,
+      `<b>Բոտը աշխատում է՝</b> ✅`,
+      `<b>🕐 Ժամը՝</b> ${new Date().toLocaleString('hy-AM')}`,
+      `━━━━━━━━━━━━━━━━━━`,
       ``,
-      `<i>Շնորհակալություն մեզ հետ լինելու համար</i> 🚗`,
+      `<i>Շնորհակալություն, որ ընտրել եք մեզ</i> 🚗`,
     ].join('\n');
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
