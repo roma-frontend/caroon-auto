@@ -147,6 +147,37 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </div>
         </header>
+        {/* Desktop header */}
+        <header className="hidden lg:flex sticky top-0 z-40 h-14 items-center justify-between border-b bg-background/80 backdrop-blur-md px-6">
+          <div className="flex items-center gap-4">
+            <h2 className="text-sm font-semibold text-muted-foreground capitalize">{pathname.split('/').pop() || 'Dashboard'}</h2>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground" title="Go to store">
+              <Home className="h-4 w-4" />
+            </Link>
+            {pendingCount > 0 && (
+              <Link href="/admin/orders" className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+                <ShoppingBag className="h-4 w-4" />
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-white">{pendingCount}</span>
+              </Link>
+            )}
+            <div className="h-5 w-px bg-border" />
+            <div className="relative group">
+              <button className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-accent">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">{user.name.charAt(0)}</div>
+                <span className="text-sm font-medium">{user.name}</span>
+              </button>
+              <div className="absolute right-0 top-full mt-1 hidden w-44 flex-col rounded-xl border bg-popover p-1.5 shadow-lg group-focus-within:flex">
+                <span className="px-3 py-1.5 text-xs text-muted-foreground truncate">{user.email}</span>
+                <div className="my-1 h-px bg-border" />
+                <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-xs" onClick={handleLogout}>
+                  <LogOut className="h-3.5 w-3.5" /> Դdelays-delays
+                </Button>
+              </div>
+            </div>
+          </div>
+        </header>
         <main className="flex-1 p-4 pb-20 md:p-8 lg:pb-8">{children}</main>
       </div>
 
