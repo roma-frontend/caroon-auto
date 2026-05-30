@@ -17,6 +17,7 @@ import type * as lib_auth from "../lib/auth.js";
 import type * as notifications from "../notifications.js";
 import type * as orders from "../orders.js";
 import type * as pages from "../pages.js";
+import type * as priceAlerts from "../priceAlerts.js";
 import type * as products from "../products.js";
 import type * as promotions from "../promotions.js";
 import type * as reviews from "../reviews.js";
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   orders: typeof orders;
   pages: typeof pages;
+  priceAlerts: typeof priceAlerts;
   products: typeof products;
   promotions: typeof promotions;
   reviews: typeof reviews;

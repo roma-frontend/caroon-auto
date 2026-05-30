@@ -185,14 +185,15 @@ export const update = mutation({
   },
   handler: async (ctx, args) => {
     await getAdminCaller(ctx, args.sessionToken);
-    const { id, sessionToken: _, stock, ...patch } = args;
-    if (stock !== undefined) {
-      const old = await ctx.db.get(id);
-      if (old && old.stock <= 0 && stock > 0) {
-        await ctx.scheduler.runAfter(0, api.backInStock.notifySubscribers, { productId: id, productName: old.name });
-      }
+    const { id, sessionToken: _, stock, price, ...patch } = args;
+    const old = await ctx.db.get(id);
+    if (stock !== undefined && old && old.stock <= 0 && stock > 0) {
+      await ctx.scheduler.runAfter(0, api.backInStock.notifySubscribers, { productId: id, productName: old.name });
     }
-    await ctx.db.patch(id, { ...patch, ...(stock !== undefined ? { stock } : {}), updatedAt: Date.now() });
+    if (price !== undefined && old && price < old.price) {
+      await ctx.scheduler.runAfter(0, api.priceAlerts.checkAndNotify, { productId: id, newPrice: price });
+    }
+    await ctx.db.patch(id, { ...patch, ...(stock !== undefined ? { stock } : {}), ...(price !== undefined ? { price } : {}), updatedAt: Date.now() });
   },
 });
 

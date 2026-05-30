@@ -216,9 +216,7 @@ export default function ProductDetailPage() {
             )}
             {settings?.enablePriceAlert !== false && (
               <span className="flex items-center gap-1">
-                <button onClick={() => toast.success('Կծանուցենք երբ գինը փոխվի')} className="flex items-center gap-1 hover:text-primary transition-colors">
-                  <Bell className="h-4 w-4" /> {'Զեղչ'}
-                </button>
+                <SubscribePriceButton productId={product._id} currentPrice={product.price} />
               </span>
             )}
           </div>
@@ -259,6 +257,28 @@ function BackInStockButton({ productId }: { productId: string }) {
     <div className="flex gap-2">
       <Input value={contact} onChange={(e) => setContact(e.target.value)} placeholder="@username կամ հեռախոս" className="h-10 flex-1" />
       <Button size="sm" onClick={handleSubmit} disabled={!contact} className="gap-2 shrink-0"><Smartphone className="h-4 w-4" /> Telegram</Button>
+    </div>
+  );
+}
+
+function SubscribePriceButton({ productId, currentPrice }: { productId: string; currentPrice: number }) {
+  const subscribe = useMutation(api.priceAlerts.subscribe);
+  const [email, setEmail] = useState('');
+  const [sent, setSent] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  if (sent) return <span className="text-xs text-green-600">✅ Կծանուցենք</span>;
+  if (!showForm) return (
+    <button onClick={() => setShowForm(true)} className="flex items-center gap-1 hover:text-primary transition-colors text-xs">
+      <Bell className="h-4 w-4" /> {'Զեղչ'}
+    </button>
+  );
+  return (
+    <div className="flex gap-1">
+      <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email" className="h-7 text-xs w-36" />
+      <Button size="sm" className="h-7 text-xs" disabled={!email} onClick={async () => {
+        await subscribe({ productId: productId as Id<'products'>, email, priceAtSubscribe: currentPrice });
+        setSent(true); toast.success('Կծանուցենք երբ գինը նվազի');
+      }}>OK</Button>
     </div>
   );
 }
