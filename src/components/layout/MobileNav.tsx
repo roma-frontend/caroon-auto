@@ -22,7 +22,6 @@ export function MobileNav() {
   const favCount = useFavoritesStore((s) => s.count());
   const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
   // On a product detail page the sticky buy-bar takes over the bottom.
   if (/^\/products\/.+/.test(pathname)) return null;

@@ -57,12 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <LogOut className="h-7 w-7 text-primary" />
         </div>
         <h1 className="text-xl font-semibold tracking-tight">Սեսիան ավարտվել է</h1>
-        <Link href="/login">
-          <Button className="mt-2 gap-2">
-            <LogOut className="h-4 w-4" />
-            Մուտք գործել
-          </Button>
-        </Link>
+        <p className="text-sm text-muted-foreground">Մինչ նոր հանդիպում</p>
       </div>
     </div>
   );
