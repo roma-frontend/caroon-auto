@@ -13,6 +13,7 @@ interface CategoryCardProps {
   imageUrl?: string | null;
   productCount?: number;
   index?: number;
+  className?: string;
 }
 
 export const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -37,13 +38,13 @@ export const CATEGORY_COLORS: Record<string, string> = {
   accessories: 'bg-violet-500/15 text-violet-600 dark:text-violet-400',
 };
 
-export function CategoryCard({ name, slug, description, productCount, index = 0 }: CategoryCardProps) {
+export function CategoryCard({ name, slug, description, productCount, index = 0, className }: CategoryCardProps) {
   const { ref, visible } = useReveal();
   const Icon = CATEGORY_ICONS[slug] ?? Package;
   const color = CATEGORY_COLORS[slug] ?? 'bg-primary/10 text-primary';
 
   return (
-    <Link href={`/categories/${slug}`}>
+    <Link href={`/categories/${slug}`} className={className}>
       <div ref={ref} style={cardRevealStyle(visible, index * 0.06)}>
         <div className="group flex h-full items-center gap-4 rounded-2xl border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
           <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 ${color}`}>

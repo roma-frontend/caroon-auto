@@ -22,7 +22,7 @@ export default function AdminPagesPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Էջեր</h1>
+          <h1 className="text-3xl font-bold">Էջեր</h1>
           <p className="text-sm text-muted-foreground">Ստատիկ էջերի կառավարում</p>
         </div>
         <Link href="/admin/pages/new/edit">

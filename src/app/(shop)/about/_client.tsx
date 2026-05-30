@@ -59,8 +59,8 @@ export default function AboutPage() {
     <div>
       <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5" style={{ paddingBlock: 'var(--space-20)' }}>
         <div className="mx-auto text-center" style={{ maxWidth: 'var(--container-max)', paddingInline: 'var(--space-container)' }}>
-          <Badge variant="default" className="hero-fade-1 mb-4">Մեր մասին</Badge>
-          <p className="hero-fade-3 mx-auto mt-6 max-w-2xl text-lg text-muted-foreground leading-relaxed">
+          <Badge variant="default" className="mb-4">Մեր մասին</Badge>
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground leading-relaxed">
             Բարի գալուստ մեր կայք։ Մենք ուրախ ենք տրամադրել բարձրորակ ավտոպահեստամասեր և գերազանց ծառայություն մեր հաճախորդներին Հայաստանում։ Մեր առաքելությունն է ապահովել, որ ձեր մեքենան միշտ պատրաստ լինի ճանապարհին լինելու համար՝ առաջարկելով լայն տեսականի ապրանքներ և անհատականացված աջակցություն։
           </p>
         </div>

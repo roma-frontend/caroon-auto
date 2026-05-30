@@ -130,7 +130,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
           <span className="font-bold">{SITE.name} Admin</span>
         </header>
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+        <main className="flex-1 p-4 md:p-8">{children}</main>
       </div>
     </div>
   );
