@@ -154,7 +154,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input type="text" placeholder="Որոնել..." className="h-9 w-full rounded-lg border bg-muted/50 pl-9 pr-3 text-sm outline-none transition-colors focus:border-primary/40 focus:bg-background"   onChange={(e) => { const q = e.target.value.toLowerCase(); const el = e.currentTarget.nextElementSibling; if (el) { el.querySelectorAll('[data-nav]').forEach((n) => { (n as HTMLElement).style.display = (n as HTMLElement).dataset.nav!.includes(q) ? '' : 'none'; }); }}} />
             <div className="absolute left-0 top-full mt-1 hidden group-focus-within/search:flex flex-col w-full rounded-xl border bg-popover p-1.5 shadow-lg z-50">
-              {NAV_ITEMS.map((item) => (<Link key={item.href} href={item.href} data-nav={item.label.toLowerCase()} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent"><item.icon className="h-4 w-4 text-muted-foreground" />{item.label}</Link>))}
+              {NAV_ITEMS.map((item) => (<Link key={item.href} href={item.href} data-nav={item.label.toLowerCase()} onClick={() => { (document.activeElement as HTMLElement)?.blur(); }} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent"><item.icon className="h-4 w-4 text-muted-foreground" />{item.label}</Link>))}
             </div>
           </div>
           <div className="flex items-center gap-2">
