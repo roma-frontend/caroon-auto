@@ -124,11 +124,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main */}
       <div className="flex flex-1 flex-col">
         {/* Mobile header */}
-        <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b bg-background px-4 lg:hidden">
-          <button onClick={() => setSidebarOpen(true)} className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-accent">
-            <Menu className="h-5 w-5" />
-          </button>
-          <span className="font-bold">{SITE.name} Admin</span>
+        <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b bg-background/80 backdrop-blur-md px-4 lg:hidden">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setSidebarOpen(true)} className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors hover:bg-primary/20">
+              <Menu className="h-4 w-4" />
+            </button>
+            <div className="flex items-center gap-2">
+              <Logo size={24} />
+              <span className="text-sm font-semibold tracking-tight">{SITE.name}</span>
+              <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">Admin</span>
+            </div>
+          </div>
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">{user.name.charAt(0)}</div>
         </header>
         <main className="flex-1 p-4 pb-20 md:p-8 lg:pb-8">{children}</main>
       </div>
