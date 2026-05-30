@@ -6,7 +6,11 @@ import { Logo } from '@/components/layout/Logo';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { NAV, SITE } from '@/lib/constants';
-import { useState, useEffect } from 'react';
+import { useState, useSyncExternalStore } from 'react';
+
+const subscribe = () => () => {};
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
 import { useRouter } from 'next/navigation';
 import { useSettings } from '@/hooks/useSettings';
 import { useStoreName } from '@/hooks/useStoreName';
@@ -38,8 +42,7 @@ export function Header() {
   const settings = useSettings();
   const [searchOpen, setSearchOpen] = useState(false);
   const favCount = useFavoritesStore((s) => s.count());
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const hasFavs = mounted && favCount > 0;
   const storeName = useStoreName();
 
@@ -62,7 +65,7 @@ export function Header() {
           <nav className="hidden items-center gap-1 md:flex">
             {settings?.enableCarSelector !== false && (
               <Link href="/car-selector" className="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10">
-                <Car className="h-4 w-4" /> Ընտրել ավտո
+                <Car className="h-4 w-4" /> Ընտրել մակնիշ
               </Link>
             )}
             {LINKS.map((link) => (
