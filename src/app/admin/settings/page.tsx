@@ -22,6 +22,7 @@ import {
   Send,
   Eye,
   EyeOff,
+  ShoppingCart,
 } from 'lucide-react';
 
 import { toast } from 'sonner';
@@ -77,6 +78,25 @@ export default function AdminSettingsPage() {
         telegramBotToken: String(form.telegramBotToken ?? ''),
         telegramChatId: String(form.telegramChatId ?? ''),
         mapUrl: String(form.mapUrl ?? ''),
+        minOrderAmount: Number(form.minOrderAmount) || 0,
+        enableQuickBuy: flags.enableQuickBuy !== false,
+        paymentMethods: form.paymentMethods ? JSON.parse(String(form.paymentMethods)) : ['cash', 'card'],
+        gaId: String(form.gaId ?? ''),
+        fbPixelId: String(form.fbPixelId ?? ''),
+        enableCookieConsent: flags.enableCookieConsent === true,
+        cookieConsentText: String(form.cookieConsentText ?? ''),
+        enableNewsletter: flags.enableNewsletter === true,
+        defaultViewMode: form.defaultViewMode === 'list' ? 'list' : 'grid',
+        productsPerPage: Number(form.productsPerPage) || 20,
+        enableBreadcrumbs: flags.enableBreadcrumbs !== false,
+        enableScrollToTop: flags.enableScrollToTop !== false,
+        logoUrl: String(form.logoUrl ?? ''),
+        customCss: String(form.customCss ?? ''),
+        customJsHead: String(form.customJsHead ?? ''),
+        enableRegistration: flags.enableRegistration !== false,
+        enableVinDecoder: flags.enableVinDecoder === true,
+        enableOemSearch: flags.enableOemSearch === true,
+        defaultWarranty: String(form.defaultWarranty ?? ''),
       });
 
       toast.success('Կարգավորումները պահպանվել են');
@@ -460,6 +480,137 @@ export default function AdminSettingsPage() {
                 className="h-10 w-14 cursor-pointer rounded-md border bg-transparent p-1" />
               <span className="text-sm text-muted-foreground">{'Ակցենտ գույնը՝ փոխվում է ողջ կայքում իրական ժամանակում'}</span>
               {!!form.accentColor && <Button variant="ghost" size="sm" onClick={() => saveField('accentColor', '')}>{'Վերականգնել'}</Button>}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Cart & Checkout */}
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <ShoppingCart className="h-5 w-5 text-primary" />
+              {'Զամբյուղ և վճարում'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <Label>{'Նվազագույն պատվեր (֏)'}</Label>
+                <Input type="number" value={Number(form.minOrderAmount) || 0} onChange={(e) => set('minOrderAmount', Number(e.target.value))} className="h-10" />
+              </div>
+              <div>
+                <Label>{'Ապրանքներ էջում'}</Label>
+                <Input type="number" value={Number(form.productsPerPage) || 20} onChange={(e) => set('productsPerPage', Number(e.target.value))} className="h-10" />
+              </div>
+              <div>
+                <Label>{'Երաշխիք (լռությամբ)'}</Label>
+                <Input value={String(form.defaultWarranty ?? '')} onChange={(e) => set('defaultWarranty', e.target.value)} className="h-10" />
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-6">
+              <div className="flex items-center gap-2">
+                <Switch checked={flags.enableQuickBuy !== false} onCheckedChange={(v) => saveField('enableQuickBuy', v)} />
+                <span className="text-sm">{'Արագ գնում'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={flags.enableBreadcrumbs !== false} onCheckedChange={(v) => saveField('enableBreadcrumbs', v)} />
+                <span className="text-sm">{'Հացի փշրանքներ'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={flags.enableScrollToTop !== false} onCheckedChange={(v) => saveField('enableScrollToTop', v)} />
+                <span className="text-sm">{'Կոճակ «Վերև»'}</span>
+              </div>
+            </div>
+            <div>
+              <Label>{'Վճարման եղանակներ'}</Label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {['cash', 'card', 'idram', 'easypay', 'transfer'].map((m) => {
+                  const labels: Record<string, string> = { cash: 'Կանխիկ', card: 'Քարտով', idram: 'Idram', easypay: 'EasyPay', transfer: 'Բանկային փոխանցում' };
+                  const pm: string[] = form.paymentMethods ? JSON.parse(String(form.paymentMethods)) : ['cash', 'card', 'idram', 'easypay'];
+                  const active = pm.includes(m);
+                    return (
+                      <button key={m} onClick={() => {
+                        const current: string[] = form.paymentMethods ? JSON.parse(String(form.paymentMethods)) : ['cash', 'card', 'idram', 'easypay'];
+                        const next = active ? current.filter((x) => x !== m) : [...current, m];
+                        setForm({ ...form, paymentMethods: JSON.stringify(next) as unknown as number });
+                      }} className={`rounded-xl border px-3 py-1.5 text-xs transition-all ${active ? 'border-primary bg-primary/10 text-primary' : 'text-muted-foreground hover:border-primary/40'}`}>{labels[m] || m}</button>
+                  );
+                })}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Marketing & Analytics */}
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Globe className="h-5 w-5 text-primary" />
+              {'Մարքեթինգ'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label>Google Analytics ID</Label>
+                <Input value={String(form.gaId ?? '')} onChange={(e) => set('gaId', e.target.value)} placeholder="G-XXXXXXXXXX" className="h-10 font-mono text-xs" />
+              </div>
+              <div>
+                <Label>Facebook Pixel ID</Label>
+                <Input value={String(form.fbPixelId ?? '')} onChange={(e) => set('fbPixelId', e.target.value)} placeholder="1234567890" className="h-10 font-mono text-xs" />
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-6">
+              <div className="flex items-center gap-2">
+                <Switch checked={flags.enableCookieConsent === true} onCheckedChange={(v) => saveField('enableCookieConsent', v)} />
+                <span className="text-sm">{'Cookie Consent'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={flags.enableNewsletter === true} onCheckedChange={(v) => saveField('enableNewsletter', v)} />
+                <span className="text-sm">{'Newsletter (footer)'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={flags.enableRegistration !== false} onCheckedChange={(v) => saveField('enableRegistration', v)} />
+                <span className="text-sm">{'Գրանցում'}</span>
+              </div>
+            </div>
+            {flags.enableCookieConsent === true && (
+              <div>
+                <Label>{'Cookie Consent տեքստ'}</Label>
+                <Input value={String(form.cookieConsentText ?? '')} onChange={(e) => set('cookieConsentText', e.target.value)} className="h-10" />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* UI / Branding */}
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Palette className="h-5 w-5 text-primary" />
+              {'UI / Branding'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>{'Logo URL (թափուր = SVG լոգո)'}</Label>
+              <Input value={String(form.logoUrl ?? '')} onChange={(e) => set('logoUrl', e.target.value)} placeholder="https://example.com/logo.png" className="h-10" />
+            </div>
+            <div>
+              <Label>Custom CSS</Label>
+              <textarea value={String(form.customCss ?? '')} onChange={(e) => set('customCss', e.target.value)} className="h-20 w-full rounded-xl border bg-background p-3 font-mono text-xs outline-none focus:ring-2 focus:ring-primary/20" />
+            </div>
+            <div>
+              <Label>Custom JS (head)</Label>
+              <textarea value={String(form.customJsHead ?? '')} onChange={(e) => set('customJsHead', e.target.value)} className="h-20 w-full rounded-xl border bg-background p-3 font-mono text-xs outline-none focus:ring-2 focus:ring-primary/20" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch checked={flags.enableVinDecoder === true} onCheckedChange={(v) => saveField('enableVinDecoder', v)} />
+              <span className="text-sm">{'VIN-դեկոդեր'}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch checked={flags.enableOemSearch === true} onCheckedChange={(v) => saveField('enableOemSearch', v)} />
+              <span className="text-sm">{'OEM որոնում'}</span>
             </div>
           </CardContent>
         </Card>
