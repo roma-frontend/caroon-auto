@@ -22,7 +22,6 @@ const NAV_ITEMS = [
   { href: '/admin/categories', icon: FolderTree, label: 'Կատեգորիաներ' },
   { href: '/admin/orders', icon: BarChart3, label: 'Պատվերներ' },
   { href: '/admin/products', icon: Package, label: 'Ապրանքներ' },
-  { href: '/admin/categories', icon: FolderTree, label: 'Կատեգորիաներ' },
   { href: '/admin/customers', icon: Users, label: 'Հաճախորդներ' },
   { href: '/admin/promotions', icon: Tag, label: 'Ակցիաներ' },
   { href: '/admin/promotions/coupons', icon: Ticket, label: 'Կուպոններ' },

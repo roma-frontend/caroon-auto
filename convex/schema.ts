@@ -230,7 +230,50 @@ export default defineSchema(
     enableBackInStock: v.optional(v.boolean()),
     // Order history
     enableOrderHistory: v.optional(v.boolean()),
+    // Abandoned cart
+    enableCartRecovery: v.optional(v.boolean()),
+    cartRecoveryDelay: v.optional(v.number()),
+    // Price alerts
+    enablePriceAlert: v.optional(v.boolean()),
+    // Daily report
+    enableDailyReport: v.optional(v.boolean()),
+    // Store pickup
+    enablePickup: v.optional(v.boolean()),
+    pickupAddress: v.optional(v.string()),
+    // Loyalty
+    enableLoyalty: v.optional(v.boolean()),
+    loyaltyPercent: v.optional(v.number()),
+    // Bulk order
+    enableBulkOrder: v.optional(v.boolean()),
+    // Install videos
+    enableInstallVideos: v.optional(v.boolean()),
+    // Timeline
+    enableTimeline: v.optional(v.boolean()),
+    // Plate decoder
+    enablePlateDecoder: v.optional(v.boolean()),
   }),
+
+  // ─── Price Alerts ────────────────────────────────────────────
+  priceAlerts: defineTable({
+    email: v.string(),
+    productId: v.id('products'),
+    priceAtSubscribe: v.number(),
+    notified: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index('by_product', ['productId'])
+    .index('by_notified', ['notified']),
+
+  // ─── Loyalty Points ──────────────────────────────────────────
+  loyaltyPoints: defineTable({
+    userId: v.optional(v.id('users')),
+    email: v.string(),
+    points: v.number(),
+    totalEarned: v.number(),
+    createdAt: v.number(),
+  })
+    .index('by_email', ['email'])
+    .index('by_user', ['userId']),
 
   // ─── Coupons / Promocodes ────────────────────────────────────
   coupons: defineTable({

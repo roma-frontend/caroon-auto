@@ -1,6 +1,6 @@
-import { mutation } from './_generated/server';
+import { mutation, mutation as seedMutation } from './_generated/server';
 
-export const seed = mutation({
+export const seed = seedMutation({
   args: {},
   handler: async (ctx) => {
     // Check if already seeded
@@ -43,7 +43,7 @@ export const seed = mutation({
   },
 });
 
-export const setImages = mutation({
+export const setImages = seedMutation({
   args: {},
   handler: async (ctx) => {
     const map: Record<string, string> = {
