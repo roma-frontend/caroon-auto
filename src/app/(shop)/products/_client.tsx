@@ -7,7 +7,8 @@ import { api } from '../../../../convex/_generated/api';
 import { Id } from '../../../../convex/_generated/dataModel';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Car, X } from 'lucide-react';
+import { Search, Car, X, LayoutGrid, List } from 'lucide-react';
+import { useSettings } from '@/hooks/useSettings';
 import { Loader, LoaderInline } from '@/components/ui/loader';
 import { ProductGridSkeleton } from '@/components/ProductSkeleton';
 import { ProductCard } from '@/components/cards/ProductCard';
@@ -15,10 +16,11 @@ import { ProductFilters, SortBar } from '@/components/ProductFilters';
 import { NAV } from '@/lib/constants';
 import { useVehicleStore } from '@/store/vehicle';
 
-const PAGE_SIZE = 20;
-
 export default function ProductsPage() {
   const params = useSearchParams();
+  const settings = useSettings();
+  const PAGE_SIZE = settings?.productsPerPage || 20;
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(settings?.defaultViewMode || 'grid');
   const [search, setSearch] = useState(params.get('q') ?? '');
   const vehicle = useVehicleStore((s) => s.vehicle);
   const clearVehicle = useVehicleStore((s) => s.clear);
@@ -74,8 +76,16 @@ export default function ProductsPage() {
         <ProductFilters onFilterChange={setFilters} activeFilters={filters} />
 
         <div className="flex-1 min-w-0">
-          <div className="mb-5">
+          <div className="mb-5 flex items-center justify-between gap-3">
             <SortBar activeFilters={filters} onFilterChange={setFilters} />
+            <div className="flex items-center gap-1 shrink-0">
+              <button onClick={() => setViewMode('grid')} className={`rounded-lg p-1.5 transition-colors ${viewMode === 'grid' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent'}`} aria-label="Grid">
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+              <button onClick={() => setViewMode('list')} className={`rounded-lg p-1.5 transition-colors ${viewMode === 'list' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent'}`} aria-label="List">
+                <List className="h-4 w-4" />
+              </button>
+            </div>
           </div>
           {mounted && vehicle && (
             <div className="mb-5 flex items-center gap-2 rounded-xl border bg-primary/5 px-4 py-2.5 text-sm">
@@ -96,7 +106,7 @@ export default function ProductsPage() {
             </div>
           )}
 
-          <div className="grid" style={{ gap: 'var(--space-5)', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
+          <div className={viewMode === 'list' ? 'flex flex-col gap-3' : 'grid'} style={viewMode === 'list' ? {} : { gap: 'var(--space-5)', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
             {results.map((p, i) => (
               <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} stock={p.stock} rating={p.rating} reviewCount={p.reviewCount} carBrand={p.attributes?.carBrand} index={i} />
             ))}

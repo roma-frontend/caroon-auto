@@ -1,9 +1,19 @@
+'use client';
+
+import { useSettings } from '@/hooks/useSettings';
+import Image from 'next/image';
+
 interface LogoProps {
   size?: number;
   className?: string;
 }
 
 export function Logo({ size = 36, className }: LogoProps) {
+  const settings = useSettings();
+
+  if (settings?.logoUrl) {
+    return <Image src={settings.logoUrl} alt="Logo" width={size} height={size} className={className} style={{ objectFit: 'contain' }} />;
+  }
   return (
     <svg
       width={size}
