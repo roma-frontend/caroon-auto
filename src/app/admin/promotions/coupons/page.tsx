@@ -69,11 +69,24 @@ export default function AdminCouponsPage() {
               <div><Label>Արժեք</Label><Input type="number" value={value} onChange={(e) => setValue(Number(e.target.value))} placeholder={type === 'percent' ? '10' : '5000'} className="h-10" /></div>
               <div><Label>Մին. պատվեր</Label><Input type="number" value={minAmount} onChange={(e) => setMinAmount(Number(e.target.value))} className="h-10" /></div>
               <div><Label>Մաքս. օգտ.</Label><Input type="number" value={maxUses} onChange={(e) => setMaxUses(Number(e.target.value))} className="h-10" /></div>
-              <div>
+              <div className="sm:col-span-3">
                 <Label>Վերջնաժամկետ</Label>
-                <div className="relative">
-                  <Input type="date" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} className="h-10 pr-8" />
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground pointer-events-none">📅</span>
+                <div className="flex gap-2 mt-1">
+                  <select value={expiresAt ? new Date(expiresAt).getDate() : ''} onChange={(e) => { const d = new Date(expiresAt || Date.now()); d.setDate(Number(e.target.value)); setExpiresAt(d.toISOString().slice(0,10)); }}
+                    className="h-10 flex-1 rounded-xl border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20">
+                    <option value="">Օր</option>
+                    {Array.from({ length: 31 }, (_, i) => <option key={i} value={i + 1}>{i + 1}</option>)}
+                  </select>
+                  <select value={expiresAt ? new Date(expiresAt).getMonth() : ''} onChange={(e) => { const d = new Date(expiresAt || Date.now()); d.setMonth(Number(e.target.value)); setExpiresAt(d.toISOString().slice(0,10)); }}
+                    className="h-10 flex-1 rounded-xl border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20">
+                    <option value="">Ամիս</option>
+                    {['Հունվար','Փետրվար','Մարտ','Ապրիլ','Մայիս','Հունիս','Հուլիս','Օգոստոս','Սեպտեմբեր','Հոկտեմբեր','Նոյեմբեր','Դեկտեմբեր'].map((m, i) => <option key={m} value={i}>{m}</option>)}
+                  </select>
+                  <select value={expiresAt ? new Date(expiresAt).getFullYear() : ''} onChange={(e) => { const d = new Date(expiresAt || Date.now()); d.setFullYear(Number(e.target.value)); setExpiresAt(d.toISOString().slice(0,10)); }}
+                    className="h-10 w-20 rounded-xl border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20">
+                    <option value="">Տարի</option>
+                    {Array.from({ length: 5 }, (_, i) => <option key={i} value={2025 + i}>{2025 + i}</option>)}
+                  </select>
                 </div>
               </div>
             </div>
