@@ -5,7 +5,7 @@ import { useQuery, useMutation } from 'convex/react';
 import { ProductCard } from '@/components/cards/ProductCard';
 import { api } from '../../../../../convex/_generated/api';
 import { Id } from '../../../../../convex/_generated/dataModel';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -207,28 +207,7 @@ export default function ProductDetailPage() {
           <div className="mt-6 flex flex-wrap gap-3 sm:gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1"><Truck className="h-4 w-4" /> {'Առաքման վճար'}</span>
             <span className="flex items-center gap-1"><Shield className="h-4 w-4" /> {'Անվտանգ գնումներ'}</span>
-            {settings?.enableShareButtons !== false && (
-              <span className="relative group/share">
-                <button onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({ title: product.name, url: window.location.href }).catch(() => {});
-                  } else {
-                    navigator.clipboard.writeText(window.location.href);
-                    toast.success('Հղումը պատճենվեց');
-                  }
-                }} className="flex items-center gap-1 hover:text-primary transition-colors">
-                  <Share2 className="h-4 w-4" /> {'Կիսվել'}
-                </button>
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/share:flex gap-1 rounded-xl border bg-background p-1.5 shadow-lg">
-                  <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer" className="flex h-7 w-7 items-center justify-center rounded-lg text-blue-600 hover:bg-blue-50" aria-label="Facebook">
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-                  </a>
-                  <a href={`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(product.name)}`} target="_blank" rel="noopener noreferrer" className="flex h-7 w-7 items-center justify-center rounded-lg text-sky-500 hover:bg-sky-50" aria-label="Telegram">
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M21.5 2.5L2.5 10.5L8.5 13.5L11.5 20.5L15.5 14.5L21.5 2.5Z"/><path d="M11.5 20.5L15.5 14.5L8.5 13.5"/></svg>
-                  </a>
-                </div>
-              </span>
-            )}
+            <ShareButton productName={product.name} />
             {settings?.enablePriceAlert !== false && (
               <span className="flex items-center gap-1">
                 <SubscribePriceButton productId={product._id} currentPrice={product.price} />
@@ -295,6 +274,40 @@ function SubscribePriceButton({ productId, currentPrice }: { productId: string; 
         setSent(true); toast.success('Կծանուցենք երբ գինը նվազի');
       }}>OK</Button>
     </div>
+  );
+}
+
+function ShareButton({ productName }: { productName: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+  return (
+    <span className="relative" ref={ref}>
+      <button onClick={() => {
+        if (navigator.share) { navigator.share({ title: productName, url: window.location.href }).catch(() => {}); }
+        else setOpen(!open);
+      }} className="flex items-center gap-1 hover:text-primary transition-colors">
+        <Share2 className="h-4 w-4" /> {'Կիսվել'}
+      </button>
+      {open && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 flex gap-1 rounded-xl border bg-background p-1.5 shadow-lg animate-in zoom-in-95 duration-100">
+          <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" aria-label="Facebook">
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          </a>
+          <a href={`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(productName)}`} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-lg text-sky-500 hover:bg-sky-50 transition-colors" aria-label="Telegram">
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M21.5 2.5L2.5 10.5L8.5 13.5L11.5 20.5L15.5 14.5L21.5 2.5Z"/><path d="M11.5 20.5L15.5 14.5L8.5 13.5"/></svg>
+          </a>
+          <button onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Հղումը պատճենվեց'); setOpen(false); }} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent transition-colors" aria-label="Copy link">
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </button>
+        </div>
+      )}
+    </span>
   );
 }
 
