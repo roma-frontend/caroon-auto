@@ -92,7 +92,7 @@ export default function EditPromotionPage() {
           <div className="flex items-center justify-between rounded-lg border bg-card px-4 py-3">
             <div>
               <Label className="text-sm font-medium">Ակտիվ է</Label>
-              <p className="text-xs text-muted-foreground">Деактивируйте, чтобы скрыть акцию с сайта</p>
+              <p className="text-xs text-muted-foreground">Ապաակտիվացրեք, որպեսզի թաքցնեք ակցիան կայքից</p>
             </div>
             <Switch checked={form.isActive} onCheckedChange={(v) => setForm({ ...form, isActive: v })} />
           </div>
