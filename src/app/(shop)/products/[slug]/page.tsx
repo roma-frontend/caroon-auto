@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
@@ -230,12 +230,12 @@ export default function ProductDetailPage() {
             </Button>
             <div className="flex gap-2 w-full sm:w-auto">
             <Button size="icon" variant="outline" title={isFav ? 'Հեռացնել նախընտրածներից' : 'Ավելացնել նախընտրածներին'}
-              className={isFav ? 'text-red-500 border-red-200 h-10 w-10 sm:h-11 sm:w-11' : 'h-10 w-10 sm:h-11 sm:w-11'}
+              className={isFav ? 'text-red-500 border-red-200 h-10 w-10 sm:h-11 sm:w-11' : 'h-10 w-10 sm:h-11 sm:w-11 hover:text-red-500 hover:border-red-300 hover:bg-red-50 dark:hover:bg-red-950/20'}
               onClick={() => toggleFav({ id: product._id, name: product.name, price: product.price, image: product.images?.[0] ?? null })}>
               <Heart className={`h-4 w-4 sm:h-5 sm:w-5 ${isFav ? 'fill-current' : ''}`} />
             </Button>
             <Button variant="outline" size="icon" title={inCompare ? 'Համեմատման մեջ' : 'Համեմատել'}
-              className={`h-10 w-10 sm:h-11 sm:w-11 ${inCompare ? 'border-primary text-primary' : ''}`}
+              className={`h-10 w-10 sm:h-11 sm:w-11 ${inCompare ? 'border-primary text-primary' : 'hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/20'}`}
               onClick={() => { if (!inCompare) { addCompare({ id: product._id, slug: product.slug, name: product.name, price: product.price, image: product.images?.[0] ?? null, attributes: (product.attributes ?? {}) as Record<string, string> }); toast.success('Ավելացվեց համեմատման'); } }}>
               <GitCompareArrows className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
@@ -304,7 +304,7 @@ function SubscribePriceButton({ productId, currentPrice }: { productId: string; 
 
   if (sent) {
     return (
-      <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-lg border border-green-200 bg-green-50 text-green-600">
+      <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-lg border border-green-200 bg-green-50 text-green-600" title="Դուք հետևում եք գնին">
         <Bell className="h-4 w-4 sm:h-5 sm:w-5 fill-current" />
       </div>
     );
@@ -312,17 +312,17 @@ function SubscribePriceButton({ productId, currentPrice }: { productId: string; 
 
   return (
     <div className="relative" ref={ref}>
-      <Button variant="outline" size="icon" className="h-10 w-10 sm:h-11 sm:w-11" onClick={() => setOpen(true)} aria-label="Ստանալ զեղչ">
+      <Button variant="outline" size="icon" title="Հետևել գնին" aria-label="Հետևել գնին" className="h-10 w-10 sm:h-11 sm:w-11 hover:text-amber-500 hover:border-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/20" onClick={() => setOpen(true)}>
         <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
       </Button>
       {open && (
         <>
           <div className="fixed inset-0 z-40 sm:hidden" onClick={() => setOpen(false)} />
           <div className="absolute bottom-full sm:bottom-auto sm:top-full right-0 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 mb-2 sm:mt-2 z-50 min-w-[240px] rounded-2xl border bg-popover p-3 shadow-xl animate-in zoom-in-95 duration-150 origin-bottom-right sm:origin-top">
-            <p className="text-sm font-semibold mb-1">Следить за ценой</p>
-            <p className="text-xs text-muted-foreground mb-3">Уведомим вас, когда цена снизится</p>
+            <p className="text-sm font-semibold mb-1">Հետևել գնին</p>
+            <p className="text-xs text-muted-foreground mb-3">Կծանուցենք երբ գինը նվազի</p>
             <div className="flex gap-2">
-              <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ваш email" className="h-9 text-xs flex-1" />
+              <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ձեր էլ. հասցեն" className="h-9 text-xs flex-1" />
               <Button size="sm" className="h-9 gap-1 text-xs" disabled={!email} onClick={async () => {
                 await subscribe({ productId: productId as Id<'products'>, email, priceAtSubscribe: currentPrice });
                 setSent(true); setOpen(false); toast.success('Կծանուցենք երբ գինը նվազի');
@@ -355,7 +355,7 @@ function ShareButton({ productName }: { productName: string }) {
 
   return (
     <div className="relative" ref={ref}>
-      <Button variant="outline" size="icon" className="h-10 w-10 sm:h-11 sm:w-11" onClick={share} aria-label="Կիսվել">
+      <Button variant="outline" size="icon" title="Կիսվել" className="h-10 w-10 sm:h-11 sm:w-11 hover:text-sky-500 hover:border-sky-300 hover:bg-sky-50 dark:hover:bg-sky-950/20" onClick={share}>
         <Share2 className="h-4 w-4 sm:h-5 sm:w-5" />
       </Button>
       {open && (
