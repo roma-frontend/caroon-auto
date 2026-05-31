@@ -34,14 +34,36 @@ function CountdownBlock({ endDate }: { endDate: number }) {
 function PromoCard({ promo, index }: { promo: { _id: string; title: string; description?: string; imageUrl?: string; discountPercent?: number; endDate: number; categoryIds?: string[]; productIds?: string[] }; index: number }) {
   return (
     <Link href={`/promotions/${promo._id}`} className="block">
-      <div className="group overflow-hidden rounded-2xl border bg-background transition-all hover:shadow-xl hover:-translate-y-1">
-        <div className="aspect-[2/1] bg-gradient-to-br from-primary/10 to-primary/5 relative overflow-hidden">
-          {promo.imageUrl ? <Image src={promo.imageUrl} alt="" width={400} height={300} sizes="(max-width: 768px) 100vw, 50vw" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground/20"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div>}
-          {promo.discountPercent && <Badge className="absolute left-4 top-4 bg-destructive text-lg px-3 py-1 font-black">-{promo.discountPercent}%</Badge>}
+      <div className="group relative overflow-hidden rounded-2xl border bg-card transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+        {/* Image — shorter and proportional */}
+        <div className="relative aspect-[16/9] sm:aspect-[4/3] overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
+          {promo.imageUrl ? (
+            <>
+              <Image src={promo.imageUrl} alt="" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover transition-transform duration-700 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent" />
+            </>
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <Percent className="h-16 w-16 text-primary/15" strokeWidth={1} />
+            </div>
+          )}
+
+          {/* Discount badge */}
+          {promo.discountPercent && (
+            <div className="absolute left-4 top-4 rounded-xl bg-destructive px-3 py-1.5 text-sm font-black text-white shadow-lg">
+              -{promo.discountPercent}%
+            </div>
+          )}
         </div>
-        <div className="p-6">
-          <h3 className="text-xl font-bold group-hover:text-primary transition-colors">{promo.title}</h3>
-          {promo.description && <p className="mt-2 text-muted-foreground">{promo.description}</p>}
+
+        {/* Text below image */}
+        <div className="p-5">
+          <h3 className="text-lg font-bold group-hover:text-primary transition-colors leading-tight">{promo.title}</h3>
+          {promo.description && <p className="mt-1.5 text-sm text-muted-foreground line-clamp-2">{promo.description}</p>}
+          <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+            <span>Մանրամասներ</span>
+          </div>
         </div>
       </div>
     </Link>
