@@ -7,9 +7,9 @@ export const get = query({
   handler: async (ctx) => {
     const settings = await ctx.db.query('settings').first();
     return settings ?? {
-      storeName: 'AutoParts Armenia',
+      storeName: 'DriveX Armenia',
       phone: '+374 XX XXX XXX',
-      email: 'info@autoparts.am',
+      email: 'info@drivex.am',
       address: 'Երևան, Հայաստան',
       whatsapp: '',
       telegram: '',
@@ -40,7 +40,7 @@ export const get = query({
       bankAccount: '1570000000000000',
       bankCode: 'AMRNAM22',
       cardNumber: '',
-      paymentNote: 'Հաշվի համար: 1570000000000000 • Ameriabank • AutoParts LLC',
+      paymentNote: 'Հաշվի համար: 1570000000000000 • Ameriabank • DriveX LLC',
       gaId: '',
       fbPixelId: '',
       enableCookieConsent: false,
@@ -179,7 +179,7 @@ export const save = mutation({
       await ctx.db.patch(existing._id, data);
     } else {
       await ctx.db.insert('settings', {
-        storeName: args.storeName ?? 'AutoParts Armenia',
+        storeName: args.storeName ?? 'DriveX Armenia',
         phone: args.phone ?? '',
         email: args.email ?? '',
         address: args.address ?? '',

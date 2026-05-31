@@ -6,6 +6,7 @@ import { getRoleSuggestions, type UserRole } from '@/lib/aiAssistant';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sparkles, Send, X, Bot, User, Loader2 } from 'lucide-react';
+import { SITE } from '@/lib/constants';
 
 type Message = { id: string; role: 'user' | 'assistant'; content: string };
 
@@ -63,7 +64,7 @@ export function AIChatWidget() {
       {/* Header */}
       <div className="flex items-center gap-3 border-b px-4 py-3">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10"><Bot className="h-4 w-4 text-primary" /></div>
-        <div className="flex-1"><p className="text-sm font-semibold">AutoParts AI</p><p className="text-[10px] text-muted-foreground">Ավտոպահեստամասերի օգնական</p></div>
+        <div className="flex-1"><p className="text-sm font-semibold">{SITE.name} AI</p><p className="text-[10px] text-muted-foreground">Ավտոպահեստամասերի օգնական</p></div>
         <button onClick={() => setOpen(false)} className="rounded-lg p-1.5 hover:bg-muted"><X className="h-4 w-4" /></button>
       </div>
 

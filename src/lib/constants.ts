@@ -1,7 +1,7 @@
 /** Site-wide Armenian text constants */
 export const SITE = {
-  name: process.env.NEXT_PUBLIC_STORE_NAME || 'AutoParts',
-  fullName: process.env.NEXT_PUBLIC_STORE_FULL_NAME || 'AutoParts',
+  name: process.env.NEXT_PUBLIC_STORE_NAME || 'DriveX',
+  fullName: process.env.NEXT_PUBLIC_STORE_FULL_NAME || 'DriveX',
   tagline: 'Ձեր ավտոպահեստամասերի հառթակը Հայաստանում',
   get heroDesc() { return this.name + '-ը Հայաստանի առաջատար ավտոպահեստամասերի առցանց խանութն է։'; },
   get description() { return this.name + '-ը Հայաստանի առաջատար ավտոպահեստամասերի առցանց խանութն է։'; },
@@ -89,7 +89,7 @@ export const FOOTER = {
 };
 
 export const HOME = {
-  name: process.env.NEXT_PUBLIC_STORE_NAME || 'AutoParts',
+  name: process.env.NEXT_PUBLIC_STORE_NAME || 'DriveX',
   heroBadge: 'Նորամուծություն',
   heroTitle: 'Ավտոմասեր ձեր մեքենայի համար',
   heroHighlight: 'Նորամուծություն',

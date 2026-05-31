@@ -113,8 +113,8 @@ const nextConfig = {
       // Redirect www to non-www (handled by Vercel, but good to have)
       {
         source: '/:path*',
-        has: [{ type: 'host', value: 'www.autoparts.am' }],
-        destination: 'https://autoparts.am/:path*',
+        has: [{ type: 'host', value: 'www.drivex.am' }],
+        destination: 'https://drivex.am/:path*',
         permanent: true,
       },
     ];

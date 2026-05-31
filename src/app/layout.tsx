@@ -37,7 +37,7 @@ const notoSansArmenian = Noto_Sans_Armenian({
   fallback: ['sans-serif'],
 });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://autoparts.am';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://drivex.am';
 
 export const viewport: Viewport = {
   themeColor: [
@@ -73,8 +73,8 @@ export const metadata: Metadata = {
     'ավտոմեքենայի պարագաներ',
     'auto parts Armenia',
     'ավտոպահեստ Երևան',
-    'autoparts',
-    'autoparts.am',
+    'DriveX',
+    'drivex.am',
   ],
 
   authors: [{ name: SITE.fullName, url: APP_URL }],
@@ -95,7 +95,7 @@ export const metadata: Metadata = {
     locale: 'hy_AM',
     url: APP_URL,
     siteName: SITE.fullName,
-    title: 'AutoParts Armenia | Ավտոպահեստամասերի առցանց խանութ',
+    title: 'DriveX Armenia | Ավտոպահեստամասերի առցանց խանութ',
     description:
       'Ավտոպահեստամասերի առցանց խանութ Հայաստանում։ Գնեք բարձրորակ ավտոպահեստամասեր ձեր մեքենայի համար՝ մատչելի գներով և արագ առաքմամբ։',
     images: [
@@ -103,7 +103,7 @@ export const metadata: Metadata = {
         url: '/og-image.svg',
         width: 1200,
         height: 630,
-        alt: 'AutoParts Armenia — Ավտոպահեստամասերի առցանց խանութ',
+        alt: 'DriveX Armenia — Ավտոպահեստամասերի առցանց խանութ',
         type: 'image/svg+xml',
       },
     ],
@@ -111,7 +111,7 @@ export const metadata: Metadata = {
 
   twitter: {
     card: 'summary_large_image',
-    title: 'AutoParts Armenia | Ավտոպահեստամասերի առցանց խանութ',
+    title: 'DriveX Armenia | Ավտոպահեստամասերի առցանց խանութ',
     description: 'Ավտոպահեստամասերի առցանց խանութ Հայաստանում',
     images: ['/og-image.svg'],
   },

@@ -270,7 +270,7 @@ export default function AdminSettingsPage() {
               </div>
               <div>
                 <Label>Facebook</Label>
-                <Input value={form.facebook ?? ''} onChange={(e) => set('facebook', e.target.value)} placeholder="autoparts.am" className="h-10" />
+                <Input value={form.facebook ?? ''} onChange={(e) => set('facebook', e.target.value)} placeholder="drivex.am" className="h-10" />
               </div>
             </CardContent>
           </Card>

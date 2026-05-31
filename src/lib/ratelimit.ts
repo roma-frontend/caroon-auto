@@ -10,7 +10,7 @@ function getRatelimit(): Ratelimit | null {
   _ratelimit = new Ratelimit({
     redis: Redis.fromEnv(),
     limiter: Ratelimit.slidingWindow(5, '60 s'),
-    prefix: 'autoparts:rl',
+    prefix: 'DriveX:rl',
   });
   return _ratelimit;
 }
