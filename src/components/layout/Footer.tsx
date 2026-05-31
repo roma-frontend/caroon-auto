@@ -8,12 +8,13 @@ import { SITE, NAV, FOOTER } from '@/lib/constants';
 import { useSettings } from '@/hooks/useSettings';
 import { useStoreName } from '@/hooks/useStoreName';
 import { NewsletterForm } from '@/components/NewsletterForm';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
-const SOCIAL_CONFIG: { key: string; label: string; href: string; icon: string }[] = [
-  { key: 'instagram', label: 'Instagram', href: 'https://instagram.com/', icon: 'instagram' },
-  { key: 'facebook', label: 'Facebook', href: 'https://facebook.com/', icon: 'facebook' },
-  { key: 'telegram', label: 'Telegram', href: 'https://t.me/', icon: 'telegram' },
-  { key: 'whatsapp', label: 'WhatsApp', href: 'https://wa.me/', icon: 'whatsapp' },
+const SOCIAL_CONFIG: { key: string; label: string; href: string; icon: string; hover: string }[] = [
+  { key: 'instagram', label: 'Instagram', href: 'https://instagram.com/', icon: 'instagram', hover: 'hover:text-[#E4405F] hover:border-[#E4405F]/40 hover:shadow-[#E4405F]/20' },
+  { key: 'facebook', label: 'Facebook', href: 'https://facebook.com/', icon: 'facebook', hover: 'hover:text-[#1877F2] hover:border-[#1877F2]/40 hover:shadow-[#1877F2]/20' },
+  { key: 'telegram', label: 'Telegram', href: 'https://t.me/', icon: 'telegram', hover: 'hover:text-[#0088cc] hover:border-[#0088cc]/40 hover:shadow-[#0088cc]/20' },
+  { key: 'whatsapp', label: 'WhatsApp', href: 'https://wa.me/', icon: 'whatsapp', hover: 'hover:text-[#25D366] hover:border-[#25D366]/40 hover:shadow-[#25D366]/20' },
 ];
 
 function socialUrl(setting: string | undefined, fallback: string): string {
@@ -76,10 +77,15 @@ export function Footer() {
                 const val = settings ? (settings as Record<string, unknown>)[s.key] as string | undefined : undefined;
                 const url = socialUrl(val, s.href);
                 return (
-                  <Link key={s.key} href={url} target="_blank" rel="noopener noreferrer" aria-label={s.label}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl border bg-background text-muted-foreground transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:text-primary hover:shadow-md">
-                    <SocialIcon icon={s.icon} />
-                  </Link>
+                  <Tooltip key={s.key}>
+                    <TooltipTrigger>
+                      <Link href={url} target="_blank" rel="noopener noreferrer" aria-label={s.label}
+                        className={`flex h-9 w-9 items-center justify-center rounded-xl border bg-background text-muted-foreground transition-all hover:-translate-y-0.5 hover:shadow-md ${s.hover}`}>
+                        <SocialIcon icon={s.icon} />
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>{s.label}</TooltipContent>
+                  </Tooltip>
                 );
               })}
             </div>
