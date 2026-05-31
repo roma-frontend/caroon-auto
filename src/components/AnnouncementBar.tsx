@@ -6,6 +6,12 @@ import Link from 'next/link';
 
 type AnnouncementStyle = 'info' | 'sale' | 'promo' | 'dark' | 'custom';
 
+function hashStr(s: string): string {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+  return Math.abs(h).toString(36);
+}
+
 interface AnnouncementConfig {
   text?: string;
   type?: AnnouncementStyle;
@@ -28,31 +34,21 @@ function parseAnnouncement(raw: string): AnnouncementConfig {
   return { text: raw, type: 'info', _raw: raw };
 }
 
-const STYLES: Record<AnnouncementStyle, { bg: string; text: string; glow: string }> = {
+const STYLES: Record<AnnouncementStyle, { className: string }> = {
   info: {
-    bg: 'bg-gradient-to-r from-primary/90 via-primary to-primary/90',
-    text: 'text-primary-foreground',
-    glow: 'bg-primary/20',
+    className: 'bg-muted/80 text-foreground border-b border-border',
   },
   sale: {
-    bg: 'bg-gradient-to-r from-rose-600 via-red-500 to-orange-500',
-    text: 'text-white',
-    glow: 'bg-rose-400/20',
+    className: 'bg-destructive/90 text-white border-b border-destructive',
   },
   promo: {
-    bg: 'bg-gradient-to-r from-violet-600 via-purple-500 to-fuchsia-500',
-    text: 'text-white',
-    glow: 'bg-violet-400/20',
+    className: 'bg-primary/90 text-primary-foreground border-b border-primary',
   },
   dark: {
-    bg: 'bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900',
-    text: 'text-neutral-100',
-    glow: 'bg-white/5',
+    className: 'bg-foreground text-background border-b border-foreground',
   },
   custom: {
-    bg: 'bg-gradient-to-r from-primary/90 via-primary to-primary/90',
-    text: 'text-primary-foreground',
-    glow: 'bg-primary/20',
+    className: 'bg-muted/80 text-foreground border-b border-border',
   },
 };
 
@@ -80,7 +76,9 @@ export function AnnouncementBar({ raw, phone }: { raw?: string | null; phone?: s
 
   useEffect(() => {
     if (raw) {
-      const key = `announcement_dismissed_${btoa(raw).slice(0, 32)}`;
+      let hash = 0;
+      for (let i = 0; i < raw.length; i++) hash = ((hash << 5) - hash + raw.charCodeAt(i)) | 0;
+      const key = `announcement_dismissed_${Math.abs(hash).toString(36)}`;
       setDismissed(localStorage.getItem(key) === '1');
     }
   }, [raw]);
@@ -88,17 +86,19 @@ export function AnnouncementBar({ raw, phone }: { raw?: string | null; phone?: s
   if (!raw || dismissed) return null;
 
   const config = parseAnnouncement(raw);
-  const style = STYLES[config.type ?? 'info'];
+  const styleClass = STYLES[config.type ?? 'info'].className;
   const Icon = config.icon ? ICONS[config.icon] : null;
 
   const dismiss = () => {
-    const key = `announcement_dismissed_${btoa(raw).slice(0, 32)}`;
+    let hash = 0;
+    for (let i = 0; i < raw.length; i++) hash = ((hash << 5) - hash + raw.charCodeAt(i)) | 0;
+    const key = `announcement_dismissed_${Math.abs(hash).toString(36)}`;
     localStorage.setItem(key, '1');
     setDismissed(true);
   };
 
   const content = (
-    <div className={`relative overflow-hidden ${style.bg} ${style.text}`}>
+    <div className={`relative overflow-hidden ${styleClass}`}>
       <ShinyOverlay />
 
       <div className="mx-auto flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 text-center text-[11px] sm:text-xs font-medium leading-tight"

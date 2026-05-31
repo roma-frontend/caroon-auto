@@ -32,6 +32,7 @@ import {
 
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function AdminSettingsPage() {
   const router = useRouter();
@@ -65,7 +66,7 @@ export default function AdminSettingsPage() {
       icon: (form._ab_icon as string) || undefined,
       link: (form._ab_link as string) || undefined,
       linkText: (form._ab_linkText as string) || undefined,
-      dismissible: form._ab_dismiss !== false,
+      dismissible: form._ab_dismiss !== 0,
     });
     try {
       await save({ sessionToken: sessionToken!, announcementBar: json } as Parameters<typeof save>[0]);
@@ -283,7 +284,7 @@ export default function AdminSettingsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-xs text-muted-foreground">JSON will be generated from the fields below and saved to announcement field</p>
+              <p className="text-xs text-muted-foreground">JSON-ը կգեներացվի ստորև նշված դաշտերից և կպահպանվի ՀԱՅՏԱՐԱՐՈՒԹՅՈԻՆ դաշտում</p>
               <div>
                 <Label>{'Վերին գոտու տեքստ'}</Label>
                 <Input value={form._ab_text ?? ''} onChange={(e) => set('_ab_text', e.target.value)} className="h-10" placeholder={'Անվճար առաքում 20,000֏-ից...'} />
@@ -292,27 +293,29 @@ export default function AdminSettingsPage() {
                 <div>
                   <Label>{'Ոճ'}</Label>
                   <select value={form._ab_type as string || 'info'} onChange={(e) => set('_ab_type', e.target.value)}
-                    className="flex h-10 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm">
-                    <option value="info">Info (կապույտ)</option>
-                    <option value="sale">Sale (կարմիր)</option>
-                    <option value="promo">Promo (մանուշակագույն)</option>
-                    <option value="dark">Dark (սև)</option>
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground">
+                    <option value="info" className="bg-background text-foreground">Տեղեկատվություն</option>
+                    <option value="sale" className="bg-background text-foreground">Վաճառք</option>
+                    <option value="promo" className="bg-background text-foreground">Պրոմո</option>
+                    <option value="dark" className="bg-background text-foreground">Մուգ</option>
                   </select>
                 </div>
                 <div>
                   <Label>{'Պատկերակ'}</Label>
                   <select value={form._ab_icon as string || ''} onChange={(e) => set('_ab_icon', e.target.value)}
-                    className="flex h-10 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm">
-                    <option value="">—</option>
-                    <option value="sparkles">✨ Sparkles</option>
-                    <option value="zap">⚡ Zap</option>
-                    <option value="truck">🚚 Truck</option>
-                    <option value="clock">⏰ Clock</option>
-                    <option value="gift">🎁 Gift</option>
-                    <option value="percent">% Percent</option>
-                    <option value="bell">🔔 Bell</option>
-                    <option value="star">⭐ Star</option>
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground">
+                    <option value="" className="bg-background text-foreground">—</option>
+                    <option value="sparkles" className="bg-background text-foreground">Sparkles</option>
+                    <option value="zap" className="bg-background text-foreground">Zap</option>
+                    <option value="truck" className="bg-background text-foreground">Truck</option>
+                    <option value="clock" className="bg-background text-foreground">Clock</option>
+                    <option value="gift" className="bg-background text-foreground">Gift</option>
+                    <option value="percent" className="bg-background text-foreground">Percent</option>
+                    <option value="bell" className="bg-background text-foreground">Bell</option>
+                    <option value="star" className="bg-background text-foreground">Star</option>
                   </select>
+                </div>
+                <div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -326,7 +329,7 @@ export default function AdminSettingsPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="ab_dismiss" checked={form._ab_dismiss !== false} onChange={(e) => set('_ab_dismiss', e.target.checked)} className="h-4 w-4 rounded border-gray-300" />
+                <input type="checkbox" id="ab_dismiss" checked={form._ab_dismiss !== 0} onChange={(e) => set('_ab_dismiss', e.target.checked ? 1 : 0)} className="h-4 w-4 rounded border border-input bg-transparent" />
                 <Label htmlFor="ab_dismiss" className="text-sm font-normal">{'Հնարավորություն տալ փակելու'}</Label>
               </div>
               <Button onClick={saveAnnouncement} size="sm" className="gap-1.5 text-xs">
