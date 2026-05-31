@@ -62,6 +62,14 @@ export const listPaginated = query({
         const pa = p.attributes as Record<string, unknown>;
         for (const [key, val] of Object.entries(attrs)) {
           if (val === null || val === undefined || val === '') continue;
+          // Special handling for carBrand — also check vehicleCompat
+          if (key === 'carBrand' && typeof val === 'string') {
+            const compat = pa.vehicleCompat as Array<{ brand: string }> | undefined;
+            if (compat && compat.length > 0) {
+              if (!compat.some((c) => c.brand === val)) return false;
+              continue;
+            }
+          }
           if (Array.isArray(val)) {
             if (val.length === 0) continue;
             const pVal = pa[key];
@@ -123,6 +131,13 @@ export const list = query({
   },
 });
 
+export const getById = query({
+  args: { id: v.id('products') },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.id);
+  },
+});
+
 export const getBySlug = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {
@@ -161,6 +176,7 @@ export const create = mutation({
     compareAtPrice: v.optional(v.number()), categoryId: v.id('categories'),
     images: v.array(v.string()), sku: v.optional(v.string()), stock: v.number(),
     isActive: v.boolean(), isFeatured: v.optional(v.boolean()),
+    showInPromotions: v.optional(v.boolean()),
     attributes: v.optional(v.any()),
     seoTitle: v.optional(v.string()), seoDescription: v.optional(v.string()),
   },
@@ -168,6 +184,9 @@ export const create = mutation({
     await getAdminCaller(ctx, args.sessionToken);
     const { sessionToken: _, ...data } = args;
     const now = Date.now();
+    if (data.showInPromotions === undefined && data.compareAtPrice && data.compareAtPrice > data.price) {
+      data.showInPromotions = true;
+    }
     return await ctx.db.insert('products', { ...data, createdAt: now, updatedAt: now });
   },
 });
@@ -180,12 +199,14 @@ export const update = mutation({
     compareAtPrice: v.optional(v.number()), categoryId: v.optional(v.id('categories')),
     images: v.optional(v.array(v.string())), sku: v.optional(v.string()),
     stock: v.optional(v.number()), isActive: v.optional(v.boolean()),
-    isFeatured: v.optional(v.boolean()), attributes: v.optional(v.any()),
+    isFeatured: v.optional(v.boolean()),
+    showInPromotions: v.optional(v.boolean()),
+    attributes: v.optional(v.any()),
     seoTitle: v.optional(v.string()), seoDescription: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     await getAdminCaller(ctx, args.sessionToken);
-    const { id, sessionToken: _, stock, price, ...patch } = args;
+    const { id, sessionToken: _, stock, price, compareAtPrice, showInPromotions, ...rest } = args;
     const old = await ctx.db.get(id);
     if (stock !== undefined && old && old.stock <= 0 && stock > 0) {
       await ctx.scheduler.runAfter(0, api.backInStock.notifySubscribers, { productId: id, productName: old.name });
@@ -193,7 +214,26 @@ export const update = mutation({
     if (price !== undefined && old && price < old.price) {
       await ctx.scheduler.runAfter(0, api.priceAlerts.checkAndNotify, { productId: id, newPrice: price });
     }
-    await ctx.db.patch(id, { ...patch, ...(stock !== undefined ? { stock } : {}), ...(price !== undefined ? { price } : {}), updatedAt: Date.now() });
+    const patch: Record<string, unknown> = { ...rest };
+    if (compareAtPrice !== undefined) {
+      const effectivePrice = price ?? old?.price ?? 0;
+      if (compareAtPrice > 0) {
+        patch.compareAtPrice = compareAtPrice;
+        if (showInPromotions === undefined) {
+          patch.showInPromotions = compareAtPrice > effectivePrice;
+        }
+      } else {
+        patch.compareAtPrice = undefined;
+        if (showInPromotions === undefined) patch.showInPromotions = false;
+      }
+    }
+    if (showInPromotions !== undefined) {
+      patch.showInPromotions = showInPromotions;
+    }
+    if (stock !== undefined) patch.stock = stock;
+    if (price !== undefined) patch.price = price;
+    patch.updatedAt = Date.now();
+    await ctx.db.patch(id, patch);
   },
 });
 

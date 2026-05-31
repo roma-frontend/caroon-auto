@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -112,7 +112,7 @@ export default function HomePage() {
                       <p className="text-xs font-semibold text-white line-clamp-2 drop-shadow-lg">{p.name}</p>
                       <p className="mt-1 text-sm font-bold text-white drop-shadow-lg">{formatPrice(p.price)}</p>
                     </div>
-                    {p.isFeatured && <Badge className="absolute left-2 top-2 px-2 py-0.5 text-[10px] font-bold" variant="destructive">Թոփ</Badge>}
+                    {p.isFeatured && <Badge className="absolute left-2 top-2 px-2 py-0.5 text-[10px] font-bold group-hover:bg-white group-hover:text-black" variant="destructive">Թոփ</Badge>}
                   </Link>
                 ))}
               </div>
@@ -180,7 +180,7 @@ export default function HomePage() {
               {featured === undefined
                 ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="animate-pulse rounded-xl bg-muted" style={{ height: '16rem' }} />)
                 : featured.slice(0, 4).map((p, i) => (
-                    <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} rating={p.rating} reviewCount={p.reviewCount} carBrand={p.attributes?.carBrand} index={i} isHit={p.isFeatured} />
+                    <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} rating={p.rating} reviewCount={p.reviewCount} carBrand={p.attributes?.carBrand} attributes={p.attributes} index={i} isHit={p.isFeatured} />
                   ))}
             </div>
             <div className="mt-8 flex justify-center">

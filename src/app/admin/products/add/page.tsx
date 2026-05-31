@@ -13,9 +13,11 @@ import { ImagePlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Id } from '../../../../../convex/_generated/dataModel';
 import { useUpload } from '@/hooks/useUpload';
-import { useRef } from 'react';
+import { useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { useAuth } from '@/store/auth';
+import { VehicleCompatSelector } from '@/components/admin/VehicleCompatSelector';
+import type { VehicleCompatEntry } from '@/components/admin/VehicleCompatSelector';
 
 function StepBasicInfo() {
   const { data, update } = useWizardData();
@@ -29,7 +31,7 @@ function StepBasicInfo() {
       <div><Label>Slug</Label><Input value={(data.slug as string) ?? ''} onChange={(e) => update('slug', e.target.value)} placeholder="Ապրանքի սլագ" className="h-11 font-mono" /></div>
       <div>
         <Label>Կատեգորիա *</Label>
-        <Select value={(data.categoryId as string) ?? ''} onValueChange={(v: string | null) => update('categoryId', v)}>
+        <Select value={(data.categoryId as string) ?? ''} onValueChange={(v) => update('categoryId', v != null ? String(v) : null)}>
           <SelectTrigger className="h-11"><SelectValue placeholder="Կատեգորիա" /></SelectTrigger>
           <SelectContent>{categories?.map((c) => <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>)}</SelectContent>
         </Select>
@@ -57,11 +59,34 @@ function StepBasicInfo() {
 
 function StepPricing() {
   const { data, update } = useWizardData();
+
+  const price = Number(data.price) || 0;
+  const compareAtPrice = Number(data.compareAtPrice) || 0;
+  const discountPct = compareAtPrice > price ? Math.round((1 - price / compareAtPrice) * 100) : 0;
+
+  const setDiscountPct = (pct: number) => {
+    if (pct > 0 && price > 0) {
+      update('compareAtPrice', Math.round(price / (1 - pct / 100)));
+    } else {
+      update('compareAtPrice', '');
+    }
+  };
+
+  const setPrice = (val: string) => {
+    update('price', val);
+    const newPrice = Number(val) || 0;
+    const oldDiscount = Number(data.discountPercent) || 0;
+    if (oldDiscount > 0 && newPrice > 0) {
+      update('compareAtPrice', Math.round(newPrice / (1 - oldDiscount / 100)));
+    }
+  };
+
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-4">
-        <div><Label>Գին (֏) *</Label><Input type="number" value={(data.price as string) ?? ''} onChange={(e) => update('price', e.target.value)} placeholder="10000" className="h-11" /></div>
+      <div className="grid grid-cols-3 gap-4">
+        <div><Label>Գին (֏) *</Label><Input type="number" value={(data.price as string) ?? ''} onChange={(e) => setPrice(e.target.value)} placeholder="10000" className="h-11" /></div>
         <div><Label>Համեմատական գին (֏)</Label><Input type="number" value={(data.compareAtPrice as string) ?? ''} onChange={(e) => update('compareAtPrice', e.target.value)} placeholder="15000" className="h-11" /></div>
+        <div><Label>Զեղչ %</Label><Input type="number" value={discountPct || ''} onChange={(e) => setDiscountPct(Number(e.target.value))} placeholder="20" className="h-11" min={0} max={100} /></div>
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div><Label>SKU</Label><Input value={(data.sku as string) ?? ''} onChange={(e) => update('sku', e.target.value)} placeholder="ART-001" className="h-11" /></div>
@@ -79,6 +104,24 @@ function StepSEO() {
       <div><Label>SEO նկարագրություն</Label><Textarea value={(data.seoDescription as string) ?? ''} onChange={(e) => update('seoDescription', e.target.value)} rows={4} /></div>
     </div>
   );
+}
+
+function StepVehicle() {
+  const { data, update } = useWizardData();
+  const attrs = ((data.attributes as Record<string, unknown>) ?? {});
+  const compat = (attrs.vehicleCompat as VehicleCompatEntry[]) ?? [];
+
+  const handleChange = useCallback((newCompat: VehicleCompatEntry[]) => {
+    const next: Record<string, unknown> = { ...attrs };
+    if (newCompat.length > 0) {
+      next.vehicleCompat = newCompat;
+    } else {
+      delete next.vehicleCompat;
+    }
+    update('attributes', next);
+  }, [attrs, update]);
+
+  return <VehicleCompatSelector value={compat} onChange={handleChange} />;
 }
 
 function StepAttributes() {
@@ -103,12 +146,12 @@ function StepAttributes() {
         <div key={def._id}>
           <Label>{def.name} {def.unit ? `(${def.unit})` : ''}</Label>
           {(def.type === 'select' || def.type === 'multiselect') && def.options ? (
-            <Select value={attrs[def.slug] ?? ''} onValueChange={(v: string | null) => setAttr(def.slug, v ?? '')}>
+            <Select value={attrs[def.slug] ?? ''} onValueChange={(v) => setAttr(def.slug, v != null ? String(v) : '')}>
               <SelectTrigger className="h-11"><SelectValue placeholder={def.name} /></SelectTrigger>
               <SelectContent>{def.options.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}</SelectContent>
             </Select>
           ) : def.type === 'boolean' ? (
-            <Select value={attrs[def.slug] ?? ''} onValueChange={(v: string | null) => setAttr(def.slug, v ?? '')}>
+            <Select value={attrs[def.slug] ?? ''} onValueChange={(v) => setAttr(def.slug, v != null ? String(v) : '')}>
               <SelectTrigger className="h-11"><SelectValue placeholder={def.name} /></SelectTrigger>
               <SelectContent><SelectItem value="true">Այո</SelectItem><SelectItem value="false">Ոչ</SelectItem></SelectContent>
             </Select>
@@ -130,6 +173,7 @@ export default function AddProductPage() {
     { id: 'basic', title: 'Սկզբնական տվյալներ', content: <StepBasicInfo />, validation: (d) => !!(d.name && d.slug && d.categoryId) },
     { id: 'pricing', title: 'Գնային տվյալներ', content: <StepPricing />, validation: (d) => !!(d.price && d.stock) },
     { id: 'attributes', title: 'Բնութագրեր', content: <StepAttributes /> },
+    { id: 'vehicle', title: 'Совместимость', content: <StepVehicle /> },
     { id: 'seo', title: 'SEO', content: <StepSEO /> },
   ];
 
@@ -147,7 +191,7 @@ export default function AddProductPage() {
       images: (data.images as string[]) ?? [],
       isActive: true,
       isFeatured: false,
-      attributes: (data.attributes as Record<string, string>) || undefined,
+      attributes: (data.attributes as Record<string, unknown>) || undefined,
     });
     toast.success('Ապրանքը հաջողությամբ ստեղծվեց');
     router.push('/admin/products');

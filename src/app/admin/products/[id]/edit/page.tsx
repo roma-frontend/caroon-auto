@@ -17,6 +17,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/store/auth';
+import { VehicleCompatSelector } from '@/components/admin/VehicleCompatSelector';
+import type { VehicleCompatEntry } from '@/components/admin/VehicleCompatSelector';
 
 export default function EditProductPage() {
   const params = useParams();
@@ -27,24 +29,24 @@ export default function EditProductPage() {
   const { upload, uploading } = useUpload();
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const [form, setForm] = useState<{ name?: string; price?: number; stock?: number; description?: string; sku?: string; attributes?: Record<string, string> }>({});
+  const [form, setForm] = useState<{ name?: string; price?: number; stock?: number; description?: string; sku?: string; compareAtPrice?: number; discountPercent?: number; attributes?: Record<string, unknown> }>({});
   const [images, setImages] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
   // Load product data
-  const prod = useQuery(api.products.list, {});
-  const currentProduct = prod?.find((p) => p._id === productId);
+  const currentProduct = useQuery(api.products.getById, { id: productId });
 
   // Init form when product loads
   if (currentProduct && !form.name) {
-    setForm({ name: currentProduct.name, price: currentProduct.price, stock: currentProduct.stock, description: currentProduct.description, sku: currentProduct.sku, attributes: (currentProduct.attributes as Record<string, string>) ?? {} });
+    setForm({ name: currentProduct.name, price: currentProduct.price, compareAtPrice: currentProduct.compareAtPrice, stock: currentProduct.stock, description: currentProduct.description, sku: currentProduct.sku, attributes: (currentProduct.attributes as Record<string, string>) ?? {} });
     setImages(currentProduct.images ?? []);
   }
 
   const filterDefs = useQuery(api.filters.getByCategory, currentProduct ? { categoryId: currentProduct.categoryId } : 'skip');
 
   const setAttr = (slug: string, value: string) => {
-    const next = { ...(form.attributes ?? {}), [slug]: value };
+    const base = form.attributes ?? {};
+    const next: Record<string, unknown> = { ...base, [slug]: value };
     if (!value) delete next[slug];
     setForm({ ...form, attributes: next });
   };
@@ -69,6 +71,7 @@ export default function EditProductPage() {
         id: productId,
         name: form.name,
         price: Number(form.price),
+        compareAtPrice: form.discountPercent === 0 ? 0 : (form.compareAtPrice || undefined),
         stock: Number(form.stock),
         description: form.description,
         sku: form.sku,
@@ -127,10 +130,23 @@ export default function EditProductPage() {
           <CardHeader><CardTitle>Ապրանքի տվյալներ</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div><Label>Անվանում</Label><Input value={form.name ?? ''} onChange={(e) => setForm({ ...form, name: e.target.value })} className="h-11" /></div>
-            <div className="grid grid-cols-3 gap-4">
-              <div><Label>Գին (֏)</Label><Input type="number" value={form.price ?? ''} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} className="h-11" /></div>
+            <div className="grid grid-cols-4 gap-4">
+              <div><Label>Գին (֏)</Label><Input type="number" value={form.price ?? ''} onChange={(e) => {
+                const p = Number(e.target.value);
+                const d = form.discountPercent ?? 0;
+                setForm({ ...form, price: p, compareAtPrice: d > 0 && p > 0 ? Math.round(p / (1 - d / 100)) : form.compareAtPrice });
+              }} className="h-11" /></div>
+              <div><Label>Համեմատ. գին (֏)</Label><Input type="number" value={form.compareAtPrice ?? ''} onChange={(e) => {
+                const cp = Number(e.target.value);
+                const p = form.price ?? 0;
+                setForm({ ...form, compareAtPrice: cp, discountPercent: cp > p ? Math.round((1 - p / cp) * 100) : 0 });
+              }} className="h-11" /></div>
+              <div><Label>Զեղչ %</Label><Input type="number" value={form.discountPercent ?? ''} onChange={(e) => {
+                const d = Number(e.target.value);
+                const p = form.price ?? 0;
+                setForm({ ...form, discountPercent: d, compareAtPrice: d > 0 && p > 0 ? Math.round(p / (1 - d / 100)) : undefined });
+              }} className="h-11" min={0} max={100} /></div>
               <div><Label>Պահեստ</Label><Input type="number" value={form.stock ?? ''} onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })} className="h-11" /></div>
-              <div><Label>SKU</Label><Input value={form.sku ?? ''} onChange={(e) => setForm({ ...form, sku: e.target.value })} className="h-11" /></div>
             </div>
             <div><Label>Նկարագրություն</Label><Textarea value={form.description ?? ''} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} /></div>
           </CardContent>
@@ -145,23 +161,42 @@ export default function EditProductPage() {
                 <div key={def._id}>
                   <Label>{def.name} {def.unit ? `(${def.unit})` : ''}</Label>
                   {(def.type === 'select' || def.type === 'multiselect') && def.options ? (
-                    <Select value={(form.attributes ?? {})[def.slug] ?? ''} onValueChange={(v: string | null) => setAttr(def.slug, v ?? '')}>
+                    <Select value={((form.attributes ?? {})[def.slug] as string) ?? ''} onValueChange={(v) => setAttr(def.slug, v != null ? String(v) : '')}>
                       <SelectTrigger className="h-11"><SelectValue placeholder={def.name} /></SelectTrigger>
                       <SelectContent>{def.options.map((opt) => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}</SelectContent>
                     </Select>
                   ) : def.type === 'boolean' ? (
-                    <Select value={(form.attributes ?? {})[def.slug] ?? ''} onValueChange={(v: string | null) => setAttr(def.slug, v ?? '')}>
+                    <Select value={((form.attributes ?? {})[def.slug] as string) ?? ''} onValueChange={(v) => setAttr(def.slug, v != null ? String(v) : '')}>
                       <SelectTrigger className="h-11"><SelectValue placeholder={def.name} /></SelectTrigger>
                       <SelectContent><SelectItem value="true">{'այո'}</SelectItem><SelectItem value="false">{'ոչ'}</SelectItem></SelectContent>
                     </Select>
                   ) : (
-                    <Input value={(form.attributes ?? {})[def.slug] ?? ''} onChange={(e) => setAttr(def.slug, e.target.value)} placeholder={def.name} className="h-11" />
+                    <Input value={((form.attributes ?? {})[def.slug] as string) ?? ''} onChange={(e) => setAttr(def.slug, e.target.value)} placeholder={def.name} className="h-11" />
                   )}
                 </div>
               ))}
             </CardContent>
           </Card>
         )}
+
+        {/* Vehicle compatibility */}
+        <Card>
+          <CardHeader><CardTitle>Համապատասխանություն ավտոմեքենայի հետ</CardTitle></CardHeader>
+          <CardContent>
+            <VehicleCompatSelector
+              value={((form.attributes ?? {}).vehicleCompat as VehicleCompatEntry[]) ?? []}
+              onChange={(newCompat) => {
+                const base = form.attributes ?? {};
+                if (newCompat.length > 0) {
+                  setForm({ ...form, attributes: { ...base, vehicleCompat: newCompat } });
+                } else {
+                  const { vehicleCompat: _, ...rest } = base as Record<string, unknown>;
+                  setForm({ ...form, attributes: Object.keys(rest).length > 0 ? rest : undefined });
+                }
+              }}
+            />
+          </CardContent>
+        </Card>
 
         <Button onClick={handleSave} disabled={saving} size="lg" className="gap-2">
           <Save className="h-4 w-4" /> {saving ? 'Թարմացվում է...' : 'Թարմացնել'}

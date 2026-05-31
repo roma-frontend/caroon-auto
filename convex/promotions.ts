@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
 import { getAdminCaller } from './lib/auth';
+import { api } from './_generated/api';
 
 export const list = query({
   args: {},
@@ -15,6 +16,16 @@ export const active = query({
     const now = Date.now();
     const all = await ctx.db.query('promotions').withIndex('by_active', (q) => q.eq('isActive', true)).take(50);
     return all.filter((p) => p.startDate <= now && p.endDate >= now);
+  },
+});
+
+export const getPromoProducts = query({
+  args: {},
+  handler: async (ctx) => {
+    const all = await ctx.db.query('products').collect();
+    return all
+      .filter((p) => p.isActive && p.showInPromotions && p.compareAtPrice && p.compareAtPrice > p.price)
+      .slice(0, 50);
   },
 });
 
@@ -53,13 +64,31 @@ export const update = mutation({
     description: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     discountPercent: v.optional(v.number()),
+    productIds: v.optional(v.array(v.id('products'))),
+    categoryIds: v.optional(v.array(v.id('categories'))),
     startDate: v.optional(v.number()),
     endDate: v.optional(v.number()),
     isActive: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     await getAdminCaller(ctx, args.sessionToken);
-    const { id, sessionToken, ...patch } = args;
+    const { id, sessionToken, productIds, ...rest } = args;
+
+    const old = await ctx.db.get(id);
+    const oldIds = old?.productIds ?? [];
+    const newIds = productIds ?? oldIds;
+
+    const added = newIds.filter((id) => !oldIds.includes(id));
+    if (added.length > 0) {
+      await ctx.scheduler.runAfter(0, api.promotionSubscribers.notifySubscribers, {
+        promotionId: id,
+        promotionTitle: old?.title ?? '',
+        newProductIds: added,
+      });
+    }
+
+    const patch: Record<string, unknown> = { ...rest };
+    if (productIds !== undefined) patch.productIds = productIds;
     await ctx.db.patch(id, patch);
   },
 });

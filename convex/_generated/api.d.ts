@@ -19,6 +19,7 @@ import type * as orders from "../orders.js";
 import type * as pages from "../pages.js";
 import type * as priceAlerts from "../priceAlerts.js";
 import type * as products from "../products.js";
+import type * as promotionSubscribers from "../promotionSubscribers.js";
 import type * as promotions from "../promotions.js";
 import type * as reviews from "../reviews.js";
 import type * as seed from "../seed.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   pages: typeof pages;
   priceAlerts: typeof priceAlerts;
   products: typeof products;
+  promotionSubscribers: typeof promotionSubscribers;
   promotions: typeof promotions;
   reviews: typeof reviews;
   seed: typeof seed;

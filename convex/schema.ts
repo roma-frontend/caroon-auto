@@ -67,6 +67,7 @@ export default defineSchema(
     stock: v.number(),
     isActive: v.boolean(),
     isFeatured: v.optional(v.boolean()),
+    showInPromotions: v.optional(v.boolean()),
     rating: v.optional(v.number()),
     reviewCount: v.optional(v.number()),
     attributes: v.optional(v.any()),
@@ -299,6 +300,15 @@ export default defineSchema(
     createdAt: v.number(),
   })
     .index('by_product', ['productId'])
+    .index('by_notified', ['notified']),
+
+  // ─── Promotion Subscribers (Telegram) ─────────────────────────
+  promotionSubscribers: defineTable({
+    contact: v.string(),
+    notified: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index('by_contact', ['contact'])
     .index('by_notified', ['notified']),
 
   // ─── Pages (CMS) ──────────────────────────────────────────────

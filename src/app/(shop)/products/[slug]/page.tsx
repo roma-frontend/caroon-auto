@@ -68,7 +68,10 @@ export default function ProductDetailPage() {
     </div>
   );
 
-  const attrs = (product.attributes ?? {}) as Record<string, string | boolean>;
+  const attrs = (product.attributes ?? {}) as Record<string, unknown>;
+  const compat = attrs.vehicleCompat as Array<{ brand: string; model: string; yearFrom: number; yearTo: number }> | undefined;
+  const fitsCompat = vehicle && compat?.some((c) => c.brand === vehicle.brand && c.model === vehicle.model && Number(vehicle.year) >= c.yearFrom && Number(vehicle.year) <= c.yearTo);
+  const fitsSimple = vehicle && typeof attrs.carBrand === 'string' && vehicle.brand === attrs.carBrand;
 
   const productLd = {
     '@context': 'https://schema.org',
@@ -130,7 +133,7 @@ export default function ProductDetailPage() {
             <div className="mt-3 flex gap-2 overflow-x-auto overflow-y-hidden px-0.5">
               {imgs.map((img, i) => (
                 <button key={i} onClick={() => emblaApi?.scrollTo(i)}
-                  className={`h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-200 ${i === emblaIndex ? 'border-primary ring-1 ring-primary/30 scale-105' : 'border-transparent opacity-70 hover:opacity-100 hover:border-muted-foreground/30'}`}>
+                  className={`h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-200 ${i === emblaIndex ? 'border-primary ring-1 ring-primary/30' : 'border-transparent opacity-70 hover:opacity-100 hover:border-muted-foreground/30'}`}>
                   <Image src={img} alt="" width={150} height={150} sizes="64px" className="h-full w-full object-cover" />
                 </button>
               ))}
@@ -179,12 +182,12 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          {typeof attrs.carBrand === 'string' && attrs.carBrand && (
+          {(fitsCompat || (typeof attrs.carBrand === 'string' && attrs.carBrand)) && (
             <div className="mt-3">
-              {vehicle && vehicle.brand === attrs.carBrand ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-green-600/10 px-3 py-1 text-sm font-medium text-green-700"><Check className="h-4 w-4" /> Համապատասխանում է ձեր {vehicle.brand}{vehicle.model ? ` ${vehicle.model}` : ''}-ին</span>
+              {fitsCompat || fitsSimple ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-green-600/10 px-3 py-1 text-sm font-medium text-green-700"><Check className="h-4 w-4" /> Համապատասխանում է ձեր {vehicle?.brand}{vehicle?.model ? ` ${vehicle.model}` : ''}-ին</span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary"><Car className="h-4 w-4" /> Համատեղելի՝ {attrs.carBrand}</span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary"><Car className="h-4 w-4" /> Համատեղելի՝ {attrs.carBrand as string}</span>
               )}
             </div>
           )}
@@ -194,11 +197,11 @@ export default function ProductDetailPage() {
           <p className="text-muted-foreground leading-relaxed">{product.description}</p>
 
           {/* Attributes */}
-          {Object.keys(attrs).length > 0 && (
+          {Object.entries(attrs).filter(([k]) => k !== 'vehicleCompat' && k !== 'carBrand').length > 0 && (
             <div className="mt-6">
               <h3 className="mb-3 font-semibold">{'Ատրիբուտներ'}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {Object.entries(attrs).map(([key, val]) => (
+                {Object.entries(attrs).filter(([k]) => k !== 'vehicleCompat' && k !== 'carBrand').map(([key, val]) => (
                   <div key={key} className="flex justify-between rounded-lg bg-muted/50 px-3 py-2 text-sm">
                     <span className="text-muted-foreground">{key}</span>
                     <span className="font-medium">{typeof val === 'boolean' ? (val ? 'Այո' : 'Ոչ') : String(val)}</span>
@@ -394,7 +397,7 @@ function RelatedProducts({ categoryId, currentId }: { categoryId: string; curren
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {filtered.map((p, i) => (
-        <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} rating={p.rating} reviewCount={p.reviewCount} carBrand={p.attributes?.carBrand} index={i} />
+        <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} rating={p.rating} reviewCount={p.reviewCount} carBrand={p.attributes?.carBrand} attributes={p.attributes} index={i} />
       ))}
     </div>
   );

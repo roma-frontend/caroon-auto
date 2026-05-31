@@ -39,10 +39,12 @@ export default function ProductsPage() {
     categoryId?: Id<'categories'>; minPrice?: number; maxPrice?: number; inStockOnly?: boolean; onSale?: boolean; minRating?: number; sort?: string; attributes?: Record<string, unknown>;
   }>({});
 
+  const isVehicleSearch = !!vehicle && (search?.includes(vehicle.brand) || !!params.get('q'));
+
   const { results, status, loadMore } = usePaginatedQuery(
     api.products.listPaginated,
     {
-      search: search || undefined,
+      search: isVehicleSearch ? undefined : (search || undefined),
       categoryId: filters.categoryId,
       minPrice: filters.minPrice,
       maxPrice: filters.maxPrice,
@@ -50,7 +52,9 @@ export default function ProductsPage() {
       onSale: filters.onSale,
       minRating: filters.minRating,
       sort: filters.sort as 'newest' | 'priceAsc' | 'priceDesc' | 'popular' | undefined,
-      attributes: filters.attributes,
+      attributes: isVehicleSearch
+        ? { ...(filters.attributes ?? {}), carBrand: vehicle.brand }
+        : filters.attributes,
     },
     { initialNumItems: PAGE_SIZE },
   );
@@ -113,7 +117,7 @@ export default function ProductsPage() {
 
           <div className={viewMode === 'list' ? 'mx-auto max-w-3xl flex flex-col gap-3' : 'grid'} style={viewMode === 'list' ? {} : { gap: 'var(--space-5)', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
             {results.map((p, i) => (
-              <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} stock={p.stock} rating={p.rating} reviewCount={p.reviewCount} carBrand={p.attributes?.carBrand} index={i} compact={viewMode === 'list'} />
+              <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} stock={p.stock} rating={p.rating} reviewCount={p.reviewCount} carBrand={p.attributes?.carBrand} attributes={p.attributes} index={i} compact={viewMode === 'list'} />
             ))}
           </div>
 

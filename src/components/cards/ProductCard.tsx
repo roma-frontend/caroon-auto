@@ -33,12 +33,25 @@ interface ProductCardProps {
   rating?: number;
   reviewCount?: number;
   carBrand?: string;
+  attributes?: Record<string, unknown>;
   index?: number;
   description?: string;
   compact?: boolean;
 }
 
-export function ProductCard({ id, name, slug, price, compareAtPrice, image, category, inStock = true, stock, isNew, isHit, rating, reviewCount, carBrand, index = 0, description, compact }: ProductCardProps) {
+function checkFits(vehicle: { brand: string; model: string; year: string } | null, carBrand?: string, attributes?: Record<string, unknown>): boolean {
+  if (!vehicle) return false;
+  const compat = attributes?.vehicleCompat as Array<{ brand: string; model: string; yearFrom: number; yearTo: number }> | undefined;
+  if (compat && compat.length > 0) {
+    const year = Number(vehicle.year);
+    return compat.some((c) =>
+      c.brand === vehicle.brand && c.model === vehicle.model && year >= c.yearFrom && year <= c.yearTo
+    );
+  }
+  return !!(carBrand && vehicle.brand === carBrand);
+}
+
+export function ProductCard({ id, name, slug, price, compareAtPrice, image, category, inStock = true, stock, isNew, isHit, rating, reviewCount, carBrand, attributes, index = 0, description, compact }: ProductCardProps) {
   const { ref, visible } = useReveal();
   const { mousePos, isHovered, handlers } = useMouseGlow();
   const addItem = useCartStore((s) => s.addItem);
@@ -46,7 +59,7 @@ export function ProductCard({ id, name, slug, price, compareAtPrice, image, cate
   const isFav = useFavoritesStore((s) => s.items.some((i) => i.id === id));
   const vehicle = useVehicleStore((s) => s.vehicle);
   const settings = useSettings();
-  const fits = !!(vehicle && carBrand && vehicle.brand === carBrand);
+  const fits = checkFits(vehicle, carBrand, attributes);
   const [quickOpen, setQuickOpen] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {

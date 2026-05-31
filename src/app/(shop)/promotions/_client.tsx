@@ -1,16 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Clock, Flame, Percent, Gift, Zap } from 'lucide-react';
+import { Clock, Flame, Percent, Gift, Zap, Bell } from 'lucide-react';
 import Link from 'next/link';
-import { useReveal, cardRevealStyle, useMouseGlow } from '@/lib/motion';
+import { useReveal, cardRevealStyle } from '@/lib/motion';
 import { ProductCard } from '@/components/cards/ProductCard';
 import { Loader } from '@/components/ui/loader';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 function CountdownBlock({ endDate }: { endDate: number }) {
   const [now] = useState(() => Date.now());
@@ -32,38 +34,51 @@ function CountdownBlock({ endDate }: { endDate: number }) {
 }
 
 function PromoCard({ promo, index }: { promo: { _id: string; title: string; description?: string; imageUrl?: string; discountPercent?: number; endDate: number; categoryIds?: string[]; productIds?: string[] }; index: number }) {
+  const { ref, visible } = useReveal();
+
   return (
-    <Link href={`/promotions/${promo._id}`} className="block">
-      <div className="group relative overflow-hidden rounded-2xl border bg-card transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
-        {/* Image */}
-        <div className="relative aspect-[6/6] overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
-          {promo.imageUrl ? (
-            <>
-              <Image src={promo.imageUrl} alt="" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover transition-transform duration-700 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent" />
-            </>
-          ) : (
-            <div className="flex h-full items-center justify-center">
-              <Percent className="h-16 w-16 text-primary/15" strokeWidth={1} />
-            </div>
-          )}
+    <Link href={`/promotions/${promo._id}`} className="group block mx-auto w-full max-w-[420px]">
+      <div
+        ref={ref}
+        style={cardRevealStyle(visible, index * 0.05)}
+        className="relative overflow-hidden rounded-2xl border bg-card transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+      >
+        {/* Gallery frame — matted area around the image */}
+        <div className="relative overflow-hidden bg-gradient-to-b from-muted/30 to-muted/10 p-5">
+          <div className="relative aspect-square overflow-hidden rounded-xl bg-card shadow-sm ring-1 ring-black/[0.04]">
+            {promo.imageUrl ? (
+              <Image
+                src={promo.imageUrl}
+                alt=""
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-contain p-3 transition-all duration-500 group-hover:scale-105"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center">
+                <Percent className="h-12 w-12 text-primary/10" strokeWidth={1} />
+              </div>
+            )}
+          </div>
 
           {/* Discount badge */}
           {promo.discountPercent && (
-            <div className="absolute left-4 top-4 rounded-xl bg-destructive px-3 py-1.5 text-sm font-black text-white shadow-lg">
+            <div className="absolute right-6 top-6 inline-flex items-center gap-1 rounded-full bg-destructive px-3 py-1 text-xs font-bold text-white shadow-lg">
               -{promo.discountPercent}%
             </div>
           )}
         </div>
 
-          {/* Text below image */}
-        <div className="p-4">
-          <h3 className="text-base font-bold group-hover:text-primary transition-colors leading-tight">{promo.title}</h3>
-          {promo.description && <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{promo.description}</p>}
-          <div className="mt-3 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-            <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-            <span>Մանրամասներ</span>
-          </div>
+        {/* Content */}
+        <div className="px-5 pb-5 pt-3">
+          <h3 className="text-sm font-bold leading-snug text-center transition-colors group-hover:text-primary">
+            {promo.title}
+          </h3>
+          {promo.description && (
+            <p className="mt-1 text-xs text-muted-foreground text-center line-clamp-2">
+              {promo.description}
+            </p>
+          )}
         </div>
       </div>
     </Link>
@@ -85,14 +100,84 @@ function PromoProducts({ promo }: { promo: { categoryIds?: string[]; productIds?
   return (
     <div className="mt-4 grid grid-cols-2 gap-2">
       {filtered.map((p, i) => (
-        <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} rating={p.rating} reviewCount={p.reviewCount} carBrand={p.attributes?.carBrand} index={i} />
+        <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} rating={p.rating} reviewCount={p.reviewCount} carBrand={p.attributes?.carBrand} attributes={p.attributes} index={i} />
       ))}
+    </div>
+  );
+}
+
+function PromoSubscribe() {
+  const [contact, setContact] = useState('');
+  const [savedContact, setSavedContact] = useState(() => localStorage.getItem('promo_sub_contact') ?? '');
+  const subscribe = useMutation(api.promotionSubscribers.subscribe);
+  const unsubscribe = useMutation(api.promotionSubscribers.unsubscribe);
+  const isSubscribedQ = useQuery(api.promotionSubscribers.isSubscribed, savedContact ? { contact: savedContact } : 'skip');
+  const [busy, setBusy] = useState(false);
+
+  const handleSubscribe = async () => {
+    const raw = contact.trim().replace('@', '');
+    if (!raw) return;
+    setBusy(true);
+    try {
+      await subscribe({ contact: raw });
+      localStorage.setItem('promo_sub_contact', raw);
+      setSavedContact(raw);
+      setContact('');
+      toast.success('Դուք բաժանորդագրվել եք ակցիաների թարմացումներին');
+    } catch { toast.error('Չհաջողվեց բաժանորդագրվել'); }
+    setBusy(false);
+  };
+
+  const handleUnsubscribe = async () => {
+    setBusy(true);
+    try {
+      await unsubscribe({ contact: savedContact });
+      localStorage.removeItem('promo_sub_contact');
+      setSavedContact('');
+      toast.success('Դուք ապաբաժանորդագրվել եք');
+    } catch { toast.error('Չհաջողվեց ապաբաժանորդագրվել'); }
+    setBusy(false);
+  };
+
+  const isSubscribed = savedContact && isSubscribedQ;
+
+  if (isSubscribed) {
+    return (
+      <div className="flex items-center justify-center gap-3">
+        <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Bell className="h-3.5 w-3.5 text-primary" />
+          @{savedContact}
+        </span>
+        <button onClick={handleUnsubscribe} disabled={busy} className="text-xs text-muted-foreground underline-offset-2 hover:text-destructive hover:underline">
+          Ապաբաժանորդագրվել
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-center gap-3 flex-wrap">
+      <Bell className="h-4 w-4 text-primary shrink-0" />
+      <span className="text-sm text-muted-foreground whitespace-nowrap">Telegram-ի ծանուցում</span>
+      <div className="flex gap-1.5">
+        <Input
+          placeholder="@username"
+          value={contact}
+          onChange={(e) => setContact(e.target.value)}
+          className="h-8 w-36 text-xs"
+          onKeyDown={(e) => e.key === 'Enter' && handleSubscribe()}
+        />
+        <Button onClick={handleSubscribe} disabled={busy || !contact.trim()} size="sm" className="h-8 gap-1 text-xs">
+          <Bell className="h-3 w-3" /> Բաժանորդագրվել
+        </Button>
+      </div>
     </div>
   );
 }
 
 export default function PromotionsPage() {
   const promotions = useQuery(api.promotions.active, {});
+  const promoProducts = useQuery(api.promotions.getPromoProducts, {});
 
   if (promotions === undefined) return <Loader />;
 
@@ -147,18 +232,48 @@ export default function PromotionsPage() {
 
       {/* Promo cards */}
       {promotions.length > 0 && (
-        <section className="mx-auto" style={{ maxWidth: 'var(--container-max)', paddingInline: 'var(--space-container)', paddingBlock: 'var(--space-section)' }}>
+        <section className="mx-auto" style={{ maxWidth: 'var(--container-max)', paddingInline: 'var(--space-container)', paddingBlock: 'var(--space-section) 0' }}>
           <h2 className="mb-8 text-center text-2xl font-bold">Ակցիաներ</h2>
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             {promotions.map((promo, i) => <PromoCard key={promo._id} promo={promo} index={i} />)}
           </div>
         </section>
       )}
 
-      {promotions.length === 0 && (
+      {/* Products on sale */}
+      {promoProducts && promoProducts.length > 0 && (
+        <section className="mx-auto" style={{ maxWidth: 'var(--container-max)', paddingInline: 'var(--space-container)', paddingBlock: '4rem 5rem' }}>
+          {/* Decorative divider */}
+          <div className="mb-8 flex items-center gap-4">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-muted-foreground/20 to-transparent" />
+            <div className="flex items-center gap-2.5 rounded-full border bg-card px-5 py-1.5">
+              <Percent className="h-4 w-4 text-destructive" />
+              <span className="text-sm font-semibold">Ապրանքներ զեղչով</span>
+              <Badge variant="secondary" className="text-[10px] px-1.5">{promoProducts.length}</Badge>
+            </div>
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-muted-foreground/20 to-transparent" />
+          </div>
+          <div className="grid gap-4 sm:gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {promoProducts.map((p, i) => (
+              <ProductCard key={p._id} id={p._id} slug={p.slug} name={p.name} price={p.price} compareAtPrice={p.compareAtPrice} image={p.images?.[0]} inStock={p.stock > 0} rating={p.rating} reviewCount={p.reviewCount} index={i} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {promotions.length === 0 && (!promoProducts || promoProducts.length === 0) && (
         <section className="py-16 text-center">
           <p className="text-lg text-muted-foreground">Ակցիաներ չեն հայտնաբերվել</p>
         </section>
+      )}
+
+      {/* Subscribe banner — glass strip at the very bottom */}
+      {(promotions.length > 0 || (promoProducts && promoProducts.length > 0)) && (
+        <div className="border-t bg-gradient-to-r from-muted/40 via-muted/20 to-muted/40">
+          <div className="mx-auto py-5" style={{ maxWidth: 'var(--container-max)', paddingInline: 'var(--space-container)' }}>
+            <PromoSubscribe />
+          </div>
+        </div>
       )}
     </div>
   );

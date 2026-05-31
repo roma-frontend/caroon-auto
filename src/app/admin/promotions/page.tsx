@@ -7,7 +7,9 @@ import { useRouter } from 'next/navigation';
 import { api } from '../../../../convex/_generated/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, Edit, Tag, Percent, Calendar, Clock, Package } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Plus, Trash2, Edit, Tag, Percent, Calendar, Clock, Package, Search, X, ShoppingBag } from 'lucide-react';
 import { toast } from 'sonner';
 import { Id } from '../../../../convex/_generated/dataModel';
 import { useReveal, revealStyle } from '@/lib/motion';
@@ -42,6 +44,106 @@ export default function AdminPromotionsPage() {
           <p className="text-muted-foreground">Ակցիաներ չեն գտնվել</p>
         </div>
       )}
+
+      {/* Promoted products (on-sale items) */}
+      <PromotedProductsSection />
+    </div>
+  );
+}
+
+function PromotedProductsSection() {
+  const promoProducts = useQuery(api.promotions.getPromoProducts, {});
+  const allProducts = useQuery(api.products.list, { limit: 200 });
+  const updateProduct = useMutation(api.products.update);
+  const sessionToken = useAuthStore((s) => s.sessionToken);
+  const [search, setSearch] = useState('');
+
+  const togglePromotion = async (productId: Id<'products'>, current: boolean) => {
+    try {
+      await updateProduct({ sessionToken: sessionToken!, id: productId, showInPromotions: !current });
+      toast.success(current ? 'Հեռացված է ակցիաներից' : 'Ավելացված է ակցիաներին');
+    } catch { toast.error('Չհաջողվեց թարմացնել'); }
+  };
+
+  const filteredAll = allProducts?.filter(
+    (p) => p.isActive && p.name.toLowerCase().includes(search.toLowerCase()),
+  ).slice(0, 20) ?? [];
+
+  return (
+    <div className="mt-12">
+      <div className="mb-6 flex items-center gap-3">
+        <ShoppingBag className="h-5 w-5 text-primary" />
+        <h2 className="text-xl font-bold">Ակցիայի ապրանքներ</h2>
+        <Badge variant="secondary" className="ml-auto text-xs">
+          {promoProducts?.length ?? 0} ապրանք
+        </Badge>
+      </div>
+
+      {/* Already promoted products */}
+      <div className="mb-4 space-y-1.5">
+        {promoProducts?.length === 0 && (
+          <p className="text-sm text-muted-foreground">Ակցիայի ապրանքներ չեն գտնվել</p>
+        )}
+        {promoProducts?.map((p) => {
+          const discount = p.compareAtPrice && p.compareAtPrice > p.price
+            ? Math.round((1 - p.price / p.compareAtPrice) * 100)
+            : 0;
+          return (
+            <div key={p._id} className="flex items-center gap-3 rounded-lg border bg-card px-4 py-2.5">
+              <button
+                onClick={() => togglePromotion(p._id, true)}
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-primary bg-primary text-primary-foreground"
+              >
+                <Package className="h-3 w-3" />
+              </button>
+              <span className="flex-1 truncate text-sm font-medium">{p.name}</span>
+              <span className="shrink-0 text-xs text-muted-foreground line-through">{p.compareAtPrice?.toLocaleString('hy-AM')} ֏</span>
+              <span className="shrink-0 text-sm font-bold text-destructive">{p.price.toLocaleString('hy-AM')} ֏</span>
+              {discount > 0 && (
+                <Badge className="shrink-0 text-[10px]">-{discount}%</Badge>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Search & add */}
+      <div>
+        <Label className="text-xs text-muted-foreground">Ավելացնել ապրանք</Label>
+        <div className="relative mt-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Որոնել ապրանքներ..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-10 pl-9"
+          />
+        </div>
+        {search && (
+          <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border">
+            {filteredAll.map((p) => {
+              const alreadyPromoted = promoProducts?.some((pp) => pp._id === p._id);
+              return (
+                <button
+                  key={p._id}
+                  onClick={() => {
+                    if (!alreadyPromoted) togglePromotion(p._id, false);
+                  }}
+                  disabled={alreadyPromoted}
+                  className={`flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-muted ${alreadyPromoted ? 'opacity-40' : ''}`}
+                >
+                  <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${alreadyPromoted ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/30'}`}>
+                    {alreadyPromoted && <Package className="h-2.5 w-2.5" />}
+                  </div>
+                  <span className="truncate">{p.name}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground">{p.price.toLocaleString('hy-AM')} ֏</span>
+                </button>
+              );
+            })}
+            {filteredAll.length === 0 && <p className="p-3 text-sm text-muted-foreground">Ապրանքներ չեն գտնվել</p>}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
