@@ -75,8 +75,6 @@ export const setImages = seedMutation({
 export const seedPromotions = seedMutation({
   args: {},
   handler: async (ctx) => {
-    const existing = await ctx.db.query('promotions').take(1);
-    if (existing.length > 0) return 'Promotions already seeded';
     const now = Date.now();
     await ctx.db.insert('promotions', { title: 'Ձմեռային զեղչ անվադողերի վրա', description: 'Հատուկ զեղչեր մինչև -40% ձմեռային անվադողերի վրա։ Michelin, Continental, Bridgestone և այլն։', images: ['/promotions/winter.svg'], imageUrl: '/promotions/winter.svg', discountPercent: 40, startDate: now, endDate: now + 60 * 24 * 60 * 60 * 1000, isActive: true, createdAt: now });
     await ctx.db.insert('promotions', { title: 'Շարժիչի յուղերի ակցիա', description: 'Մինչև -25% զեղչ Mobil 1, Castrol EDGE և Shell Helix Ultra յուղերի վրա։', images: ['/promotions/oils.svg'], imageUrl: '/promotions/oils.svg', discountPercent: 25, startDate: now, endDate: now + 45 * 24 * 60 * 60 * 1000, isActive: true, createdAt: now });
