@@ -58,7 +58,6 @@ export default function ProductDetailPage() {
   useEffect(() => {
     if (!emblaApi) return;
     emblaApi.on('select', onEmblaSelect);
-    onEmblaSelect();
   }, [emblaApi, onEmblaSelect]);
 
   if (product === undefined) return <Loader />;
