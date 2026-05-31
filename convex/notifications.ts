@@ -149,7 +149,25 @@ export const sendReceiptToCustomer = action({
     if (!order) return { ok: false, error: 'Order not found', botUsername };
 
     const o = order as unknown as Record<string, unknown>;
-    const chatId = args.telegramUser.replace('@', '');
+    let chatId = args.telegramUser.replace('@', '');
+
+    // Try to resolve @username → numeric chat_id via getUpdates
+    if (!/^\d+$/.test(chatId)) {
+      try {
+        const upRes = await fetch(`https://api.telegram.org/bot${token}/getUpdates`);
+        const upData = (await upRes.json()) as {
+          ok: boolean;
+          result?: Array<{ message?: { chat?: { id: number; username?: string } } }>;
+        };
+        if (upData.ok && upData.result) {
+          const match = upData.result.find(
+            (u) => u.message?.chat?.username?.toLowerCase() === chatId.toLowerCase(),
+          );
+          if (match?.message?.chat?.id) chatId = String(match.message.chat.id);
+        }
+      } catch {}
+    }
+
     const items = (o.items as Array<Record<string, unknown>>) || [];
     const itemsList = items
       .map(
