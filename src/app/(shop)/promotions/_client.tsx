@@ -36,7 +36,7 @@ function PromoCard({ promo, index }: { promo: { _id: string; title: string; desc
     <Link href={`/promotions/${promo._id}`} className="block">
       <div className="group relative overflow-hidden rounded-2xl border bg-card transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
         {/* Image */}
-        <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
+        <div className="relative aspect-[6/6] overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
           {promo.imageUrl ? (
             <>
               <Image src={promo.imageUrl} alt="" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover transition-transform duration-700 group-hover:scale-110" />

@@ -40,7 +40,7 @@ export default function PromotionDetailPage() {
 
       {/* Hero banner with overlay */}
       <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/10 to-primary/5 max-w-2xl">
-        <div className="aspect-square sm:aspect-[4/3] relative max-h-80">
+        <div className="aspect-square relative max-h-80">
           {promo.imageUrl ? (
             <Image src={promo.imageUrl} alt={promo.title} fill priority sizes="(max-width: 768px) 100vw, 600px" className="object-cover" />
           ) : (
