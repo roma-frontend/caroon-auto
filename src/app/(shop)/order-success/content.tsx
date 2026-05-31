@@ -138,8 +138,7 @@ function SendTelegramReceipt({ orderId }: { orderId: Id<'orders'> }) {
   const [username, setUsername] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
-  const [botLink, setBotLink] = useState('');
-  const [showHelp, setShowHelp] = useState(false);
+  const [botUsername, setBotUsername] = useState<string | null>(null);
   const sendReceipt = useAction(api.notifications.sendReceiptToCustomer);
 
   const handleSend = async () => {
@@ -153,10 +152,9 @@ function SendTelegramReceipt({ orderId }: { orderId: Id<'orders'> }) {
         setSent(true);
         toast.success('Չեկը ուղարկվել է Telegram');
       } else {
-        if (r?.botUsername) setBotLink(r.botUsername);
-        setShowHelp(true);
+        if (r?.botUsername) setBotUsername(r.botUsername);
         if (r?.error?.includes('chat not found')) {
-          toast.error('Բոտը չի գտել ձեր chat-ը');
+          toast.error('Սեղմեք Start Telegram-ում, ապա փորձեք նորից');
         } else {
           toast.error(r?.error || 'Սխալ ուղարկելիս');
         }
@@ -176,10 +174,15 @@ function SendTelegramReceipt({ orderId }: { orderId: Id<'orders'> }) {
     );
   }
 
-  const botLinkHref = botLink ? `https://t.me/${botLink}` : '';
-
   return (
     <div className="flex flex-col gap-2 w-full">
+      <p className="text-xs text-muted-foreground">
+        {botUsername ? (
+          <>Բացեք բոտը՝ <a href={`https://t.me/${botUsername}`} target="_blank" rel="noopener noreferrer" className="text-primary font-medium underline">t.me/{botUsername}</a>, սեղմեք <b>Start</b>, ապա մուտքագրեք ձեր @username</>
+        ) : (
+          <>Գտեք մեր բոտը Telegram-ում, սեղմեք <b>Start</b>, ապա մուտքագրեք ձեր @username</>
+        )}
+      </p>
       <div className="flex gap-2">
         <Input
           value={username}
@@ -198,17 +201,6 @@ function SendTelegramReceipt({ orderId }: { orderId: Id<'orders'> }) {
           {sending ? '...' : 'Telegram'}
         </Button>
       </div>
-      {showHelp && botLinkHref && (
-        <p className="text-xs text-muted-foreground">
-          Սեղմեք <a href={botLinkHref} target="_blank" rel="noopener noreferrer" className="text-primary font-medium underline">t.me/{botLink}</a>,
-          ապա սեղմեք Start / Սկսել և կրկին փորձեք
-        </p>
-      )}
-      {showHelp && !botLinkHref && (
-        <p className="text-xs text-muted-foreground">
-          Գտեք մեր բոտը Telegram-ում, սեղմեք Start, ապա մուտքագրեք @username
-        </p>
-      )}
     </div>
   );
 }
