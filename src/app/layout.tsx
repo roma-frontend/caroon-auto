@@ -172,7 +172,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <SettingsProvider>
               <BrandTheme />
               <AnalyticsInjector />
-              <main id="main-content">{children}</main>
+              <main id="main-content" className="min-h-dvh">{children}</main>
               <CookieConsentWrapper />
               <AdminOrderWatcher />
             </SettingsProvider>

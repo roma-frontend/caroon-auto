@@ -42,6 +42,20 @@
     "zod": "^4.4.3",
     "zustand": "^5.0.14"
   },
+  "browserslist": {
+    "production": [
+      "last 2 versions",
+      "not dead",
+      "not ie 11",
+      "not ie_mob 11",
+      "since 2022"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.2.6",
     "@tailwindcss/postcss": "^4",

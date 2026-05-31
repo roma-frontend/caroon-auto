@@ -48,8 +48,8 @@ const nextConfig = {
     ],
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60 * 60 * 24 * 30,
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    deviceSizes: [320, 480, 640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 320, 480],
   },
 
   compiler: {
@@ -75,6 +75,14 @@ const nextConfig = {
       'tailwind-merge',
       '@vercel/analytics',
       '@vercel/speed-insights',
+      '@base-ui/react',
+      'embla-carousel-react',
+      'react-hook-form',
+      'cmdk',
+      'next-themes',
+      'jose',
+      'zod',
+      'tw-animate-css',
     ],
   },
 
