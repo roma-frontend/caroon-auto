@@ -52,14 +52,19 @@ export function AdminOrderWatcher() {
 
   const pendingCount = orders?.filter((o) => o.status === 'pending').length ?? 0;
   const prevCount = useRef(pendingCount);
+  const initialized = useRef(false);
 
   useEffect(() => {
-    setPendingCount(pendingCount);
-
-    if (!isAdmin || prevCount.current === 0) {
+    if (!initialized.current) {
+      initialized.current = true;
       prevCount.current = pendingCount;
+      setPendingCount(pendingCount);
       return;
     }
+
+    setPendingCount(pendingCount);
+
+    if (!isAdmin) return;
 
     if (pendingCount > prevCount.current) {
       setFlash(true);
@@ -96,7 +101,7 @@ export function AdminOrderWatcher() {
           ),
           {
             duration: 8000,
-            position: 'top-right',
+            position: 'top-center',
           },
         );
       }
