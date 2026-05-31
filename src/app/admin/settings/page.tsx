@@ -56,8 +56,40 @@ export default function AdminSettingsPage() {
     }
   };
 
+  const saveAnnouncement = async () => {
+    const text = form._ab_text as string || '';
+    if (!text) { toast.error('Տեքստը պարտադիր է'); return; }
+    const json = JSON.stringify({
+      text,
+      type: (form._ab_type as string) || 'info',
+      icon: (form._ab_icon as string) || undefined,
+      link: (form._ab_link as string) || undefined,
+      linkText: (form._ab_linkText as string) || undefined,
+      dismissible: form._ab_dismiss !== false,
+    });
+    try {
+      await save({ sessionToken: sessionToken!, announcementBar: json } as Parameters<typeof save>[0]);
+      toast.success('Հայտարարությունը պահպանվեց');
+    } catch { toast.error('Սխալ'); }
+  };
+
   if (settings && !loaded) {
-    setForm(settings as unknown as Record<string, string | number>);
+    const raw = (settings as Record<string, unknown>).announcementBar as string || '';
+    let abFields: Record<string, string | number> = {};
+    try {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed === 'object' && parsed !== null) {
+        abFields = {
+          _ab_text: parsed.text || '',
+          _ab_type: parsed.type || 'info',
+          _ab_icon: parsed.icon || '',
+          _ab_link: parsed.link || '',
+          _ab_linkText: parsed.linkText || '',
+          _ab_dismiss: parsed.dismissible !== false ? 1 : 0,
+        };
+      }
+    } catch { abFields = { _ab_text: raw || '', _ab_type: 'info', _ab_dismiss: 1 }; }
+    setForm({ ...settings as unknown as Record<string, string | number>, ...abFields });
     setLoaded(true);
   }
 
@@ -250,12 +282,56 @@ export default function AdminSettingsPage() {
                 {'Հայտարարություն'}
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              <p className="text-xs text-muted-foreground">JSON will be generated from the fields below and saved to announcement field</p>
               <div>
                 <Label>{'Վերին գոտու տեքստ'}</Label>
-                <Input value={form.announcementBar ?? ''} onChange={(e) => set('announcementBar', e.target.value)} className="h-10" placeholder={'Անվճար առաքում 20,000֏-ից...'} />
+                <Input value={form._ab_text ?? ''} onChange={(e) => set('_ab_text', e.target.value)} className="h-10" placeholder={'Անվճար առաքում 20,000֏-ից...'} />
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">{'Թարմացվում է իրական ժամանակում կայքի վերևում'}</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>{'Ոճ'}</Label>
+                  <select value={form._ab_type as string || 'info'} onChange={(e) => set('_ab_type', e.target.value)}
+                    className="flex h-10 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm">
+                    <option value="info">Info (կապույտ)</option>
+                    <option value="sale">Sale (կարմիր)</option>
+                    <option value="promo">Promo (մանուշակագույն)</option>
+                    <option value="dark">Dark (սև)</option>
+                  </select>
+                </div>
+                <div>
+                  <Label>{'Պատկերակ'}</Label>
+                  <select value={form._ab_icon as string || ''} onChange={(e) => set('_ab_icon', e.target.value)}
+                    className="flex h-10 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm">
+                    <option value="">—</option>
+                    <option value="sparkles">✨ Sparkles</option>
+                    <option value="zap">⚡ Zap</option>
+                    <option value="truck">🚚 Truck</option>
+                    <option value="clock">⏰ Clock</option>
+                    <option value="gift">🎁 Gift</option>
+                    <option value="percent">% Percent</option>
+                    <option value="bell">🔔 Bell</option>
+                    <option value="star">⭐ Star</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>{'Հղում (URL)'}</Label>
+                  <Input value={form._ab_link as string ?? ''} onChange={(e) => set('_ab_link', e.target.value)} className="h-10" placeholder={'/products'} />
+                </div>
+                <div>
+                  <Label>{'Կոճակի տեքստ'}</Label>
+                  <Input value={form._ab_linkText as string ?? ''} onChange={(e) => set('_ab_linkText', e.target.value)} className="h-10" placeholder={'Գնել'} />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="ab_dismiss" checked={form._ab_dismiss !== false} onChange={(e) => set('_ab_dismiss', e.target.checked)} className="h-4 w-4 rounded border-gray-300" />
+                <Label htmlFor="ab_dismiss" className="text-sm font-normal">{'Հնարավորություն տալ փակելու'}</Label>
+              </div>
+              <Button onClick={saveAnnouncement} size="sm" className="gap-1.5 text-xs">
+                <Save className="h-3.5 w-3.5" /> {'Պահպանել'}
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>

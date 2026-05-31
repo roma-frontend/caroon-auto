@@ -478,6 +478,12 @@
 
 
 
+/* Announcement bar shimmer */
+@keyframes announcement-shimmer {
+  0% { transform: translateX(-150%); }
+  100% { transform: translateX(150%); }
+}
+
 /* Skeleton shimmer */
 @keyframes shimmer {
   0% { background-position: -200% 0; }

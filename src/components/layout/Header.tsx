@@ -20,6 +20,7 @@ import { useFavoritesStore } from '@/store/favorites';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import dynamic from 'next/dynamic';
 const SearchCommand = dynamic(() => import('@/components/SearchCommand').then((m) => ({ default: m.SearchCommand })));
+import { AnnouncementBar } from '@/components/AnnouncementBar';
 
 const LINKS = [
   { href: '/products', label: NAV.catalog },
@@ -50,11 +51,7 @@ export function Header() {
 
   return (
     <>
-      {settings?.announcementEnabled !== false && settings?.announcementBar && (
-        <div className="bg-primary text-primary-foreground text-center text-[10px] sm:text-xs font-medium py-1.5 sm:py-2 px-2 sm:px-4 leading-tight">
-          <span className="line-clamp-1 sm:line-clamp-none">{settings?.announcementBar} • Հեռ. {settings?.phone}</span>
-        </div>
-      )}
+      {settings?.announcementEnabled !== false && <AnnouncementBar raw={settings?.announcementBar} phone={settings?.phone} />}
       <header className="glass-header sticky top-0 w-full" style={{ zIndex: 'var(--z-sticky)', height: 'var(--header-height)' }}>
         <div className="mx-auto flex h-full items-center justify-between gap-1 px-2 sm:px-4" style={{ maxWidth: 'var(--container-max)' }}>
           {/* Logo */}
