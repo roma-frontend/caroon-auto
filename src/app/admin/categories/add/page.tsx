@@ -22,7 +22,7 @@ function StepBasicInfo() {
   const handleImg = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
-    try { const url = await upload(f); update('imageUrl', url); } catch { toast.error('Error'); }
+      try { const url = await upload(f); if (url) update('imageUrl', url); } catch { toast.error('Error'); }
   };
 
   return (

@@ -47,7 +47,7 @@ export default function EditPromotionPage() {
   const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    try { const url = await upload(file); setForm({ ...form, imageUrl: url }); } catch { toast.error('Չի հաջողվել պատկերը բեռնել'); }
+    try { const url = await upload(file); if (url) setForm({ ...form, imageUrl: url }); } catch { toast.error('Չի հաջողվել պատկերը բեռնել'); }
   };
 
   const handleSave = async () => {

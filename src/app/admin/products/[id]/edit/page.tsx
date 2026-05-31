@@ -22,7 +22,6 @@ export default function EditProductPage() {
   const params = useParams();
   const router = useRouter();
   const productId = params.id as Id<'products'>;
-  const product = useQuery(api.products.getBySlug, { slug: '' }); // We need getById
   const update = useMutation(api.products.update);
   const { sessionToken } = useAuth();
   const { upload, uploading } = useUpload();
@@ -55,8 +54,8 @@ export default function EditProductPage() {
     if (!file) return;
     try {
       const url = await upload(file);
+      if (!url) return;
       setImages((prev) => [...prev, url]);
-      toast.success('Հաջողությամբ վերբեռնվեց');
     } catch {
       toast.error('Վերբեռնումը ձախողվեց');
     }
@@ -73,18 +72,19 @@ export default function EditProductPage() {
         stock: Number(form.stock),
         description: form.description,
         sku: form.sku,
-        images,
+        images: images.filter(Boolean),
         attributes: form.attributes || undefined,
       });
       toast.success('Ապրանքը հաջողությամբ թարմացվել է');
       router.push('/admin/products');
     } catch (e) {
-      const msg = e instanceof Error ? e.message : '';
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error('Update product error:', msg);
       if (msg.includes('Not authenticated') || msg.includes('Session expired')) {
         toast.error('Սեսիան ավարտվել է, մուտք գործեք կրկին');
         router.push('/login');
       } else {
-        toast.error('Ապրանքի թարմացումը ձախողվեց');
+        toast.error(`Ապրանքի թարմացումը ձախողվեց: ${msg}`);
       }
     } finally {
       setSaving(false);

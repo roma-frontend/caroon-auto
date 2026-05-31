@@ -1,27 +1,38 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 export function useUpload() {
   const [uploading, setUploading] = useState(false);
 
-  const upload = async (file: File): Promise<string> => {
+  const upload = async (file: File): Promise<string | null> => {
     setUploading(true);
     try {
-      // Get presigned URL
+      const fd = new FormData();
+      fd.append('file', file);
+
       const res = await fetch('/api/upload', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: file.name, contentType: file.type }),
+        body: fd,
       });
-      const { presignedUrl, publicUrl } = await res.json();
 
-      // Upload directly to R2
-      await fetch(presignedUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file,
-      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Upload failed' }));
+        toast.error(`${err.error || res.status}`);
+        return null;
+      }
+
+      const { publicUrl } = await res.json();
+
+      if (!publicUrl) {
+        toast.error('R2_PUBLIC_URL настроен неправильно');
+        return null;
+      }
 
       return publicUrl;
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Unknown error';
+      toast.error(`Վերբեռնումը ձախողվեց: ${msg}`);
+      return null;
     } finally {
       setUploading(false);
     }
