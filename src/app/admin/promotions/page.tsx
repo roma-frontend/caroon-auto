@@ -169,7 +169,7 @@ function PromoCard({ promo, index, onDelete, onEdit }: { promo: { _id: Id<'promo
               <Percent className="h-16 w-16 text-primary/20" strokeWidth={1} />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent transition-transform duration-500 group-hover:scale-105" />
 
           {/* Discount badge */}
           {promo.discountPercent && (
