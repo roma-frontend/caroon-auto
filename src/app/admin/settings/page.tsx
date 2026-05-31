@@ -1,6 +1,7 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useAction } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 
@@ -33,6 +34,7 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth';
 
 export default function AdminSettingsPage() {
+  const router = useRouter();
   const settings = useQuery(api.settings.get, {});
   const save = useMutation(api.settings.save);
   const sendTest = useAction(api.notifications.sendTest);
@@ -84,7 +86,7 @@ export default function AdminSettingsPage() {
         mapUrl: String(form.mapUrl ?? ''),
         minOrderAmount: Number(form.minOrderAmount) || 0,
         enableQuickBuy: flags.enableQuickBuy !== false,
-        paymentMethods: form.paymentMethods ? JSON.parse(String(form.paymentMethods)) : ['cash', 'card'],
+        paymentMethods: form.paymentMethods ? (Array.isArray(form.paymentMethods) ? form.paymentMethods : JSON.parse(String(form.paymentMethods))) : ['cash', 'card'],
         bankName: String(form.bankName ?? ''),
         bankAccount: String(form.bankAccount ?? ''),
         bankCode: String(form.bankCode ?? ''),
@@ -119,8 +121,14 @@ export default function AdminSettingsPage() {
       });
 
       toast.success('Կարգավորումները պահպանվել են');
-    } catch {
-      toast.error('Սխալ տեղի ունեցավ');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '';
+      if (msg.includes('Not authenticated') || msg.includes('Session expired')) {
+        toast.error('Սեսիան ավարտվել է, մուտք գործեք կրկին');
+        router.push('/login');
+      } else {
+        toast.error('Սխալ տեղի ունեցավ');
+      }
     } finally {
       setSaving(false);
     }
@@ -361,11 +369,12 @@ export default function AdminSettingsPage() {
                 <div className="mt-2 flex flex-wrap gap-2">
                   {['cash', 'card', 'idram', 'easypay', 'transfer'].map((m) => {
                     const labels: Record<string, string> = { cash: 'Կանխիկ', card: 'Քարտով', idram: 'Idram', easypay: 'EasyPay', transfer: 'Բանկային փոխանցում' };
-                    const pm: string[] = form.paymentMethods ? JSON.parse(String(form.paymentMethods)) : ['cash', 'card', 'idram', 'easypay'];
+                    const raw = form.paymentMethods;
+                    const pm: string[] = raw ? (Array.isArray(raw) ? raw : JSON.parse(String(raw))) : ['cash', 'card', 'idram', 'easypay'];
                     const active = pm.includes(m);
                     return (
                       <button key={m} onClick={() => {
-                        const current: string[] = form.paymentMethods ? JSON.parse(String(form.paymentMethods)) : ['cash', 'card', 'idram', 'easypay'];
+                        const current: string[] = raw ? (Array.isArray(raw) ? raw : JSON.parse(String(raw))) : ['cash', 'card', 'idram', 'easypay'];
                         const next = active ? current.filter((x) => x !== m) : [...current, m];
                         setForm({ ...form, paymentMethods: JSON.stringify(next) as unknown as number });
                       }} className={`rounded-xl border px-3 py-1.5 text-xs transition-all ${active ? 'border-primary bg-primary/10 text-primary' : 'text-muted-foreground hover:border-primary/40'}`}>{labels[m] || m}</button>
