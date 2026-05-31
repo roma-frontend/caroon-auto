@@ -129,7 +129,7 @@ export default function ProductDetailPage() {
           </div>
           {/* Thumbnails */}
           {imgs.length > 1 && (
-            <div className="mt-3 flex gap-2 overflow-x-auto px-0.5">
+            <div className="mt-3 flex gap-2 overflow-x-auto overflow-y-hidden px-0.5">
               {imgs.map((img, i) => (
                 <button key={i} onClick={() => emblaApi?.scrollTo(i)}
                   className={`h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-200 ${i === emblaIndex ? 'border-primary ring-1 ring-primary/30 scale-105' : 'border-transparent opacity-70 hover:opacity-100 hover:border-muted-foreground/30'}`}>
@@ -239,6 +239,10 @@ export default function ProductDetailPage() {
               onClick={() => { if (!inCompare) { addCompare({ id: product._id, slug: product.slug, name: product.name, price: product.price, image: product.images?.[0] ?? null, attributes: (product.attributes ?? {}) as Record<string, string> }); toast.success('Ավելացվեց համեմատման'); } }}>
               <GitCompareArrows className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
+            <ShareButton productName={product.name} />
+            {settings?.enablePriceAlert !== false && (
+              <SubscribePriceButton productId={product._id} currentPrice={product.price} />
+            )}
             <QuickBuyButton productId={product._id} productName={product.name} productPrice={product.price} productImage={product.images?.[0]} />
             </div>
           </div>
@@ -247,12 +251,6 @@ export default function ProductDetailPage() {
           <div className="mt-6 flex flex-wrap gap-3 sm:gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1"><Truck className="h-4 w-4" /> {'Առաքման վճար'}</span>
             <span className="flex items-center gap-1"><Shield className="h-4 w-4" /> {'Անվտանգ գնումներ'}</span>
-            <ShareButton productName={product.name} />
-            {settings?.enablePriceAlert !== false && (
-              <span className="flex items-center gap-1">
-                <SubscribePriceButton productId={product._id} currentPrice={product.price} />
-              </span>
-            )}
           </div>
         </div>
       </div>
@@ -295,20 +293,44 @@ function SubscribePriceButton({ productId, currentPrice }: { productId: string; 
   const subscribe = useMutation(api.priceAlerts.subscribe);
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  if (sent) return <span className="text-xs text-green-600">✅ Կծանուցենք</span>;
-  if (!showForm) return (
-    <button onClick={() => setShowForm(true)} className="flex items-center gap-1 hover:text-primary transition-colors text-xs">
-      <Bell className="h-4 w-4" /> {'Զեղչ'}
-    </button>
-  );
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  if (sent) {
+    return (
+      <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-lg border border-green-200 bg-green-50 text-green-600">
+        <Bell className="h-4 w-4 sm:h-5 sm:w-5 fill-current" />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex gap-1">
-      <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email" className="h-7 text-xs w-36" />
-      <Button size="sm" className="h-7 text-xs" disabled={!email} onClick={async () => {
-        await subscribe({ productId: productId as Id<'products'>, email, priceAtSubscribe: currentPrice });
-        setSent(true); toast.success('Կծանուցենք երբ գինը նվազի');
-      }}>OK</Button>
+    <div className="relative" ref={ref}>
+      <Button variant="outline" size="icon" className="h-10 w-10 sm:h-11 sm:w-11" onClick={() => setOpen(true)} aria-label="Ստանալ զեղչ">
+        <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
+      </Button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40 sm:hidden" onClick={() => setOpen(false)} />
+          <div className="absolute bottom-full sm:bottom-auto sm:top-full right-0 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 mb-2 sm:mt-2 z-50 min-w-[240px] rounded-2xl border bg-popover p-3 shadow-xl animate-in zoom-in-95 duration-150 origin-bottom-right sm:origin-top">
+            <p className="text-sm font-semibold mb-1">Следить за ценой</p>
+            <p className="text-xs text-muted-foreground mb-3">Уведомим вас, когда цена снизится</p>
+            <div className="flex gap-2">
+              <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ваш email" className="h-9 text-xs flex-1" />
+              <Button size="sm" className="h-9 gap-1 text-xs" disabled={!email} onClick={async () => {
+                await subscribe({ productId: productId as Id<'products'>, email, priceAtSubscribe: currentPrice });
+                setSent(true); setOpen(false); toast.success('Կծանուցենք երբ գինը նվազի');
+              }}><Bell className="h-3 w-3" /> OK</Button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -322,28 +344,46 @@ function ShareButton({ productName }: { productName: string }) {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
+
+  const share = () => {
+    if (navigator.share) {
+      navigator.share({ title: productName, url: window.location.href }).catch(() => {});
+    } else {
+      setOpen(true);
+    }
+  };
+
   return (
-    <span className="relative" ref={ref}>
-      <button onClick={() => {
-        if (navigator.share) { navigator.share({ title: productName, url: window.location.href }).catch(() => {}); }
-        else setOpen(!open);
-      }} className="flex items-center gap-1 hover:text-primary transition-colors">
-        <Share2 className="h-4 w-4" /> {'Կիսվել'}
-      </button>
+    <div className="relative" ref={ref}>
+      <Button variant="outline" size="icon" className="h-10 w-10 sm:h-11 sm:w-11" onClick={share} aria-label="Կիսվել">
+        <Share2 className="h-4 w-4 sm:h-5 sm:w-5" />
+      </Button>
       {open && (
-        <div className="absolute bottom-full left-0 sm:left-1/2 sm:-translate-x-1/2 mb-2 flex gap-1 rounded-xl border bg-background p-1.5 shadow-lg animate-in zoom-in-95 duration-100" style={{ right: 'auto' }}>
-          <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" aria-label="Facebook">
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-          </a>
-          <a href={`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(productName)}`} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-lg text-sky-500 hover:bg-sky-50 transition-colors" aria-label="Telegram">
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M21.5 2.5L2.5 10.5L8.5 13.5L11.5 20.5L15.5 14.5L21.5 2.5Z"/><path d="M11.5 20.5L15.5 14.5L8.5 13.5"/></svg>
-          </a>
-          <button onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Հղումը պատճենվեց'); setOpen(false); }} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent transition-colors" aria-label="Copy link">
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-          </button>
-        </div>
+        <>
+          <div className="fixed inset-0 z-40 sm:hidden" onClick={() => setOpen(false)} />
+          <div className="absolute bottom-full sm:bottom-auto sm:top-full right-0 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 mb-2 sm:mt-2 z-50 min-w-[200px] rounded-2xl border bg-popover p-2 shadow-xl animate-in zoom-in-95 duration-150 origin-bottom-right sm:origin-top">
+            <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Կիսվել</p>
+            <a href={`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(productName)}`} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors hover:bg-accent"
+              onClick={() => setOpen(false)}>
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-100 text-sky-600"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M21.5 2.5L2.5 10.5L8.5 13.5L11.5 20.5L15.5 14.5L21.5 2.5Z"/><path d="M11.5 20.5L15.5 14.5L8.5 13.5"/></svg></div>
+              Telegram
+            </a>
+            <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors hover:bg-accent"
+              onClick={() => setOpen(false)}>
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></div>
+              Facebook
+            </a>
+            <button onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Հղումը պատճենվեց'); setOpen(false); }}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors hover:bg-accent">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted text-muted-foreground"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+              Պատճենել հղումը
+            </button>
+          </div>
+        </>
       )}
-    </span>
+    </div>
   );
 }
 
