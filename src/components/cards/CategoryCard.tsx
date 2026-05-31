@@ -4,6 +4,7 @@ import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
 import { Disc3, CircleDot, Droplet, Filter, Lightbulb, BatteryCharging, Wrench, Gauge, Package, ChevronRight } from 'lucide-react';
 import { useReveal, cardRevealStyle } from '@/lib/motion';
+import Image from 'next/image';
 
 interface CategoryCardProps {
   id: string;
@@ -38,7 +39,7 @@ export const CATEGORY_COLORS: Record<string, string> = {
   accessories: 'bg-violet-500/15 text-violet-600 dark:text-violet-400',
 };
 
-export function CategoryCard({ name, slug, description, productCount, index = 0, className }: CategoryCardProps) {
+export function CategoryCard({ name, slug, description, imageUrl, productCount, index = 0, className }: CategoryCardProps) {
   const { ref, visible } = useReveal();
   const Icon = CATEGORY_ICONS[slug] ?? Package;
   const color = CATEGORY_COLORS[slug] ?? 'bg-primary/10 text-primary';
@@ -47,9 +48,15 @@ export function CategoryCard({ name, slug, description, productCount, index = 0,
     <Link href={`/categories/${slug}`} className={className}>
       <div ref={ref} style={cardRevealStyle(visible, index * 0.06)}>
         <div className="group flex h-full items-center gap-4 rounded-2xl border bg-card p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
-          <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 ${color}`}>
-            <Icon className="h-7 w-7" strokeWidth={1.75} />
-          </div>
+          {imageUrl ? (
+            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl">
+              <Image src={imageUrl} alt={name} width={56} height={56} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" />
+            </div>
+          ) : (
+            <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 ${color}`}>
+              <Icon className="h-7 w-7" strokeWidth={1.75} />
+            </div>
+          )}
           <div className="min-w-0 flex-1">
             <h3 className="text-base font-semibold leading-tight transition-colors duration-200 group-hover:text-primary">{name}</h3>
             {productCount !== undefined ? (
