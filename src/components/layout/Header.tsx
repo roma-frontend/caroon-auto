@@ -69,7 +69,7 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <Logo size={36} />
-            <span className="hidden text-xl font-bold sm:inline">{storeName}</span>
+            <span className="text-xl font-bold sm:inline">{storeName}</span>
           </Link>
 
           {/* Desktop Nav */}
@@ -174,9 +174,10 @@ export function Header() {
                 { href: '/promotions', label: NAV.promotions, icon: ActivityIcon },
                 { href: '/contact', label: NAV.contact, icon: Phone },
               ].map((link) => (
-                <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-accent">
+                <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} className="relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-accent">
                   <link.icon className="h-4 w-4 text-muted-foreground" />
                   {link.label}
+                  {navBadges[link.href] && <span className="absolute -right-1 -top-1"><NavBadge config={navBadges[link.href]} /></span>}
                 </Link>
               ))}
             </nav>
