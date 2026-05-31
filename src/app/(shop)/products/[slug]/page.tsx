@@ -5,12 +5,13 @@ import { useQuery, useMutation } from 'convex/react';
 import { ProductCard } from '@/components/cards/ProductCard';
 import { api } from '../../../../../convex/_generated/api';
 import { Id } from '../../../../../convex/_generated/dataModel';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ShoppingCart, Heart, ArrowLeft, Check, Truck, Shield, Star, Car, Share2, Smartphone, Bell } from 'lucide-react';
+import { ShoppingCart, Heart, ArrowLeft, Check, Truck, Shield, Star, Car, Share2, Smartphone, Bell, ChevronLeft, ChevronRight } from 'lucide-react';
+import useEmblaCarousel from 'embla-carousel-react';
 import { formatPrice, discountPercent } from '@/lib/formatters';
 import { useCartStore } from '@/store/cart';
 import { useFavoritesStore } from '@/store/favorites';
@@ -37,7 +38,6 @@ export default function ProductDetailPage() {
   const stats = useQuery(api.reviews.getStats, product?._id ? { productId: product._id } : 'skip');
   const vehicle = useVehicleStore((s) => s.vehicle);
   const settings = useSettings();
-  const [selectedImg, setSelectedImg] = useState(0);
   const addViewed = useRecentlyViewedStore((s) => s.add);
   const productId = product?._id;
   useEffect(() => { if (product) addViewed({ id: product._id, slug: product.slug, name: product.name, price: product.price, image: product.images?.[0] ?? null }); }, [productId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -47,6 +47,20 @@ export default function ProductDetailPage() {
   const inCompare = isInCompare(product?._id ?? '');
   const toggleFav = useFavoritesStore((s) => s.toggle);
   const isFav = useFavoritesStore((s) => s.items.some((i) => i.id === product?._id));
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false });
+  const [emblaIndex, setEmblaIndex] = useState(0);
+  const [emblaSnaps, setEmblaSnaps] = useState<number[]>([]);
+  const onEmblaSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setEmblaIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+  useEffect(() => {
+    if (!emblaApi) return;
+    setEmblaSnaps(emblaApi.scrollSnapList());
+    emblaApi.on('select', onEmblaSelect);
+    onEmblaSelect();
+  }, [emblaApi, onEmblaSelect]);
+  const imgs = product?.images ?? [];
 
   if (product === undefined) return <Loader />;
   if (product === null) return (
@@ -80,20 +94,45 @@ export default function ProductDetailPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }} />
 
       <div className="grid gap-8 lg:grid-cols-2">
-        {/* Gallery */}
+        {/* Gallery — Embla carousel */}
         <div>
-          <div className="aspect-square overflow-hidden rounded-2xl border bg-muted/30">
-            {product.images?.[selectedImg] ? (
-              <Image src={product.images[selectedImg]} alt={product.name} width={800} height={800} priority sizes="(max-width: 1024px) 100vw, 50vw" className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex h-full items-center justify-center text-6xl text-muted-foreground/20 p-4 text-center"><div className="flex flex-col items-center gap-3"><svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground/20"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></svg></div></div>
+          <div className="relative overflow-hidden rounded-2xl border bg-muted/30 group/carousel">
+            <div ref={emblaRef} className="overflow-hidden">
+              <div className="flex">
+                {imgs.length > 0 ? imgs.map((img, i) => (
+                  <div key={i} className="relative min-w-0 shrink-0 grow-0 basis-full aspect-square">
+                    <Image src={img} alt={`${product.name} ${i + 1}`} width={800} height={800} priority={i === 0} sizes="(max-width: 1024px) 100vw, 50vw" className="h-full w-full object-cover" />
+                  </div>
+                )) : (
+                  <div className="min-w-0 shrink-0 grow-0 basis-full aspect-square flex items-center justify-center text-muted-foreground/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                  </div>
+                )}
+              </div>
+            </div>
+            {imgs.length > 1 && (
+              <>
+                <button onClick={() => emblaApi?.scrollPrev()} className="absolute left-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-background/80 shadow-lg opacity-0 group-hover/carousel:opacity-100 transition-opacity backdrop-blur-sm hover:bg-background" aria-label="Назад">
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button onClick={() => emblaApi?.scrollNext()} className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-background/80 shadow-lg opacity-0 group-hover/carousel:opacity-100 transition-opacity backdrop-blur-sm hover:bg-background" aria-label="Вперед">
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+                {/* Dots */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {emblaSnaps.map((_, i) => (
+                    <button key={i} onClick={() => emblaApi?.scrollTo(i)} className={`h-2 rounded-full transition-all duration-300 ${i === emblaIndex ? 'w-6 bg-primary' : 'w-2 bg-background/70 hover:bg-background'}`} aria-label={`Slide ${i + 1}`} />
+                  ))}
+                </div>
+              </>
             )}
           </div>
-          {product.images && product.images.length > 1 && (
-            <div className="mt-3 flex gap-2 overflow-x-auto">
-              {product.images.map((img, i) => (
-                <button key={i} onClick={() => setSelectedImg(i)}
-                  className={`h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${i === selectedImg ? 'border-primary' : 'border-transparent hover:border-muted-foreground/30'}`}>
+          {/* Thumbnails */}
+          {imgs.length > 1 && (
+            <div className="mt-3 flex gap-2 overflow-x-auto px-0.5">
+              {imgs.map((img, i) => (
+                <button key={i} onClick={() => emblaApi?.scrollTo(i)}
+                  className={`h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-200 ${i === emblaIndex ? 'border-primary ring-1 ring-primary/30 scale-105' : 'border-transparent opacity-70 hover:opacity-100 hover:border-muted-foreground/30'}`}>
                   <Image src={img} alt="" width={150} height={150} sizes="64px" className="h-full w-full object-cover" />
                 </button>
               ))}
