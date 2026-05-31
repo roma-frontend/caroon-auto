@@ -138,8 +138,15 @@ export const sendReceiptToCustomer = action({
     const token = settings?.telegramBotToken as string | undefined;
     if (!token) return { ok: false, error: 'Telegram bot not configured' };
 
+    let botUsername = '';
+    try {
+      const meRes = await fetch(`https://api.telegram.org/bot${token}/getMe`);
+      const meData = (await meRes.json()) as { ok: boolean; result?: { username: string } };
+      if (meData.ok && meData.result) botUsername = meData.result.username;
+    } catch {}
+
     const order = await ctx.runQuery(api.orders.getById as any, { id: args.orderId });
-    if (!order) return { ok: false, error: 'Order not found' };
+    if (!order) return { ok: false, error: 'Order not found', botUsername };
 
     const o = order as unknown as Record<string, unknown>;
     const chatId = args.telegramUser.replace('@', '');
@@ -194,8 +201,8 @@ export const sendReceiptToCustomer = action({
         body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true }),
       });
       const data = (await res.json().catch(() => null)) as { ok?: boolean; description?: string } | null;
-      if (!res.ok || !data?.ok) return { ok: false, error: data?.description || `HTTP ${res.status}` };
-      return { ok: true };
+      if (!res.ok || !data?.ok) return { ok: false, error: data?.description || `HTTP ${res.status}`, botUsername };
+      return { ok: true, botUsername };
     } catch (e) {
       return { ok: false, error: String(e) };
     }

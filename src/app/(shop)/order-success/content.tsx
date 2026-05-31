@@ -138,6 +138,7 @@ function SendTelegramReceipt({ orderId }: { orderId: Id<'orders'> }) {
   const [username, setUsername] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [botLink, setBotLink] = useState('');
   const sendReceipt = useAction(api.notifications.sendReceiptToCustomer);
 
   const handleSend = async () => {
@@ -146,12 +147,16 @@ function SendTelegramReceipt({ orderId }: { orderId: Id<'orders'> }) {
     setSending(true);
     try {
       const result = await sendReceipt({ orderId, telegramUser: user });
-      const r = result as { ok: boolean; error?: string } | undefined;
+      const r = result as { ok: boolean; error?: string; botUsername?: string } | undefined;
       if (r?.ok) {
         setSent(true);
         toast.success('Չեկը ուղարկվել է Telegram');
       } else {
-        toast.error(r?.error || 'Սխալ ուղարկելիս');
+        if (r?.botUsername) setBotLink(r.botUsername);
+        const msg = r?.error?.includes('chat not found')
+          ? 'Նախ բացեք չաթը bot-ի հետ, ապա փորձեք կրկին'
+          : (r?.error || 'Սխալ ուղարկելիս');
+        toast.error(msg);
       }
     } catch {
       toast.error('Սխալ միացման ժամանակ');
@@ -168,24 +173,39 @@ function SendTelegramReceipt({ orderId }: { orderId: Id<'orders'> }) {
     );
   }
 
+  const botLinkHref = botLink ? `https://t.me/${botLink}` : '';
+
   return (
-    <div className="flex gap-2 flex-1">
-      <Input
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        placeholder="@username"
-        className="h-10 flex-1 min-w-0"
-      />
-      <Button
-        variant="outline"
-        size="sm"
-        className="gap-2 shrink-0 h-10"
-        onClick={handleSend}
-        disabled={!username.trim() || sending}
-      >
-        <Smartphone className="h-4 w-4" />
-        {sending ? '...' : 'Telegram'}
-      </Button>
+    <div className="flex flex-col gap-2 w-full">
+      <div className="flex gap-2">
+        <Input
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="@username"
+          className="h-10 flex-1 min-w-0"
+        />
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2 shrink-0 h-10"
+          onClick={handleSend}
+          disabled={!username.trim() || sending}
+        >
+          <Smartphone className="h-4 w-4" />
+          {sending ? '...' : 'Telegram'}
+        </Button>
+      </div>
+      {botLinkHref && (
+        <p className="text-xs text-muted-foreground">
+          Սկզբում բացեք բոտը՝ <a href={botLinkHref} target="_blank" rel="noopener noreferrer" className="text-primary font-medium underline">t.me/{botLink}</a>,
+          սեղմեք Start / Սկսել, ապա նորից փորձեք ուղարկել
+        </p>
+      )}
+      {!botLink && (
+        <p className="text-xs text-muted-foreground">
+          Գտեք մեր բոտը Telegram-ում և սեղմեք Start, ապա մուտքագրեք ձեր @username
+        </p>
+      )}
     </div>
   );
 }
