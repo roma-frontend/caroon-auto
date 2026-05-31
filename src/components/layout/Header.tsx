@@ -21,6 +21,8 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import dynamic from 'next/dynamic';
 const SearchCommand = dynamic(() => import('@/components/SearchCommand').then((m) => ({ default: m.SearchCommand })));
 import { AnnouncementBar } from '@/components/AnnouncementBar';
+import { NavBadge } from '@/components/NavBadge';
+import type { NavBadgeConfig } from '@/components/NavBadge';
 
 const LINKS = [
   { href: '/products', label: NAV.catalog },
@@ -48,6 +50,16 @@ export function Header() {
   const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const hasFavs = mounted && favCount > 0;
   const storeName = useStoreName();
+  const navBadges = (() => {
+    try {
+      const raw = settings?.navBadges;
+      if (!raw) return {};
+      const parsed = JSON.parse(raw) as Array<{ path: string; text: string; variant: string }>;
+      const map: Record<string, NavBadgeConfig> = {};
+      for (const item of parsed) map[item.path] = { text: item.text, variant: item.variant as NavBadgeConfig['variant'] };
+      return map;
+    } catch { return {}; }
+  })();
 
   return (
     <>
@@ -68,8 +80,9 @@ export function Header() {
               </Link>
             )}
             {LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+              <Link key={link.href} href={link.href} className="relative rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
                 {link.label}
+                {navBadges[link.href] && <span className="absolute -right-2 -top-1.5"><NavBadge config={navBadges[link.href]} /></span>}
               </Link>
             ))}
             <div className="relative" onMouseEnter={() => setMoreOpen(true)} onMouseLeave={() => setMoreOpen(false)}>

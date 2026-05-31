@@ -32,7 +32,6 @@ import {
 
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function AdminSettingsPage() {
   const router = useRouter();
@@ -55,6 +54,24 @@ export default function AdminSettingsPage() {
     } catch {
       toast.error('Սխալ');
     }
+  };
+
+  const BADGE_VARIANTS = ['hot', 'new', 'sale', 'boom', 'trending', 'popular', 'best'];
+  const VAR_ICONS: Record<string, string> = { hot: '🔥', new: '✨', sale: '🏷️', boom: '💥', trending: '📈', popular: '⭐', best: '👑' };
+  const VAR_CLASSES: Record<string, string> = { hot: 'animate-navbadge-hot', new: 'animate-navbadge-new', sale: 'animate-navbadge-sale', boom: 'animate-navbadge-boom', trending: 'animate-navbadge-trending', popular: 'animate-navbadge-popular', best: 'animate-navbadge-best' };
+  const VAR_BG: Record<string, string> = { hot: 'bg-gradient-to-r from-rose-500 to-orange-500', new: 'bg-gradient-to-r from-emerald-500 to-teal-500', sale: 'bg-gradient-to-r from-red-600 to-rose-500', boom: 'bg-gradient-to-r from-amber-400 to-yellow-500', trending: 'bg-gradient-to-r from-violet-500 to-purple-600', popular: 'bg-gradient-to-r from-sky-500 to-blue-600', best: 'bg-gradient-to-r from-amber-500 to-orange-400' };
+
+  const saveNavBadges = async () => {
+    const entries = ['promotions', 'products', 'categories', 'about'].map((key) => {
+      const text = form[`_nb_${key}_text`] as string;
+      const variant = form[`_nb_${key}_variant`] as string;
+      return text && variant ? { path: `/${key}`, text, variant } : null;
+    }).filter(Boolean);
+    const json = JSON.stringify(entries);
+    try {
+      await save({ sessionToken: sessionToken!, navBadges: json } as Parameters<typeof save>[0]);
+      toast.success('Բեյջի պահպանվեց');
+    } catch { toast.error('Սխալ'); }
   };
 
   const saveAnnouncement = async () => {
@@ -90,7 +107,21 @@ export default function AdminSettingsPage() {
         };
       }
     } catch { abFields = { _ab_text: raw || '', _ab_type: 'info', _ab_dismiss: 1 }; }
-    setForm({ ...settings as unknown as Record<string, string | number>, ...abFields });
+    const nbFields: Record<string, string | number> = {};
+    try {
+      const nbRaw = (settings as Record<string, unknown>).navBadges as string || '';
+      const nbParsed = JSON.parse(nbRaw) as Array<Record<string, string>>;
+      if (Array.isArray(nbParsed)) {
+        for (const entry of nbParsed) {
+          const key = entry.path?.replace('/', '');
+          if (key) {
+            nbFields[`_nb_${key}_text`] = entry.text || '';
+            nbFields[`_nb_${key}_variant`] = entry.variant || '';
+          }
+        }
+      }
+    } catch {}
+    setForm({ ...settings as unknown as Record<string, string | number>, ...abFields, ...nbFields });
     setLoaded(true);
   }
 
@@ -356,6 +387,46 @@ export default function AdminSettingsPage() {
                 <Label htmlFor="ab_dismiss" className="text-sm font-normal">{'Հնարավորություն տալ փակելու'}</Label>
               </div>
               <Button onClick={saveAnnouncement} size="sm" className="gap-1.5 text-xs">
+                <Save className="h-3.5 w-3.5" /> {'Պահպանել'}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Nav badges */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Bell className="h-5 w-5 text-primary" />
+                {'Նավիգացիոն բեյջեր'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-xs text-muted-foreground">Բեյջի տեքստեր և ստիլներ</p>
+              {([
+                ['/promotions', form._nb_promotions_text as string ?? '', form._nb_promotions_variant as string ?? ''],
+                ['/products', form._nb_products_text as string ?? '', form._nb_products_variant as string ?? ''],
+                ['/categories', form._nb_categories_text as string ?? '', form._nb_categories_variant as string ?? ''],
+                ['/about', form._nb_about_text as string ?? '', form._nb_about_variant as string ?? ''],
+              ] as [string, string, string][]).map(([path, txt, v]) => (
+                <div key={path} className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2">
+                  <span className="w-28 shrink-0 text-xs font-medium text-muted-foreground">{path}</span>
+                  <input value={txt} onChange={(e) => set(`_nb_${path.slice(1)}_text`, e.target.value)} placeholder="Տեքստ" className="h-8 w-24 rounded-md border border-input bg-background px-2 text-xs outline-none" />
+                  <select value={v} onChange={(e) => set(`_nb_${path.slice(1)}_variant`, e.target.value)} className="h-8 rounded-md border border-input bg-background px-2 text-xs outline-none">
+                    <option value="">—</option>
+                    {BADGE_VARIANTS.map((varName) => <option key={varName} value={varName}>{VAR_ICONS[varName]} {varName}</option>)}
+                  </select>
+                  {txt && v && (
+                    <span className={`${VAR_CLASSES[v]} ${VAR_BG[v]} inline-flex items-center gap-0.5 rounded-full px-1.5 py-[1px] text-[9px] font-black uppercase leading-tight text-white shadow-sm shrink-0`}>
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="absolute inset-0 rounded-full bg-white/70 animate-navbadge-ping" />
+                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+                      </span>
+                      {txt}
+                    </span>
+                  )}
+                </div>
+              ))}
+              <Button onClick={saveNavBadges} size="sm" className="gap-1.5 text-xs">
                 <Save className="h-3.5 w-3.5" /> {'Պահպանել'}
               </Button>
             </CardContent>

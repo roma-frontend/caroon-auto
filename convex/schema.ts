@@ -253,6 +253,7 @@ export default defineSchema(
     enableTimeline: v.optional(v.boolean()),
     // Plate decoder
     enablePlateDecoder: v.optional(v.boolean()),
+    navBadges: v.optional(v.string()),
   }),
 
   // ─── Price Alerts ────────────────────────────────────────────

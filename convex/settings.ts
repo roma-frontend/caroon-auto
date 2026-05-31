@@ -170,6 +170,7 @@ export const save = mutation({
     enableInstallVideos: v.optional(v.boolean()),
     enableTimeline: v.optional(v.boolean()),
     enablePlateDecoder: v.optional(v.boolean()),
+    navBadges: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     await getAdminCaller(ctx, args.sessionToken);
