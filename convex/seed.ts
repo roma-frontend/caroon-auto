@@ -39,7 +39,64 @@ export const seed = seedMutation({
       await ctx.db.insert('products', { ...p, images: [], isActive: true, createdAt: now, updatedAt: now });
     }
 
-    return `Seeded: 6 categories, ${products.length} products`;
+    // Promotions
+    await ctx.db.insert('promotions', {
+      title: 'Ձմեռային զեղչ անվադողերի վրա',
+      description: 'Հատուկ զեղչեր մինչև -40% ձմեռային անվադողերի վրա։ Michelin, Continental, Bridgestone և այլն։',
+      images: ['/promotions/winter.svg'],
+      imageUrl: '/promotions/winter.svg',
+      discountPercent: 40,
+      startDate: now,
+      endDate: now + 60 * 24 * 60 * 60 * 1000,
+      isActive: true,
+      createdAt: now,
+    });
+    await ctx.db.insert('promotions', {
+      title: 'Շարժիչի յուղերի ակցիա',
+      description: 'Մինչև -25% զեղչ Mobil 1, Castrol EDGE և Shell Helix Ultra յուղերի վրա։',
+      images: ['/promotions/oils.svg'],
+      imageUrl: '/promotions/oils.svg',
+      discountPercent: 25,
+      startDate: now,
+      endDate: now + 45 * 24 * 60 * 60 * 1000,
+      isActive: true,
+      createdAt: now,
+    });
+    await ctx.db.insert('promotions', {
+      title: '2+1 ֆիլտրերի վրա',
+      description: 'Գնիր 2 ֆիլտր և ստացիր 1-ը նվեր։ MANN-FILTER, Bosch, Knecht։',
+      images: ['/promotions/filters.svg'],
+      imageUrl: '/promotions/filters.svg',
+      discountPercent: 33,
+      startDate: now,
+      endDate: now + 30 * 24 * 60 * 60 * 1000,
+      isActive: true,
+      createdAt: now,
+    });
+    await ctx.db.insert('promotions', {
+      title: 'Կոճղակների զեղչ',
+      description: 'Մինչև -30% զեղչ արգելակման կոճղակների վրա։ Brembo, TRW, ATE։',
+      images: ['/promotions/brakes.svg'],
+      imageUrl: '/promotions/brakes.svg',
+      discountPercent: 30,
+      startDate: now,
+      endDate: now + 45 * 24 * 60 * 60 * 1000,
+      isActive: true,
+      createdAt: now,
+    });
+    await ctx.db.insert('promotions', {
+      title: 'Բատարիաների գարնանային զեղչ',
+      description: '-15% Varta, Bosch և Banner բատարիաների վրա։ Սահմանափակ ժամանակով։',
+      images: ['/promotions/batteries.svg'],
+      imageUrl: '/promotions/batteries.svg',
+      discountPercent: 15,
+      startDate: now,
+      endDate: now + 40 * 24 * 60 * 60 * 1000,
+      isActive: true,
+      createdAt: now,
+    });
+
+    return `Seeded: 6 categories, ${products.length} products, 5 promotions`;
   },
 });
 

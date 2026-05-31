@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a365d"/>
+      <stop offset="50%" stop-color="#0066ae"/>
+      <stop offset="100%" stop-color="#004d8a"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="rgba(255,255,255,0)"/>
+      <stop offset="50%" stop-color="rgba(255,255,255,0.08)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="24" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="24" fill="url(#shine)"/>
+  <text x="256" y="200" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="120" fill="#ff4444">-40%</text>
+  <text x="256" y="280" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="32" fill="#ffffff">Ձմեռային զեղչ</text>
+  <text x="256" y="320" text-anchor="middle" font-family="sans-serif" font-weight="400" font-size="22" fill="rgba(255,255,255,0.7)">Անվադողերի վրա</text>
+  <text x="256" y="380" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="16" fill="#ffcc00">Մինչև ապրիլի 30</text>
+</svg>

@@ -287,7 +287,30 @@ export default function AdminSettingsPage() {
               <p className="text-xs text-muted-foreground">JSON-ը կգեներացվի ստորև նշված դաշտերից և կպահպանվի ՀԱՅՏԱՐԱՐՈՒԹՅՈԻՆ դաշտում</p>
               <div>
                 <Label>{'Վերին գոտու տեքստ'}</Label>
-                <Input value={form._ab_text ?? ''} onChange={(e) => set('_ab_text', e.target.value)} className="h-10" placeholder={'Անվճար առաքում 20,000֏-ից...'} />
+                <Input value={form._ab_text ?? ''} onChange={(e) => set('_ab_text', e.target.value)} className="h-10" placeholder={'Անվճար առաքում 30.000֏-ից...'} />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">{'Պատրաստի տարբերակներ (սեղմել → խմբագրել)'}</Label>
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  {[
+                    ['🚚 Անվճար առաքում 30.000 ֏-ից սկսած', 'info', 'truck'],
+                    ['🔥 Մինչև -40% զեղչ ամառային ակցիայի շրջանակներում', 'sale', 'zap'],
+                    ['⚡ Ակցիա․ ամեն 3-րդ ապրանքը՝ -15%', 'sale', 'percent'],
+                    ['🎁 Գնիր 2 ապրանք և ստացիր 1-ը նվեր', 'sale', 'gift'],
+                    ['💥 Սահմանափակ առաջարկ․ զեղչեր մինչև -50%', 'promo', 'sparkles'],
+                    ['⭐ Միայն օրիգինալ որակի պահեստամասեր', 'info', 'star'],
+                    ['❄️ Ձմեռային անվադողեր՝ մեծ զեղչերով', 'promo', 'bell'],
+                    ['🔧 Գարնանային տեխզննության հատուկ առաջարկ', 'info', 'clock'],
+                  ].map(([text, type, icon]) => (
+                    <button
+                      key={text as string}
+                      onClick={() => setForm((f) => ({ ...f, _ab_text: text as string, _ab_type: type as string, _ab_icon: icon as string }))}
+                      className="rounded-full border border-border/50 bg-card px-2.5 py-1 text-[11px] text-foreground/80 transition-colors hover:border-primary/40 hover:text-primary hover:bg-primary/5"
+                    >
+                      {text as string}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>

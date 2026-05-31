@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, ArrowRight, Sparkles, Zap, Truck, Clock, Gift, Percent, Bell, Star } from 'lucide-react';
 import Link from 'next/link';
 
@@ -36,19 +36,19 @@ function parseAnnouncement(raw: string): AnnouncementConfig {
 
 const STYLES: Record<AnnouncementStyle, { className: string }> = {
   info: {
-    className: 'bg-muted/80 text-foreground border-b border-border',
+    className: 'bg-muted/70 text-foreground border-b border-border/40',
   },
   sale: {
-    className: 'bg-destructive/90 text-white border-b border-destructive',
+    className: 'bg-destructive/10 text-foreground border-b-2 border-destructive/40',
   },
   promo: {
-    className: 'bg-primary/90 text-primary-foreground border-b border-primary',
+    className: 'bg-primary/10 text-foreground border-b-2 border-primary/40',
   },
   dark: {
     className: 'bg-foreground text-background border-b border-foreground',
   },
   custom: {
-    className: 'bg-muted/80 text-foreground border-b border-border',
+    className: 'bg-muted/70 text-foreground border-b border-border/40',
   },
 };
 
@@ -63,25 +63,11 @@ const ICONS = {
   star: Star,
 };
 
-function ShinyOverlay() {
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute -inset-[100%] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.06),rgba(255,255,255,0.12),rgba(255,255,255,0.06),transparent)]" style={{ animation: 'announcement-shimmer 4s ease-in-out infinite' }} />
-    </div>
-  );
-}
-
 export function AnnouncementBar({ raw, phone }: { raw?: string | null; phone?: string | null }) {
-  const [dismissed, setDismissed] = useState(false);
-
-  useEffect(() => {
-    if (raw) {
-      let hash = 0;
-      for (let i = 0; i < raw.length; i++) hash = ((hash << 5) - hash + raw.charCodeAt(i)) | 0;
-      const key = `announcement_dismissed_${Math.abs(hash).toString(36)}`;
-      setDismissed(localStorage.getItem(key) === '1');
-    }
-  }, [raw]);
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === 'undefined' || !raw) return false;
+    return localStorage.getItem(`announcement_dismissed_${hashStr(raw)}`) === '1';
+  });
 
   if (!raw || dismissed) return null;
 
@@ -99,27 +85,32 @@ export function AnnouncementBar({ raw, phone }: { raw?: string | null; phone?: s
 
   const content = (
     <div className={`relative overflow-hidden ${styleClass}`}>
-      <ShinyOverlay />
 
-      <div className="mx-auto flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 text-center text-[11px] sm:text-xs font-medium leading-tight"
+      <div className="mx-auto flex items-center justify-center gap-1.5 px-4 py-2 sm:py-2.5 text-center text-[11px] sm:text-xs font-medium leading-tight"
         style={{ maxWidth: 'var(--container-max)' }}
       >
-        {Icon && <Icon className="h-3.5 w-3.5 shrink-0 opacity-80" />}
+        {Icon && <Icon className="h-3.5 w-3.5 shrink-0 opacity-70" />}
 
         <span className="line-clamp-1 sm:line-clamp-none">{config.text}</span>
 
         {config.link && (
-          <span className="inline-flex items-center gap-1 font-semibold whitespace-nowrap underline-offset-2 hover:underline">
-            {config.linkText || 'Իմանալ ավելին'} <ArrowRight className="h-3 w-3" />
-          </span>
+          <>
+            <span className="h-1 w-1 shrink-0 rounded-full bg-current opacity-30" />
+            <Link href={config.link} className="inline-flex items-center gap-1 font-semibold whitespace-nowrap underline-offset-2 hover:underline" onClick={(e) => e.stopPropagation()}>
+              {config.linkText || 'Իմանալ ավելին'} <ArrowRight className="h-3 w-3" />
+            </Link>
+          </>
         )}
 
-        {phone && !config.link && (
-          <span className="hidden sm:inline opacity-60">• {phone}</span>
+        {!config.link && phone && (
+          <>
+            <span className="hidden sm:inline h-1 w-1 shrink-0 rounded-full bg-current opacity-30" />
+            <span className="hidden sm:inline opacity-60">{phone}</span>
+          </>
         )}
 
         {config.dismissible !== false && (
-          <button onClick={dismiss} className="ml-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full opacity-60 transition-opacity hover:opacity-100 hover:bg-black/10" aria-label="Close">
+          <button onClick={dismiss} className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full opacity-50 transition-opacity hover:opacity-100 hover:bg-black/10" aria-label="Close">
             <X className="h-3 w-3" />
           </button>
         )}
