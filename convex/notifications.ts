@@ -127,6 +127,81 @@ export const sendLowStockAlert = action({
   },
 });
 
+export const sendReceiptToCustomer = action({
+  args: {
+    orderId: v.id('orders'),
+    telegramUser: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const s = await ctx.runQuery(api.settings.get as any, {});
+    const settings = s as Record<string, unknown> | null | undefined;
+    const token = settings?.telegramBotToken as string | undefined;
+    if (!token) return { ok: false, error: 'Telegram bot not configured' };
+
+    const order = await ctx.runQuery(api.orders.getById as any, { id: args.orderId });
+    if (!order) return { ok: false, error: 'Order not found' };
+
+    const o = order as unknown as Record<string, unknown>;
+    const chatId = args.telegramUser.replace('@', '');
+    const items = (o.items as Array<Record<string, unknown>>) || [];
+    const itemsList = items
+      .map(
+        (item, i) =>
+          `${i + 1}. <b>${String(item.name)}</b>\n` +
+          `   ${Number(item.quantity)} х ${fmt(Number(item.price))} ֏ = <b>${fmt(Number(item.price) * Number(item.quantity))} ֏</b>`,
+      )
+      .join('\n\n');
+
+    const logo = (settings?.logoUrl as string) || '🛒';
+    const storeName = (settings?.storeName as string) || 'AutoParts Armenia';
+    const phone = (settings?.phone as string) || '';
+    const address = (settings?.address as string) || '';
+
+    const text = [
+      `<b>${logo} ${storeName}</b>`,
+      ``,
+      `━━━━━━━━━━━━━━━━━━`,
+      `<b>✅ Պատվերը հաստատված է</b>`,
+      `<b>📝 Պատվեր՝</b> <code>${String(o.orderNumber)}</code>`,
+      `<b>📅 Ամսաթիվ՝</b> ${new Date(Number(o.createdAt)).toLocaleString('hy-AM')}`,
+      ``,
+      `━━ 🧾 <b>Ապրանքներ</b> ━━━━━━━━━`,
+      ``,
+      itemsList,
+      ``,
+      `━━━━━━━━━━━━━━━━━━`,
+      `<b>📦 Ենթագումար՝</b> ${fmt(Number(o.subtotal))} ֏`,
+      `<b>🚚 Առաքում՝</b> ${Number(o.shipping) === 0 ? 'Անվճար' : `${fmt(Number(o.shipping))} ֏`}`,
+      `<b>💰 Ընդհանուր՝</b> <b>${fmt(Number(o.total))} ֏</b>`,
+      ``,
+      `━━ 📍 <b>Առաքում</b> ━━━━━━━━━`,
+      `<b>👤 Անուն՝</b> ${String(o.customerName)}`,
+      `<b>📞 Հեռ․՝</b> ${String(o.customerPhone)}`,
+      `<b>📍 Հասցե՝</b> ${String(o.shippingAddress)}`,
+      ...(o.notes ? [`<b>📝 Նշում՝</b> ${String(o.notes)}`] : []),
+      ``,
+      `━━ 📞 <b>Կոնտակտ</b> ━━━━━━━━`,
+      ...(phone ? [`<b>📞</b> ${phone}`] : []),
+      ...(address ? [`<b>📍</b> ${address}`] : []),
+      ``,
+      `<i>Շնորհակալություն գնման համար</i> 🚗💨`,
+    ].join('\n');
+
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', disable_web_page_preview: true }),
+      });
+      const data = (await res.json().catch(() => null)) as { ok?: boolean; description?: string } | null;
+      if (!res.ok || !data?.ok) return { ok: false, error: data?.description || `HTTP ${res.status}` };
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: String(e) };
+    }
+  },
+});
+
 export const sendCartRecovery = action({
   args: { sessionToken: v.string(), cartItems: v.number(), cartTotal: v.number() },
   handler: async (ctx, args) => {

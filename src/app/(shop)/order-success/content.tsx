@@ -1,16 +1,19 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useQuery } from 'convex/react';
+import { useQuery, useAction } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Printer } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { CheckCircle, Printer, Smartphone, Check } from 'lucide-react';
 import { formatPrice, formatDateHy } from '@/lib/formatters';
 import Link from 'next/link';
 import { Id } from '../../../../convex/_generated/dataModel';
 import { useSettings } from '@/hooks/useSettings';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function OrderSuccessContent() {
   const params = useSearchParams();
@@ -119,11 +122,70 @@ export default function OrderSuccessContent() {
               <Button variant="outline" className="gap-2 flex-1" onClick={() => window.print()}>
                 <Printer className="h-4 w-4" /> Տպել / Print
               </Button>
+              {String(o?.orderNumber ?? '') && (
+                <SendTelegramReceipt orderId={orderId!} />
+              )}
               <Link href="/products" className="flex-1"><Button variant="cta" className="w-full">Շարունակել գնումը</Button></Link>
             </div>
           </CardContent>
         </Card>
       </div>
     </>
+  );
+}
+
+function SendTelegramReceipt({ orderId }: { orderId: Id<'orders'> }) {
+  const [username, setUsername] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const sendReceipt = useAction(api.notifications.sendReceiptToCustomer);
+
+  const handleSend = async () => {
+    const user = username.replace('@', '').trim();
+    if (!user) return;
+    setSending(true);
+    try {
+      const result = await sendReceipt({ orderId, telegramUser: user });
+      const r = result as { ok: boolean; error?: string } | undefined;
+      if (r?.ok) {
+        setSent(true);
+        toast.success('Չեկը ուղարկվել է Telegram');
+      } else {
+        toast.error(r?.error || 'Սխալ ուղարկելիս');
+      }
+    } catch {
+      toast.error('Սխալ միացման ժամանակ');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  if (sent) {
+    return (
+      <div className="flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700">
+        <Check className="h-4 w-4" /> Չեկը ուղարկված է Telegram
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex gap-2 flex-1">
+      <Input
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        placeholder="@username"
+        className="h-10 flex-1 min-w-0"
+      />
+      <Button
+        variant="outline"
+        size="sm"
+        className="gap-2 shrink-0 h-10"
+        onClick={handleSend}
+        disabled={!username.trim() || sending}
+      >
+        <Smartphone className="h-4 w-4" />
+        {sending ? '...' : 'Telegram'}
+      </Button>
+    </div>
   );
 }
